@@ -226,17 +226,21 @@ let bulletToBullet = (bullet, bullets, explosions) => {
 };
 
 let bulletToEnemiesAndBullets = (bullet, state) => {
-  let (hit, enemies, explosions) = List.fold_left(
-    ((hit, enemies, explosions), enemy) => hit ? (hit, [enemy, ...enemies], explosions) : {
-      if (collides(enemy.Enemy.pos, bullet.Bullet.pos, enemy.Enemy.size +. bullet.Bullet.size)) {
-        (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
-      } else {
-        (false, [enemy, ...enemies], explosions)
-      }
-    },
-    (false, [], state.explosions),
-    state.enemies
-  );
+  let (hit, enemies, explosions) =
+    List.fold_left(
+      ((hit, enemies, explosions), enemy) =>
+        hit ?
+          (hit, [enemy, ...enemies], explosions) :
+          (
+            if (collides(enemy.Enemy.pos, bullet.Bullet.pos, enemy.Enemy.size +. bullet.Bullet.size)) {
+              (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
+            } else {
+              (false, [enemy, ...enemies], explosions)
+            }
+          ),
+      (false, [], state.explosions),
+      state.enemies
+    );
   if (hit) {
     {...state, enemies, explosions}
   } else {
@@ -252,18 +256,21 @@ let stepBullets = (state) => {
   List.fold_left(
     (state, bullet) =>
       switch state.status {
-      | Dead(_) =>
-        bulletToEnemiesAndBullets(moveBullet(bullet), state)
+      | Dead(_) => bulletToEnemiesAndBullets(moveBullet(bullet), state)
       | Running =>
         let {theta, mag} = vecToward(bullet.pos, player.Player.pos);
         if (mag < bullet.size +. player.Player.size) {
-          {...state, status: Dead(100), explosions: [playerExplosion(player), bulletExplosion(bullet), ...state.explosions]}
+          {
+            ...state,
+            status: Dead(100),
+            explosions: [playerExplosion(player), bulletExplosion(bullet), ...state.explosions]
+          }
         } else {
           let acc = {theta, mag: 20. /. mag};
           let vel = vecAdd(bullet.vel, acc);
           let pos = posAdd(bullet.pos, vecToPos(vel));
           bulletToEnemiesAndBullets({...bullet, acc, vel, pos}, state)
-        };
+        }
       },
     {...state, bullets: []},
     state.bullets
