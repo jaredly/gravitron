@@ -109,7 +109,7 @@ let simple_enemy = {
   size: 20.,
   timer: 200,
   bulletTime: 120,
-  shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+  shoot: shoot(~color=Reprocessing.Constants.white, ~size=30., ~vel=2.)
 };
 
 let newGame = {
@@ -148,39 +148,102 @@ let stepMe = ({me} as state, env) => {
     vel.mag > 7. ?
       {...vel, mag: 7.} : vel.mag < 0.01 ? {...vel, mag: 0.} : {...vel, mag: vel.mag *. 0.98};
   let pos = posAdd(me.pos, vecToPos(vel));
-  /* let theta = float_of_int(Env.frameCount(env)) /. 240. *. Constants.two_pi; */
-  /* let x = cos(theta) *. 200. +. 300.; */
-  /* let y = sin(theta) *. 200. +. 300.; */
-  /* {...me, pos: (x, y)} */
   {...state, me: {...me, pos, vel}}
 };
 
-let stepEnemy = (env, me, (bullets, enemies), enemy) =>
+let playerExplosion = (player) => {
+  open Player;
+  {
+    Explosion.pos: player.pos,
+    size: player.size *. 2.,
+    color: player.color,
+    timer: 60,
+    totalTime: 60
+  }
+};
+
+let enemyExplosion = (enemy) => {
+  open Enemy;
+  {
+    Explosion.pos: enemy.pos,
+    size: enemy.size *. 2.,
+    color: enemy.color,
+    timer: 60,
+    totalTime: 60
+  }
+};
+
+let bulletExplosion = (item) => {
+  open Bullet;
+  {
+    Explosion.pos: item.pos,
+    size: item.size *. 2.,
+    color: item.color,
+    timer: 60,
+    totalTime: 60
+  }
+};
+
+let collides = (p1, p2, d) => dist(posSub(p1, p2)) <= d;
+
+let stepEnemy = (env, state, enemy) =>
   Enemy.(
-    if (enemy.timer === 0) {
-      (
-        [enemy.shoot(env, enemy, me), ...bullets],
-        [{...enemy, timer: enemy.bulletTime}, ...enemies]
-      )
+    if (collides(enemy.pos, state.me.Player.pos, enemy.size +. state.me.Player.size)) {
+      {
+        ...state,
+        status: Dead(100),
+        explosions: [
+          playerExplosion(state.me),
+          enemyExplosion(enemy),
+          ...state.explosions
+          ]
+      }
+    } else if (enemy.timer === 0) {
+      {
+        ...state,
+        bullets: [enemy.shoot(env, enemy, state.me), ...state.bullets],
+        enemies: [{...enemy, timer: enemy.bulletTime}, ...state.enemies]
+      }
     } else {
-      (bullets, [{...enemy, timer: enemy.timer - 1}, ...enemies])
+      {...state, enemies: [{...enemy, timer: enemy.timer - 1}, ...state.enemies]}
     }
   );
 
-let stepEnemies = (me, enemies, bullets, env) =>
-  List.fold_left(stepEnemy(env, me), (bullets, []), enemies);
+let stepEnemies = (state, env) =>
+  List.fold_left(stepEnemy(env), {...state, enemies: []}, state.enemies);
+
+let moveBullet = (bullet) => Bullet.{...bullet, pos: posAdd(bullet.pos, vecToPos(bullet.vel))};
+
+let bulletToBullet = (bullet, bullets, explosions) => {
+  let (removed, bullets, explosions) = List.fold_left(
+    ((removed, bullets, explosions), other) => {
+      open Bullet;
+      removed
+      ? (true, [other, ...bullets], explosions)
+      : collides(bullet.pos, other.pos, bullet.size +. other.size)
+      ? (true, bullets, [bulletExplosion(bullet), bulletExplosion(other), ...explosions])
+      : (false, [other, ...bullets], explosions)
+    },
+    (false, [], explosions),
+    bullets
+  );
+  if (removed) {
+    (bullets, explosions)
+  } else {
+    ([bullet, ...bullets], explosions)
+  }
+};
 
 let stepBullets = (bullets, player, explosions, status) =>
   Bullet.
     /* bullet on bullet collisions */
     (
       List.fold_left(
-        ((status, bullets, explosions), bullet) =>
+        ((status, (bullets, explosions)), bullet) =>
           switch status {
           | Dead(_) => (
               status,
-              [{...bullet, pos: posAdd(bullet.pos, vecToPos(bullet.vel))}, ...bullets],
-              explosions
+              bulletToBullet(moveBullet(bullet), bullets, explosions)
             )
           | Running =>
             let {theta, mag} = vecToward(bullet.pos, player.Player.pos);
@@ -189,13 +252,7 @@ let stepBullets = (bullets, player, explosions, status) =>
                 (
                   Dead(100),
                   [
-                    Player.{
-                      Explosion.pos: player.pos,
-                      size: player.size,
-                      color: player.color,
-                      timer: 60,
-                      totalTime: 60
-                    },
+                    playerExplosion(player),
                     ...explosions
                   ]
                 )
@@ -205,9 +262,9 @@ let stepBullets = (bullets, player, explosions, status) =>
             let acc = {theta, mag: 20. /. mag};
             let vel = vecAdd(bullet.vel, acc);
             let pos = posAdd(bullet.pos, vecToPos(vel));
-            (status, [{...bullet, acc, vel, pos}, ...bullets], explosions)
+            (status, bulletToBullet({...bullet, acc, vel, pos}, bullets, explosions))
           },
-        (status, [], explosions),
+        (status, ([], explosions)),
         bullets
       )
     );
@@ -304,14 +361,12 @@ let drawMe = (me, env) => {
 let drawEnemy = (env, enemy) => {
   open Enemy;
   Draw.fill(enemy.color, env);
-  /* circle(~center=enemy.pos, ~rad=enemy.size, env); */
   drawOnScreen(~center=enemy.pos, ~rad=enemy.size, env)
 };
 
 let drawBullet = (env, bullet) => {
   open Bullet;
   Draw.fill(bullet.color, env);
-  /* circle(~center=bullet.pos, ~rad=bullet.size, env); */
   drawOnScreen(~center=bullet.pos, ~rad=bullet.size, env)
 };
 
@@ -323,20 +378,20 @@ let drawExplosion = (env, explosion) => {
   circle(~center=explosion.pos, ~rad=size, env)
 };
 
-let draw = ({me, enemies, bullets, explosions, status} as state, env) =>
-  switch status {
+let draw = (state, env) =>
+  switch state.status {
   | Dead(0) => newGame
   | _ =>
     let status =
-      switch status {
+      switch state.status {
       | Dead(n) => Dead(n - 1)
       | Running => Running
       };
-    let {me, enemies, bullets, explosions, status} =
-      status === Running ? stepMe(state, env) : state;
-    let (bullets, enemies) = stepEnemies(me, enemies, bullets, env);
+    let state = {...state, status};
+    let state = status === Running ? stepMe(state, env) : state;
+    let {explosions, me, bullets, enemies, status} = stepEnemies(state, env);
     let explosions = stepExplosions(explosions);
-    let (status, bullets, explosions) = stepBullets(bullets, me, explosions, status);
+    let (status, (bullets, explosions)) = stepBullets(bullets, me, explosions, status);
     Draw.background(Constants.black, env);
     if (status === Running) {
       drawMe(me, env)
