@@ -329,9 +329,10 @@ let rect = (~center as (x, y), ~w, ~h, env) =>
   Draw.rectf(~pos=(x -. w /. 2., y -. h /. 2.), ~width=w, ~height=h, env);
 
 /** TODO maybe draw off-screen indicators as partially transparent? */
-let drawOnScreen = (~center as (x, y), ~rad, env) => {
+let drawOnScreen = (~color, ~center as (x, y), ~rad, env) => {
   let height = Env.height(env) |> float_of_int;
   let width = Env.width(env) |> float_of_int;
+  Draw.fill(withAlpha(color, 0.6), env);
   if (x +. rad < 0.) {
     if (y +. rad < 0.) {
       rect(~center=(0., 0.), ~w=4., ~h=4., env)
@@ -356,27 +357,19 @@ let drawOnScreen = (~center as (x, y), ~rad, env) => {
     let h = scale(y -. height);
     rect(~center=(x, height), ~w=h, ~h=4., env)
   } else {
+    Draw.fill(color, env);
     circle(~center=(x, y), ~rad, env)
   }
 };
 
-let drawMe = (me, env) => {
-  open Player;
-  Draw.fill(me.color, env);
-  drawOnScreen(~center=me.pos, ~rad=me.size, env)
-};
+let drawMe = (me, env) =>
+  Player.(drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size, env));
 
-let drawEnemy = (env, enemy) => {
-  open Enemy;
-  Draw.fill(enemy.color, env);
-  drawOnScreen(~center=enemy.pos, ~rad=enemy.size, env)
-};
+let drawEnemy = (env, enemy) =>
+  Enemy.(drawOnScreen(~color=enemy.color, ~center=enemy.pos, ~rad=enemy.size, env));
 
-let drawBullet = (env, bullet) => {
-  open Bullet;
-  Draw.fill(bullet.color, env);
-  drawOnScreen(~center=bullet.pos, ~rad=bullet.size, env)
-};
+let drawBullet = (env, bullet) =>
+  Bullet.(drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env));
 
 let drawExplosion = (env, explosion) => {
   open Explosion;
@@ -390,24 +383,26 @@ let draw = (state, env) =>
   switch state.status {
   | Dead(0) => newGame
   | _ =>
-    let status =
-      switch state.status {
-      | Dead(n) => Dead(n - 1)
-      | Running => Running
-      };
-    let state = {...state, status};
-    let state = status === Running ? stepMe(state, env) : state;
+    let state = {
+      ...state,
+      status:
+        switch state.status {
+        | Dead(n) => Dead(n - 1)
+        | Running => Running
+        }
+    };
+    let state = state.status === Running ? stepMe(state, env) : state;
     let state = stepEnemies(state, env);
     let state = {...state, explosions: stepExplosions(state.explosions)};
-    let {status, bullets, explosions, enemies, me} = stepBullets(state);
+    let state = stepBullets(state);
     Draw.background(Constants.black, env);
-    if (status === Running) {
-      drawMe(me, env)
+    if (state.status === Running) {
+      drawMe(state.me, env)
     };
-    List.iter(drawEnemy(env), enemies);
-    List.iter(drawBullet(env), bullets);
-    List.iter(drawExplosion(env), explosions);
-    {me, bullets, enemies, explosions, status}
+    List.iter(drawEnemy(env), state.enemies);
+    List.iter(drawBullet(env), state.bullets);
+    List.iter(drawExplosion(env), state.explosions);
+    state
   };
 
 run(~setup, ~draw, ());
