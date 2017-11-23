@@ -1,44 +1,34 @@
 open Reprocessing;
 
-type pos = (float, float);
-
-type vec = {
-  mag: float,
-  theta: float
+module Utils = {
+  type pos = (float, float);
+  type vec = {
+    mag: float,
+    theta: float
+  };
+  /** current, max */
+  type timer = (int, int);
+  let v0 = {mag: 0., theta: 0.};
+  let dx = ({theta, mag}) => cos(theta) *. mag;
+  let dy = ({theta, mag}) => sin(theta) *. mag;
+  let vecToPos = (vec) => (dx(vec), dy(vec));
+  let vecFromPos = ((dx, dy)) => {mag: sqrt(dx *. dx +. dy *. dy), theta: atan2(dy, dx)};
+  let dist = ((dx, dy)) => sqrt(dx *. dx +. dy *. dy);
+  let thetaToward = ((x0, y0), (x1, y1)) => atan2(y1 -. y0, x1 -. x0);
+  let posAdd = ((x0, y0), (x1, y1)) => (x0 +. x1, y0 +. y1);
+  let posSub = ((x0, y0), (x1, y1)) => (x0 -. x1, y0 -. y1);
+  let vecAdd = (v1, v2) => vecFromPos(posAdd(vecToPos(v1), vecToPos(v2)));
+  /* let vecToward = ((x0, y0), (x1, y1)) => vecFromPos((x1 -. x0, y1 -. y0)); */
+  let vecToward = (p1, p2) => vecFromPos(posSub(p2, p1));
+  let withAlpha = ({Reprocessing_Common.r, g, b, a}, alpha) => {
+    Reprocessing_Common.r,
+    g,
+    b,
+    a: a *. alpha
+  };
 };
 
-/** current, max */
-type timer = (int, int);
-
-let v0 = {mag: 0., theta: 0.};
-
-let dx = ({theta, mag}) => cos(theta) *. mag;
-
-let dy = ({theta, mag}) => sin(theta) *. mag;
-
-let vecToPos = (vec) => (dx(vec), dy(vec));
-
-let vecFromPos = ((dx, dy)) => {mag: sqrt(dx *. dx +. dy *. dy), theta: atan2(dy, dx)};
-
-let dist = ((dx, dy)) => sqrt(dx *. dx +. dy *. dy);
-
-let thetaToward = ((x0, y0), (x1, y1)) => atan2(y1 -. y0, x1 -. x0);
-
-let posAdd = ((x0, y0), (x1, y1)) => (x0 +. x1, y0 +. y1);
-
-let posSub = ((x0, y0), (x1, y1)) => (x0 -. x1, y0 -. y1);
-
-let vecAdd = (v1, v2) => vecFromPos(posAdd(vecToPos(v1), vecToPos(v2)));
-
-/* let vecToward = ((x0, y0), (x1, y1)) => vecFromPos((x1 -. x0, y1 -. y0)); */
-let vecToward = (p1, p2) => vecFromPos(posSub(p2, p1));
-
-let withAlpha = ({Reprocessing_Common.r, g, b, a}, alpha) => {
-  Reprocessing_Common.r,
-  g,
-  b,
-  a: a *. alpha
-};
+open Utils;
 
 module Player = {
   type t = {
@@ -66,7 +56,7 @@ module Enemy = {
     color: colorT,
     size: float,
     timer: int,
-    id: int,
+    /* id: int, */
     bulletTime: int,
     warmup: timer,
     shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t
@@ -83,18 +73,20 @@ module Explosion = {
   };
 };
 
-type status =
-  /* | Start */
-  | Running
-  | Dead(int);
+let playerExplosion = (player) =>
+  Player.{
+    Explosion.pos: player.pos,
+    size: player.size,
+    color: player.color,
+    timer: 30,
+    totalTime: 30
+  };
 
-type state = {
-  status,
-  me: Player.t,
-  enemies: list(Enemy.t),
-  bullets: list(Bullet.t),
-  explosions: list(Explosion.t)
-};
+let enemyExplosion = (enemy) =>
+  Enemy.{Explosion.pos: enemy.pos, size: enemy.size, color: enemy.color, timer: 30, totalTime: 30};
+
+let bulletExplosion = (item) =>
+  Bullet.{Explosion.pos: item.pos, size: item.size, color: item.color, timer: 30, totalTime: 30};
 
 let posToward = (p1, p2, distance) =>
   posAdd(p1, vecToPos({mag: distance, theta: thetaToward(p1, p2)}));
@@ -106,40 +98,92 @@ let shoot = (~color, ~size, ~vel, env, self, player) => {
   {Bullet.color, size, pos: posAdd(self.pos, pos), vel: {mag: vel, theta}, acc: v0}
 };
 
-let simple_enemy = {
-  Enemy.id: 0,
-  pos: (400., 400.),
-  color: Constants.red,
-  size: 20.,
-  timer: 200,
-  bulletTime: 120,
-  warmup: (0, 50),
-  shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+let circle = (~center, ~rad) => Reprocessing.Draw.ellipsef(~center, ~radx=rad, ~rady=rad);
+
+type status =
+  /* | Start */
+  | Running
+  | Won
+  | Dead(int);
+
+type state = {
+  status,
+  level: int,
+  me: Player.t,
+  enemies: list(Enemy.t),
+  bullets: list(Bullet.t),
+  explosions: list(Explosion.t)
 };
+
+let levels = [|
+  [
+    {
+      Enemy.pos: (600., 600.),
+      color: Constants.red,
+      size: 20.,
+      timer: 100,
+      bulletTime: 300,
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    }
+  ],
+  [
+    {
+      pos: (200., 200.),
+      color: Constants.red,
+      size: 20.,
+      timer: 100,
+      bulletTime: 300,
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    },
+    {
+      pos: (600., 600.),
+      color: Constants.red,
+      size: 20.,
+      timer: 250,
+      bulletTime: 300,
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    }
+  ],
+  [
+    {
+      pos: (600., 600.),
+      color: Reprocessing_Constants.blue,
+      size: 20.,
+      timer: 100,
+      bulletTime: 100,
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    }
+
+  ]
+|];
 
 let newGame = {
   status: Running,
+  level: 0,
   me: {pos: (100., 100.), color: Constants.green, vel: v0, acc: v0, size: 15.},
-  enemies: [simple_enemy],
+  enemies: levels[0],
   bullets: [],
   explosions: []
 };
 
 let setup = (env) => {
-  Env.size(~width=600, ~height=600, env);
+  Env.size(~width=800, ~height=800, env);
   newGame
 };
 
-let circle = (~center, ~rad) => Reprocessing.Draw.ellipsef(~center, ~radx=rad, ~rady=rad);
-
-let speed = 0.3;
-
-let arrowAccs = [
-  (Events.Left, vecFromPos((-. speed, 0.))),
-  (Events.Up, vecFromPos((0., -. speed))),
-  (Events.Down, vecFromPos((0., speed))),
-  (Events.Right, vecFromPos((speed, 0.)))
-];
+let arrowAccs = {
+  let speed = 0.3;
+  [
+    (Events.Left, vecFromPos((-. speed, 0.))),
+    (Events.Up, vecFromPos((0., -. speed))),
+    (Events.Down, vecFromPos((0., speed))),
+    (Events.Right, vecFromPos((speed, 0.)))
+  ]
+};
 
 let stepMe = ({me} as state, env) => {
   open Player;
@@ -156,56 +200,29 @@ let stepMe = ({me} as state, env) => {
   {...state, me: {...me, pos, vel}}
 };
 
-let playerExplosion = (player) =>
-  Player.{
-    Explosion.pos: player.pos,
-    size: player.size,
-    color: player.color,
-    timer: 30,
-    totalTime: 30
-  };
-
-let enemyExplosion = (enemy) =>
-  Enemy.{
-    Explosion.pos: enemy.pos,
-    size: enemy.size,
-    color: enemy.color,
-    timer: 30,
-    totalTime: 30
-  };
-
-let bulletExplosion = (item) =>
-  Bullet.{
-    Explosion.pos: item.pos,
-    size: item.size,
-    color: item.color,
-    timer: 30,
-    totalTime: 30
-  };
-
 let collides = (p1, p2, d) => dist(posSub(p1, p2)) <= d;
 
 let stepEnemy = (env, state, enemy) => {
   open Enemy;
   let (warmup, max) = enemy.warmup;
-    if (warmup < max) {
-      {...state, enemies: [{...enemy, warmup: (warmup + 1, max)}, ...state.enemies]}
-    } else if (collides(enemy.pos, state.me.Player.pos, enemy.size +. state.me.Player.size)) {
-      {
-        ...state,
-        status: Dead(100),
-        explosions: [playerExplosion(state.me), enemyExplosion(enemy), ...state.explosions]
-      }
-    } else if (enemy.timer === 0) {
-      {
-        ...state,
-        bullets: [enemy.shoot(env, enemy, state.me), ...state.bullets],
-        enemies: [{...enemy, timer: enemy.bulletTime}, ...state.enemies]
-      }
-    } else {
-      {...state, enemies: [{...enemy, timer: enemy.timer - 1}, ...state.enemies]}
+  if (warmup < max) {
+    {...state, enemies: [{...enemy, warmup: (warmup + 1, max)}, ...state.enemies]}
+  } else if (collides(enemy.pos, state.me.Player.pos, enemy.size +. state.me.Player.size)) {
+    {
+      ...state,
+      status: Dead(100),
+      explosions: [playerExplosion(state.me), enemyExplosion(enemy), ...state.explosions]
     }
-  };
+  } else if (enemy.timer === 0) {
+    {
+      ...state,
+      bullets: [enemy.shoot(env, enemy, state.me), ...state.bullets],
+      enemies: [{...enemy, timer: enemy.bulletTime}, ...state.enemies]
+    }
+  } else {
+    {...state, enemies: [{...enemy, timer: enemy.timer - 1}, ...state.enemies]}
+  }
+};
 
 let stepEnemies = (state, env) =>
   List.fold_left(stepEnemy(env), {...state, enemies: []}, state.enemies);
@@ -263,7 +280,7 @@ let stepBullets = (state) => {
   List.fold_left(
     (state, bullet) =>
       switch state.status {
-      | Dead(_) => bulletToEnemiesAndBullets(moveBullet(bullet), state)
+      | Won | Dead(_) => bulletToEnemiesAndBullets(moveBullet(bullet), state)
       | Running =>
         let {theta, mag} = vecToward(bullet.pos, player.Player.pos);
         if (mag < bullet.size +. player.Player.size) {
@@ -294,119 +311,94 @@ let stepExplosions = (explosions) =>
     )
   );
 
-let scale = (d) => sqrt(d);
-
-let drawOnScreenLines = (~center as (x, y), ~rad, env) => {
-  let height = Env.height(env) |> float_of_int;
-  let width = Env.width(env) |> float_of_int;
-  Draw.strokeWeight(2, env);
-  if (x +. rad < 0.) {
-    if (y +. rad < 0.) {
-      Draw.linef(~p1=(0., 0.), ~p2=(scale(-. x), scale(-. y)), env)
+module Drawing = {
+  let rect = (~center as (x, y), ~w, ~h, env) =>
+    Draw.rectf(~pos=(x -. w /. 2., y -. h /. 2.), ~width=w, ~height=h, env);
+  let scale = (d) => sqrt(d);
+  let drawOnScreen = (~color, ~center as (x, y), ~rad, env) => {
+    let height = Env.height(env) |> float_of_int;
+    let width = Env.width(env) |> float_of_int;
+    Draw.fill(withAlpha(color, 0.6), env);
+    if (x +. rad < 0.) {
+      if (y +. rad < 0.) {
+        rect(~center=(0., 0.), ~w=4., ~h=4., env)
+      } else if (y -. rad > height) {
+        rect(~center=(0., height), ~w=4., ~h=4., env)
+      } else {
+        rect(~center=(0., y), ~w=4., ~h=scale(-. x), env)
+      }
+    } else if (x -. rad > width) {
+      if (y +. rad < 0.) {
+        rect(~center=(width, 0.), ~w=4., ~h=4., env)
+      } else if (y -. rad > height) {
+        rect(~center=(width, height), ~w=4., ~h=4., env)
+      } else {
+        let w = scale(x -. width);
+        rect(~center=(width, y), ~w=4., ~h=w, env)
+      }
+    } else if (y +. rad < 0.) {
+      let h = scale(-. y);
+      rect(~center=(x, 0.), ~w=h, ~h=4., env)
     } else if (y -. rad > height) {
-      Draw.linef(~p1=(0., height), ~p2=(scale(-. x), height -. scale(y -. height)), env)
+      let h = scale(y -. height);
+      rect(~center=(x, height), ~w=h, ~h=4., env)
     } else {
-      Draw.linef(~p1=(0., y), ~p2=(scale(-. x), y), env)
+      Draw.fill(color, env);
+      circle(~center=(x, y), ~rad, env)
     }
-  } else if (x -. rad > width) {
-    if (y +. rad < 0.) {
-      Draw.linef(~p1=(width, 0.), ~p2=(width -. scale(x -. width), scale(-. y)), env)
-    } else if (y -. rad > height) {
-      Draw.linef(
-        ~p1=(width, height),
-        ~p2=(width -. scale(x -. width), height -. scale(y -. height)),
-        env
-      )
-    } else {
-      let w = scale(x -. width);
-      Draw.linef(~p1=(width -. w, y), ~p2=(width, y), env)
+  };
+  let drawMe = (me, env) =>
+    Player.(drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size, env));
+  let fldiv = (a, b) => float_of_int(a) /. float_of_int(b);
+  let drawEnemy = (env, enemy) => {
+    open Enemy;
+    let (warmup, max) = enemy.warmup;
+    drawOnScreen(~color=enemy.color, ~center=enemy.pos, ~rad=enemy.size *. fldiv(warmup, max), env);
+    if (warmup === max) {
+      let loaded = fldiv(enemy.timer, enemy.bulletTime);
+      Draw.stroke(Constants.white, env);
+      Draw.arcf(~center=enemy.pos, ~radx=enemy.size, ~rady=enemy.size, ~start=0., ~stop=Constants.two_pi *. loaded, ~isOpen=true, ~isPie=false, env);
+      Draw.noStroke(env);
     }
-  } else if (y +. rad < 0.) {
-    let h = scale(-. y);
-    Draw.linef(~p1=(x, 0.), ~p2=(x, h), env)
-  } else if (y -. rad > height) {
-    let h = scale(y -. height);
-    Draw.linef(~p1=(x, height -. h), ~p2=(x, height), env)
-  } else {
-    circle(~center=(x, y), ~rad, env)
-  }
-};
-
-let rect = (~center as (x, y), ~w, ~h, env) =>
-  Draw.rectf(~pos=(x -. w /. 2., y -. h /. 2.), ~width=w, ~height=h, env);
-
-let drawOnScreen = (~color, ~center as (x, y), ~rad, env) => {
-  let height = Env.height(env) |> float_of_int;
-  let width = Env.width(env) |> float_of_int;
-  Draw.fill(withAlpha(color, 0.6), env);
-  if (x +. rad < 0.) {
-    if (y +. rad < 0.) {
-      rect(~center=(0., 0.), ~w=4., ~h=4., env)
-    } else if (y -. rad > height) {
-      rect(~center=(0., height), ~w=4., ~h=4., env)
-    } else {
-      rect(~center=(0., y), ~w=4., ~h=scale(-. x), env)
-    }
-  } else if (x -. rad > width) {
-    if (y +. rad < 0.) {
-      rect(~center=(width, 0.), ~w=4., ~h=4., env)
-    } else if (y -. rad > height) {
-      rect(~center=(width, height), ~w=4., ~h=4., env)
-    } else {
-      let w = scale(x -. width);
-      rect(~center=(width, y), ~w=4., ~h=w, env)
-    }
-  } else if (y +. rad < 0.) {
-    let h = scale(-. y);
-    rect(~center=(x, 0.), ~w=h, ~h=4., env)
-  } else if (y -. rad > height) {
-    let h = scale(y -. height);
-    rect(~center=(x, height), ~w=h, ~h=4., env)
-  } else {
-    Draw.fill(color, env);
-    circle(~center=(x, y), ~rad, env)
-  }
-};
-
-let drawMe = (me, env) =>
-  Player.(drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size, env));
-
-let fldiv = (a, b) => float_of_int(a) /. float_of_int(b);
-
-let drawEnemy = (env, enemy) => {
-  open Enemy;
-  let (warmup, max) = enemy.warmup;
-  drawOnScreen(~color=enemy.color, ~center=enemy.pos, ~rad=enemy.size *. (fldiv(warmup, max)), env);
-};
-
-let drawBullet = (env, bullet) =>
-  Bullet.(drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env));
-
-let drawExplosion = (env, explosion) => {
-  open Explosion;
-  let faded = fldiv(explosion.timer, explosion.totalTime);
-  Draw.fill(withAlpha(explosion.color, faded), env);
-  let size = (1.5 -. 0.5 *. faded) *. explosion.size;
-  circle(~center=explosion.pos, ~rad=size, env)
+  };
+  let drawBullet = (env, bullet) =>
+    Bullet.(drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env));
+  let drawExplosion = (env, explosion) => {
+    open Explosion;
+    let faded = fldiv(explosion.timer, explosion.totalTime);
+    Draw.fill(withAlpha(explosion.color, faded), env);
+    let size = (1.5 -. 0.5 *. faded) *. explosion.size;
+    circle(~center=explosion.pos, ~rad=size, env)
+  };
 };
 
 let draw = (state, env) =>
   switch state.status {
   | Dead(0) => newGame
+  | Won => {
+    Draw.background(Constants.black, env);
+    state
+  }
   | _ =>
     let state = {
       ...state,
       status:
         switch state.status {
         | Dead(n) => Dead(n - 1)
-        | Running => Running
+        | t => t
         }
     };
     let state = state.status === Running ? stepMe(state, env) : state;
     let state = stepEnemies(state, env);
     let state = {...state, explosions: stepExplosions(state.explosions)};
     let state = stepBullets(state);
+    let state = (state.enemies !== [] || state.status !== Running)
+      ? state
+      : state.level >= Array.length(levels) - 1
+      ? {...state, status: Won}
+      : {...state, level: state.level + 1, enemies: levels[state.level + 1]};
     Draw.background(Constants.black, env);
+    open Drawing;
     if (state.status === Running) {
       drawMe(state.me, env)
     };
