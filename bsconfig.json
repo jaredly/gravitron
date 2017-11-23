@@ -1,0 +1,17 @@
+{
+  "name": "gravitron",
+  "sources": "src",
+  "bs-dependencies": ["reprocessing"],
+  "package-specs": ["es6"],
+  "entries": [{
+    "backend": "bytecode",
+    "main-module": "Indexhot"
+  },{
+    "backend": "js",
+    "main-module": "Index"
+  },{
+    "backend": "native",
+    "main-module": "Index"
+  }],
+  "refmt": 3,
+}

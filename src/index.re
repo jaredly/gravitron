@@ -7,6 +7,9 @@ type vec = {
   theta: float
 };
 
+/** current, max */
+type timer = (int, int);
+
 let v0 = {mag: 0., theta: 0.};
 
 let dx = ({theta, mag}) => cos(theta) *. mag;
@@ -65,6 +68,7 @@ module Enemy = {
     timer: int,
     id: int,
     bulletTime: int,
+    warmup: timer,
     shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t
   };
 };
@@ -109,6 +113,7 @@ let simple_enemy = {
   size: 20.,
   timer: 200,
   bulletTime: 120,
+  warmup: (0, 50),
   shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
 };
 
@@ -154,35 +159,38 @@ let stepMe = ({me} as state, env) => {
 let playerExplosion = (player) =>
   Player.{
     Explosion.pos: player.pos,
-    size: player.size *. 2.,
+    size: player.size,
     color: player.color,
-    timer: 60,
-    totalTime: 60
+    timer: 30,
+    totalTime: 30
   };
 
 let enemyExplosion = (enemy) =>
   Enemy.{
     Explosion.pos: enemy.pos,
-    size: enemy.size *. 2.,
+    size: enemy.size,
     color: enemy.color,
-    timer: 60,
-    totalTime: 60
+    timer: 30,
+    totalTime: 30
   };
 
 let bulletExplosion = (item) =>
   Bullet.{
     Explosion.pos: item.pos,
-    size: item.size *. 2.,
+    size: item.size,
     color: item.color,
-    timer: 60,
-    totalTime: 60
+    timer: 30,
+    totalTime: 30
   };
 
 let collides = (p1, p2, d) => dist(posSub(p1, p2)) <= d;
 
-let stepEnemy = (env, state, enemy) =>
-  Enemy.(
-    if (collides(enemy.pos, state.me.Player.pos, enemy.size +. state.me.Player.size)) {
+let stepEnemy = (env, state, enemy) => {
+  open Enemy;
+  let (warmup, max) = enemy.warmup;
+    if (warmup < max) {
+      {...state, enemies: [{...enemy, warmup: (warmup + 1, max)}, ...state.enemies]}
+    } else if (collides(enemy.pos, state.me.Player.pos, enemy.size +. state.me.Player.size)) {
       {
         ...state,
         status: Dead(100),
@@ -197,7 +205,7 @@ let stepEnemy = (env, state, enemy) =>
     } else {
       {...state, enemies: [{...enemy, timer: enemy.timer - 1}, ...state.enemies]}
     }
-  );
+  };
 
 let stepEnemies = (state, env) =>
   List.fold_left(stepEnemy(env), {...state, enemies: []}, state.enemies);
@@ -252,7 +260,6 @@ let bulletToEnemiesAndBullets = (bullet, state) => {
 let stepBullets = (state) => {
   open Bullet;
   let player = state.me;
-  /* bullet on bullet collisions */
   List.fold_left(
     (state, bullet) =>
       switch state.status {
@@ -328,7 +335,6 @@ let drawOnScreenLines = (~center as (x, y), ~rad, env) => {
 let rect = (~center as (x, y), ~w, ~h, env) =>
   Draw.rectf(~pos=(x -. w /. 2., y -. h /. 2.), ~width=w, ~height=h, env);
 
-/** TODO maybe draw off-screen indicators as partially transparent? */
 let drawOnScreen = (~color, ~center as (x, y), ~rad, env) => {
   let height = Env.height(env) |> float_of_int;
   let width = Env.width(env) |> float_of_int;
@@ -365,17 +371,22 @@ let drawOnScreen = (~color, ~center as (x, y), ~rad, env) => {
 let drawMe = (me, env) =>
   Player.(drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size, env));
 
-let drawEnemy = (env, enemy) =>
-  Enemy.(drawOnScreen(~color=enemy.color, ~center=enemy.pos, ~rad=enemy.size, env));
+let fldiv = (a, b) => float_of_int(a) /. float_of_int(b);
+
+let drawEnemy = (env, enemy) => {
+  open Enemy;
+  let (warmup, max) = enemy.warmup;
+  drawOnScreen(~color=enemy.color, ~center=enemy.pos, ~rad=enemy.size *. (fldiv(warmup, max)), env);
+};
 
 let drawBullet = (env, bullet) =>
   Bullet.(drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env));
 
 let drawExplosion = (env, explosion) => {
   open Explosion;
-  let faded = float_of_int(explosion.timer) /. float_of_int(explosion.totalTime);
+  let faded = fldiv(explosion.timer, explosion.totalTime);
   Draw.fill(withAlpha(explosion.color, faded), env);
-  let size = (1.0 -. 0.8 *. faded) *. explosion.size;
+  let size = (1.5 -. 0.5 *. faded) *. explosion.size;
   circle(~center=explosion.pos, ~rad=size, env)
 };
 
