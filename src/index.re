@@ -8,6 +8,7 @@ module Utils = {
   };
   /** current, max */
   type timer = (int, int);
+  let timer = num => (0, num);
   let v0 = {mag: 0., theta: 0.};
   let dx = ({theta, mag}) => cos(theta) *. mag;
   let dy = ({theta, mag}) => sin(theta) *. mag;
@@ -164,6 +165,40 @@ let levels = [|
   [
     {
       pos: (600., 600.),
+      color: Reprocessing_Constants.blue,
+      size: 20.,
+      timer: (0, 100),
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    },
+    {
+      pos: (200., 200.),
+      color: Reprocessing_Constants.blue,
+      size: 20.,
+      timer: (0, 100),
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    }
+  ],
+  [
+    {
+      pos: (600., 600.),
+      color: Reprocessing_Constants.blue,
+      size: 20.,
+      timer: (0, 100),
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    },
+    {
+      pos: (200., 600.),
+      color: Reprocessing_Constants.blue,
+      size: 20.,
+      timer: (0, 100),
+      warmup: (0, 50),
+      shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
+    },
+    {
+      pos: (600., 200.),
       color: Reprocessing_Constants.blue,
       size: 20.,
       timer: (0, 100),
