@@ -185,7 +185,7 @@ let levels = [|
       warmup: (0, 50),
       shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
     }
-  ],
+  ]
 |];
 
 let fullPlayerHealth = 100;
@@ -193,7 +193,15 @@ let fullPlayerHealth = 100;
 let newGame = {
   status: Running,
   level: 0,
-  me: {health: fullPlayerHealth, lives: 3, pos: (100., 100.), color: Constants.green, vel: v0, acc: v0, size: 15.},
+  me: {
+    health: fullPlayerHealth,
+    lives: 3,
+    pos: (100., 100.),
+    color: Constants.green,
+    vel: v0,
+    acc: v0,
+    size: 15.
+  },
   enemies: levels[0],
   bullets: [],
   explosions: []
@@ -315,19 +323,22 @@ module Steps = {
           let {theta, mag} = vecToward(bullet.pos, player.Player.pos);
           if (mag < bullet.size +. player.Player.size) {
             if (state.me.Player.health - bullet.damage > 0) {
-              ...state,
-              me: {...state.me, health: state.me.Player.health - bullet.damage},
-              explosions: [bulletExplosion(bullet), ...state.explosions]
-            } else
-            /* if (state.me.Player.lives <= 1) */
-            {
-              ...state,
-              status: Dead(100),
-              explosions: [playerExplosion(player), bulletExplosion(bullet), ...state.explosions]
-            /* } else {
-              ...state,
-              me: {...state.me, lives: state.me.Player.lives - 1, health: fullPlayerHealth},
-              explosions: [bulletExplosion(bullet), ...state.explosions] */
+              {
+                ...state,
+                me: {...state.me, health: state.me.Player.health - bullet.damage},
+                explosions: [bulletExplosion(bullet), ...state.explosions]
+              }
+            } else {
+              /* if (state.me.Player.lives <= 1) */
+              {
+                ...state,
+                status: Dead(100),
+                explosions: [playerExplosion(player), bulletExplosion(bullet), ...state.explosions]
+                /* } else {
+                   ...state,
+                   me: {...state.me, lives: state.me.Player.lives - 1, health: fullPlayerHealth},
+                   explosions: [bulletExplosion(bullet), ...state.explosions] */
+              }
             }
           } else {
             let acc = {theta, mag: 20. /. mag};
@@ -388,10 +399,10 @@ module Drawing = {
       if (stroke) {
         Draw.stroke(color, env);
         Draw.strokeWeight(3, env);
-        Draw.noFill(env);
+        Draw.noFill(env)
       } else {
         Draw.fill(color, env);
-        Draw.noStroke(env);
+        Draw.noStroke(env)
       };
       circle(~center=(x, y), ~rad, env)
     }
@@ -407,7 +418,7 @@ module Drawing = {
     Draw.noStroke(env);
     Draw.rect(~pos=(10, 10), ~width=int_of_float(100. *. percent), ~height=10, env);
     for (i in 0 to state.me.lives) {
-      circle(~center=(float_of_int(i * 15 + 100 + 20), 15.), ~rad=5., env);
+      circle(~center=(float_of_int(i * 15 + 100 + 20), 15.), ~rad=5., env)
     }
   };
   let drawMe = (me, env) =>
@@ -454,14 +465,19 @@ module Drawing = {
 
 let draw = (state, env) =>
   switch state.status {
-  | Dead(0) => if (state.me.Player.lives > 0) {
-    ...state,
-    status: Running,
-    me: {...state.me, Player.health: fullPlayerHealth, lives: state.me.Player.lives - 1},
-    enemies: levels[state.level],
-    explosions: [],
-    bullets: []
-  } else newGame
+  | Dead(0) =>
+    if (state.me.Player.lives > 0) {
+      {
+        ...state,
+        status: Running,
+        me: {...state.me, Player.health: fullPlayerHealth, lives: state.me.Player.lives - 1},
+        enemies: levels[state.level],
+        explosions: [],
+        bullets: []
+      }
+    } else {
+      newGame
+    }
   | Won =>
     Draw.background(Constants.black, env);
     state
