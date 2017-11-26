@@ -18,7 +18,6 @@ module Utils = {
   let posAdd = ((x0, y0), (x1, y1)) => (x0 +. x1, y0 +. y1);
   let posSub = ((x0, y0), (x1, y1)) => (x0 -. x1, y0 -. y1);
   let vecAdd = (v1, v2) => vecFromPos(posAdd(vecToPos(v1), vecToPos(v2)));
-  /* let vecToward = ((x0, y0), (x1, y1)) => vecFromPos((x1 -. x0, y1 -. y0)); */
   let vecToward = (p1, p2) => vecFromPos(posSub(p2, p1));
   let withAlpha = ({Reprocessing_Common.r, g, b, a}, alpha) => {
     Reprocessing_Common.r,
@@ -75,8 +74,7 @@ module Explosion = {
   type t = {
     pos,
     color: colorT,
-    timer: int,
-    totalTime: int,
+    timer,
     size: float
   };
 };
@@ -86,15 +84,14 @@ let playerExplosion = (player) =>
     Explosion.pos: player.pos,
     size: player.size,
     color: player.color,
-    timer: 30,
-    totalTime: 30
+    timer: (0, 30)
   };
 
 let enemyExplosion = (enemy) =>
-  Enemy.{Explosion.pos: enemy.pos, size: enemy.size, color: enemy.color, timer: 30, totalTime: 30};
+  Enemy.{Explosion.pos: enemy.pos, size: enemy.size, color: enemy.color, timer: (0, 30)};
 
 let bulletExplosion = (item) =>
-  Bullet.{Explosion.pos: item.pos, size: item.size, color: item.color, timer: 30, totalTime: 30};
+  Bullet.{Explosion.pos: item.pos, size: item.size, color: item.color, timer: (0, 30)};
 
 let posToward = (p1, p2, distance) =>
   posAdd(p1, vecToPos({mag: distance, theta: thetaToward(p1, p2)}));
@@ -109,7 +106,6 @@ let shoot = (~color, ~size, ~vel, env, self, player) => {
 let circle = (~center, ~rad) => Reprocessing.Draw.ellipsef(~center, ~radx=rad, ~rady=rad);
 
 type status =
-  /* | Start */
   | Running
   | Won
   | Dead(int);
@@ -222,7 +218,26 @@ let arrowAccs = {
   ]
 };
 
-let stepMe = ({me} as state, env) => {
+let floatPos = ((a, b)) => (float_of_int(a), float_of_int(b));
+
+let clampVec = (vel, min, max, fade) =>
+  vel.mag > max ?
+      {...vel, mag: max} : vel.mag < min ? {...vel, mag: 0.} : {...vel, mag: vel.mag *. fade};
+
+let springToward = (p1, p2, scale) => {
+  let vec = vecToward(p1, p2);
+  {...vec, mag: vec.mag *. scale};
+};
+
+let stepMeMouse = ({me} as state, env) => {
+  open Player;
+  let vel = springToward(me.pos, floatPos(Reprocessing_Env.mouse(env)), 0.1);
+  let vel = clampVec(vel, 0.01, 7., 0.98);
+  let pos = posAdd(me.pos, vecToPos(vel));
+  {...state, me: {...me, pos, vel}}
+};
+
+let stepMeKeys = ({me} as state, env) => {
   open Player;
   let vel =
     List.fold_left(
@@ -230,21 +245,27 @@ let stepMe = ({me} as state, env) => {
       me.vel,
       arrowAccs
     );
-  let vel =
-    vel.mag > 7. ?
-      {...vel, mag: 7.} : vel.mag < 0.01 ? {...vel, mag: 0.} : {...vel, mag: vel.mag *. 0.98};
+  let vel = clampVec(vel, 0.01, 7., 0.98);
   let pos = posAdd(me.pos, vecToPos(vel));
   {...state, me: {...me, pos, vel}}
 };
 
 let collides = (p1, p2, d) => dist(posSub(p1, p2)) <= d;
 
+let stepTimer = ((current, max)) => {
+  if (current === max) {
+    ((current, max), true)
+  } else {
+    ((current + 1, max), current + 1 === max)
+  }
+};
+
 module Steps = {
   let stepEnemy = (env, state, enemy) => {
     open Enemy;
-    let (warmup, max) = enemy.warmup;
-    if (warmup < max) {
-      {...state, enemies: [{...enemy, warmup: (warmup + 1, max)}, ...state.enemies]}
+    let (warmup, loaded) = stepTimer(enemy.warmup);
+    if (!loaded) {
+      {...state, enemies: [{...enemy, warmup}, ...state.enemies]}
     } else if (collides(enemy.pos, state.me.Player.pos, enemy.size +. state.me.Player.size)) {
       {
         ...state,
@@ -255,10 +276,10 @@ module Steps = {
       {
         ...state,
         bullets: [enemy.shoot(env, enemy, state.me), ...state.bullets],
-        enemies: [{...enemy, timer: enemy.bulletTime}, ...state.enemies]
+        enemies: [{...enemy, warmup, timer: enemy.bulletTime}, ...state.enemies]
       }
     } else {
-      {...state, enemies: [{...enemy, timer: enemy.timer - 1}, ...state.enemies]}
+      {...state, enemies: [{...enemy, warmup, timer: enemy.timer - 1}, ...state.enemies]}
     }
   };
   let stepEnemies = (state, env) =>
@@ -354,8 +375,10 @@ module Steps = {
   let stepExplosions = (explosions) =>
     Explosion.(
       List.fold_left(
-        (explosions, {timer} as explosion) =>
-          timer > 1 ? [{...explosion, timer: timer - 1}, ...explosions] : explosions,
+        (explosions, {timer} as explosion) => {
+          let (timer, finished) = stepTimer(timer);
+          finished ? explosions : [{...explosion, timer}, ...explosions]
+        },
         [],
         explosions
       )
@@ -372,6 +395,7 @@ module Drawing = {
     let height = Env.height(env) |> float_of_int;
     let width = Env.width(env) |> float_of_int;
     Draw.fill(withAlpha(color, 0.6), env);
+    Draw.noStroke(env);
     if (x +. rad < 0.) {
       if (y +. rad < 0.) {
         rect(~center=(0., 0.), ~w=4., ~h=4., env)
@@ -455,7 +479,8 @@ module Drawing = {
     Bullet.(drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env));
   let drawExplosion = (env, explosion) => {
     open Explosion;
-    let faded = fldiv(explosion.timer, explosion.totalTime);
+    let (current, total) = explosion.timer;
+    let faded = 1. -. fldiv(current, total);
     Draw.fill(withAlpha(explosion.color, faded), env);
     Draw.noStroke(env);
     let size = (1.5 -. 0.5 *. faded) *. explosion.size;
@@ -490,7 +515,7 @@ let draw = (state, env) =>
         | t => t
         }
     };
-    let state = state.status === Running ? stepMe(state, env) : state;
+    let state = state.status === Running ? stepMeKeys(state, env) : state;
     open Steps;
     let state = stepEnemies(state, env);
     let state = {...state, explosions: stepExplosions(state.explosions)};
