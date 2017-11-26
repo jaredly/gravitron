@@ -53,8 +53,8 @@ module Bullet = {
 };
 
 type enemy =
-  | SimpleBlue
-  | SimpleRed
+  | SimpleShooter(int)
+  | DoubleShooter(int, float)
   | Splitter;
 
 module Enemy = {
@@ -62,12 +62,15 @@ module Enemy = {
     pos,
     color: colorT,
     size: float,
-    timer: int,
-    /* id: int, */
-    bulletTime: int,
+    timer: timer,
     warmup: timer,
     shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t
   };
+  /* let step = (state, enemy) => {
+    switch enemy.typ {
+    | SimpleShooter()
+    }
+  }; */
 };
 
 module Explosion = {
@@ -125,8 +128,7 @@ let levels = [|
       Enemy.pos: (600., 600.),
       color: Constants.red,
       size: 20.,
-      timer: 100,
-      bulletTime: 300,
+      timer: (200, 300),
       warmup: (0, 50),
       shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
     }
@@ -136,8 +138,7 @@ let levels = [|
       pos: (200., 200.),
       color: Constants.red,
       size: 20.,
-      timer: 100,
-      bulletTime: 300,
+      timer: (200, 300),
       warmup: (0, 50),
       shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
     },
@@ -145,8 +146,7 @@ let levels = [|
       pos: (600., 600.),
       color: Constants.red,
       size: 20.,
-      timer: 250,
-      bulletTime: 300,
+      timer: (200, 300),
       warmup: (0, 50),
       shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
     }
@@ -156,8 +156,7 @@ let levels = [|
       pos: (600., 600.),
       color: Reprocessing_Constants.blue,
       size: 20.,
-      timer: 100,
-      bulletTime: 100,
+      timer: (0, 100),
       warmup: (0, 50),
       shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
     }
@@ -167,8 +166,7 @@ let levels = [|
       pos: (600., 600.),
       color: Reprocessing_Constants.blue,
       size: 20.,
-      timer: 100,
-      bulletTime: 100,
+      timer: (0, 100),
       warmup: (0, 50),
       shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
     },
@@ -176,8 +174,7 @@ let levels = [|
       pos: (200., 200.),
       color: Reprocessing_Constants.blue,
       size: 20.,
-      timer: 150,
-      bulletTime: 100,
+      timer: (0, 100),
       warmup: (0, 50),
       shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.)
     }
@@ -260,6 +257,14 @@ let stepTimer = ((current, max)) => {
   }
 };
 
+let loopTimer = ((current, max)) => {
+  if (current === max) {
+    ((0, max), true)
+  } else {
+    ((current + 1, max), false)
+  }
+};
+
 module Steps = {
   let stepEnemy = (env, state, enemy) => {
     open Enemy;
@@ -272,15 +277,18 @@ module Steps = {
         status: Dead(100),
         explosions: [playerExplosion(state.me), enemyExplosion(enemy), ...state.explosions]
       }
-    } else if (enemy.timer === 0) {
+    } else {
+      let (timer, looped) = loopTimer(enemy.timer);
+      if (looped) {
       {
         ...state,
         bullets: [enemy.shoot(env, enemy, state.me), ...state.bullets],
-        enemies: [{...enemy, warmup, timer: enemy.bulletTime}, ...state.enemies]
+        enemies: [{...enemy, warmup, timer}, ...state.enemies]
       }
     } else {
-      {...state, enemies: [{...enemy, warmup, timer: enemy.timer - 1}, ...state.enemies]}
+      {...state, enemies: [{...enemy, warmup, timer}, ...state.enemies]}
     }
+  }
   };
   let stepEnemies = (state, env) =>
     List.fold_left(stepEnemy(env), {...state, enemies: []}, state.enemies);
@@ -459,8 +467,8 @@ module Drawing = {
       env
     );
     if (warmup === max) {
-      let loaded = fldiv(enemy.timer, enemy.bulletTime);
-      Draw.stroke(Constants.white, env);
+      let loaded = fldiv(fst(enemy.timer), snd(enemy.timer));
+      Draw.stroke(withAlpha(Constants.white, 0.4), env);
       Draw.strokeWeight(5, env);
       Draw.arcf(
         ~center=enemy.pos,
