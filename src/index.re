@@ -351,7 +351,6 @@ let makePhoneLevels = (env) => {
 
 let fullPlayerHealth = 100;
 
-print_endline("Reprocessing.target = " ++ Reprocessing.target);
 let isPhone = Reprocessing.target == "native-ios";
 
 let getPhonePos = (env) => {
@@ -761,11 +760,7 @@ let draw = (state, env) =>
     let w = Env.width(env) / 2;
     let h = Env.height(env) / 2 - 50;
     centerText(~font=state.font, ~body="Gravitron", ~pos=(w, h), env);
-    if (Env.mousePressed(env)) {
-      {...state, status: Running}
-    } else {
-      state
-    }
+    state
   | Won(animate) =>
     Draw.background(Constants.black, env);
     let w = Env.width(env) / 2;
@@ -781,11 +776,7 @@ let draw = (state, env) =>
     if (animate +. delta < 100.) {
       {...state, status: Won(animate +. delta)}
     } else {
-      if (Env.mousePressed(env)) {
-        newGame(env)
-      } else {
-        state
-      }
+      {...state, status: Won(100.)}
     }
   | _ =>
     let state = {
@@ -831,4 +822,10 @@ let draw = (state, env) =>
     state
   };
 
-run(~setup, ~draw, ());
+run(~setup, ~draw, ~mouseDown=((state, env) => {
+  switch (state.status) {
+  | Won(animate) when animate >= 100. => newGame(env)
+  | Initial => {...state, status: Running}
+  | _ => state
+  }
+}), ());
