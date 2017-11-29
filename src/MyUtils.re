@@ -28,3 +28,31 @@ let flDiv = (a, b) => float_of_int(a) /. float_of_int(b);
     b,
     a: a *. alpha
   };
+let collides = (p1, p2, d) => dist(posSub(p1, p2)) <= d;
+
+let stepTimer = ((current, max), env) => {
+  let time = Reprocessing_Env.deltaTime(env) *. 1000. /. 16.;
+  if (current +. time >= max) {
+    ((max, max), true)
+  } else {
+    ((current +. time, max), false)
+  }
+};
+
+let isFullTimer = ((current, max)) => current === max;
+
+let loopTimer = ((current, max), env) => {
+  let time = Reprocessing_Env.deltaTime(env) *. 1000. /. 16.;
+  if (current +. time >= max) {
+    ((0., max), true)
+  } else {
+    ((current +. time, max), false)
+  }
+};
+
+let countDown = ((current, max)) =>
+  if (current <= 1) {
+    ((0, max), true)
+  } else {
+    ((current - 1, max), false)
+  };

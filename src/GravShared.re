@@ -35,6 +35,7 @@ module Player = {
 module Bullet = {
   type t = {
     color: Reprocessing.colorT,
+    warmup: counter,
     damage: int,
     size: float,
     vel: vec,
@@ -107,7 +108,9 @@ let shoot = (~theta=0., (color, size, vel), env, self, player) => {
   open Enemy;
   let theta = thetaToward(self.pos, player.Player.pos) +. theta;
   let pos = vecToPos({mag: self.size +. size +. 5., theta});
-  {Bullet.color, size, pos: posAdd(self.pos, pos), vel: {mag: vel, theta}, acc: v0, damage: 10}
+  {Bullet.color,
+    warmup: (0., 20.),
+    size, pos: posAdd(self.pos, pos), vel: {mag: vel, theta}, acc: v0, damage: 10}
 };
 
 let circle = (~center, ~rad) => Reprocessing.Draw.ellipsef(~center, ~radx=rad, ~rady=rad);

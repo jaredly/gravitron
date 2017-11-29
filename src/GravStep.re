@@ -67,32 +67,6 @@ let stepMeKeys = ({me} as state, env) => {
   {...state, me: {...me, pos, vel}}
 };
 
-let collides = (p1, p2, d) => dist(posSub(p1, p2)) <= d;
-
-let stepTimer = ((current, max), env) => {
-  let time = Reprocessing_Env.deltaTime(env) *. 1000. /. 16.;
-  if (current +. time >= max) {
-    ((max, max), true)
-  } else {
-    ((current +. time, max), false)
-  }
-};
-
-let loopTimer = ((current, max), env) => {
-  let time = Reprocessing_Env.deltaTime(env) *. 1000. /. 16.;
-  if (current +. time >= max) {
-    ((0., max), true)
-  } else {
-    ((current +. time, max), false)
-  }
-};
-
-let countDown = ((current, max)) =>
-  if (current <= 1) {
-    ((0, max), true)
-  } else {
-    ((current - 1, max), false)
-  };
 
 let stepEnemy = (env, state, enemy) => {
   open Enemy;
@@ -241,6 +215,7 @@ let stepBullets = (state, env) => {
       switch state.status {
       | Initial
       | Won(_)
+      | Paused
       | Dead(_) => bulletToEnemiesAndBullets(moveBullet(bullet, env), state)
       | Running =>
         let {theta, mag} = vecToward(bullet.pos, player.Player.pos);
@@ -262,7 +237,12 @@ let stepBullets = (state, env) => {
           let acc = {theta, mag: 20. /. mag};
           let vel = vecAdd(bullet.vel, acc);
           let pos = posAdd(bullet.pos, vecToPos(vel));
-          bulletToEnemiesAndBullets({...bullet, acc, vel, pos}, state)
+          let (warmup, isFull) = stepTimer(bullet.warmup, env);
+          if (isFull) {
+            bulletToEnemiesAndBullets({...bullet, warmup, acc, vel, pos}, state)
+          } else {
+            {...state, bullets: [{...bullet, acc, vel, pos, warmup}, ...state.bullets]}
+          }
         }
       },
     {...state, bullets: []},
