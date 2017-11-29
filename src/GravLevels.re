@@ -9,7 +9,7 @@ let red = (~warmup=200., pos) => {
   /* timer: (warmup, 300.), */
   warmup: (0., 50.),
   health: (1, 1),
-  behavior: DoubleShooter((warmup, 300.), (Reprocessing.Constants.white, 5., 3.))
+  behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5., 3.))
   /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
 
@@ -24,12 +24,24 @@ let blue = (~warmup=0., pos) => {
   /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
 
+let green = (~warmup=0., pos) => {
+  Enemy.pos,
+  color: Reprocessing_Constants.green,
+  size: 25.,
+  /* timer: (0., 100.), */
+  warmup: (0., 50.),
+  health: (2, 2),
+  behavior: DoubleShooter((warmup, 200.), (Reprocessing.Constants.white, 5., 2.))
+  /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
+};
+
 let levels = [|
   [red((600., 600.))],
   [red((200., 200.)), red((600., 600.))],
   [blue((600., 600.))],
   [blue((600., 600.)), blue((200., 200.))],
-  [blue((600., 600.)), blue((200., 200.)), blue((600., 200.)), blue((200., 600.))]
+  [blue((600., 600.)), blue((200., 200.)), blue((600., 200.)), blue((200., 600.))],
+  [green((600., 600.))],
 |];
 
 let makePhoneLevels = (env) => {

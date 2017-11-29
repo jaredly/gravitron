@@ -173,7 +173,12 @@ let bulletToEnemiesAndBullets = (bullet, state) => {
           (hit, [enemy, ...enemies], explosions) :
           (
             if (collides(enemy.Enemy.pos, bullet.Bullet.pos, enemy.Enemy.size +. bullet.Bullet.size)) {
-              (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
+              let (health, dead) = countDown(enemy.Enemy.health);
+              if (dead) {
+                (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
+              } else {
+                (true, [{...enemy, health}, ...enemies], [bulletExplosion(bullet), ...explosions])
+              }
             } else {
               (false, [enemy, ...enemies], explosions)
             }

@@ -123,10 +123,31 @@ let draw = (state, env) =>
     state
   };
 
+let newAtLevel = (env, level) => {
+  let state = newGame(env);
+  if (level >= Array.length(state.levels)) {
+    state
+  } else {
+    {...state, status: Running, level, enemies: state.levels[level]}
+  }
+};
+
 run(
   ~setup,
   ~draw,
-  ~keyPressed=((state, env) => Env.keyCode(env) === Events.R ? newGame(env) : state),
+  ~keyPressed=((state, env) => switch (Env.keyCode(env)) {
+  | Events.R => newGame(env)
+  | Events.Num_1 => newAtLevel(env, 0)
+  | Events.Num_2 => newAtLevel(env, 1)
+  | Events.Num_3 => newAtLevel(env, 2)
+  | Events.Num_4 => newAtLevel(env, 3)
+  | Events.Num_5 => newAtLevel(env, 4)
+  | Events.Num_6 => newAtLevel(env, 5)
+  | Events.Num_7 => newAtLevel(env, 6)
+  | Events.Num_8 => newAtLevel(env, 7)
+  | Events.Num_9 => newAtLevel(env, 8)
+  | _ => state
+  }),
   ~mouseDown=
     (state, env) =>
       switch state.status {

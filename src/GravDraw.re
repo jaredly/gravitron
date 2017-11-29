@@ -89,17 +89,38 @@ let drawEnemy = (env, enemy) => {
     ~stroke=true,
     env
   );
+  let (current, full) = enemy.health;
+  if (full > 1) {
+    Draw.fill(withAlpha(enemy.color, 0.6), env);
+    Draw.noStroke(env);
+    /* Draw.stroke(withAlpha(enemy.color, 0.6), env); */
+    /* Draw.strokeWeight(2, env); */
+    let sweep = Constants.two_pi /. float_of_int(full);
+    for (i in 0 to current - 1) {
+      let f = float_of_int(i);
+      Draw.arcf(~center=enemy.pos,
+      ~radx = enemy.size -. 10.,
+      ~rady = enemy.size -. 10.,
+      ~start = sweep *. f,
+      ~stop = sweep *. f +. sweep,
+      ~isOpen = false,
+      ~isPie = true,
+      env
+      );
+    }
+  };
   if (warmup === max) {
     switch (enemy.behavior) {
     | DoubleShooter(timer, _)
     | SimpleShooter(timer, _) =>
     let loaded = fst(timer) /. snd(timer);
+    Draw.noFill(env);
     Draw.stroke(withAlpha(Constants.white, 0.4), env);
-    Draw.strokeWeight(5, env);
+    Draw.strokeWeight(2, env);
     Draw.arcf(
       ~center=enemy.pos,
-      ~radx=enemy.size,
-      ~rady=enemy.size,
+      ~radx=enemy.size +. 5.,
+      ~rady=enemy.size +. 5.,
       ~start=0.,
       ~stop=Constants.two_pi *. loaded,
       ~isOpen=true,
