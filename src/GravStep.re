@@ -121,6 +121,20 @@ let stepEnemy = (env, state, enemy) => {
       } else {
         {...state, enemies: [{...enemy, warmup, behavior: DoubleShooter(timer, bulletConfig)}, ...state.enemies]}
       }
+    | Asteroid(vel, timer, bulletConfig) =>
+      let (timer, looped) = loopTimer(timer, env);
+      let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, state.me.Player.pos), mag: 0.01});
+      let vel = {theta: vel.theta, mag: min(vel.mag, 1.)};
+      let pos = posAdd(enemy.pos, vecToPos(vel));
+      if (looped) {
+        {
+          ...state,
+          bullets: [shoot(bulletConfig, env, enemy, state.me), ...state.bullets],
+          enemies: [{...enemy, pos, warmup, behavior: Asteroid(vel, timer, bulletConfig)}, ...state.enemies]
+        }
+      } else {
+        {...state, enemies: [{...enemy, pos, warmup, behavior: Asteroid(vel, timer, bulletConfig)}, ...state.enemies]}
+      }
     | SimpleShooter(timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
       if (looped) {
@@ -165,6 +179,14 @@ let bulletToBullet = (bullet, bullets, explosions) => {
   }
 };
 
+let asteroidSplitVel = () => {
+  let theta = Random.float(Constants.two_pi);
+  (
+    {theta, mag: 2.},
+    {theta: theta -. Constants.pi, mag: 2.},
+  )
+};
+
 let bulletToEnemiesAndBullets = (bullet, state) => {
   let (hit, enemies, explosions) =
     List.fold_left(
@@ -176,7 +198,24 @@ let bulletToEnemiesAndBullets = (bullet, state) => {
               let (health, dead) = countDown(enemy.Enemy.health);
               if (dead) {
                 (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
-              } else {
+              } else switch enemy.Enemy.behavior {
+              | Asteroid(vec, (_, bulletTime), bulletConfig) =>
+                let (current, _) = health;
+                let (one, two) = asteroidSplitVel();
+                let size = float_of_int(current) *. 5. +. 10.;
+                /* let (one, two) = splitAsteroid(enemy.Enemy.pos, bulletTime, bulletConfig); */
+                (true, [{
+                  ...enemy,
+                  size,
+                  behavior: Asteroid(one, (0., bulletTime), bulletConfig),
+                  health: (current, current)
+                }, {
+                  ...enemy,
+                  size,
+                  behavior: Asteroid(two, (0., bulletTime), bulletConfig),
+                  health: (current, current)
+                }, ...enemies], [bulletExplosion(bullet), ...explosions])
+              | _ =>
                 (true, [{...enemy, health}, ...enemies], [bulletExplosion(bullet), ...explosions])
               }
             } else {

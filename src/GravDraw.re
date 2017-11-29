@@ -111,6 +111,7 @@ let drawEnemy = (env, enemy) => {
   };
   if (warmup === max) {
     switch (enemy.behavior) {
+    | Asteroid(_, timer, _)
     | DoubleShooter(timer, _)
     | SimpleShooter(timer, _) =>
     let loaded = fst(timer) /. snd(timer);
