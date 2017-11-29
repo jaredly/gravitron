@@ -114,6 +114,7 @@ let circle = (~center, ~rad) => Reprocessing.Draw.ellipsef(~center, ~radx=rad, ~
 type status =
   | Initial
   | Running
+  | Paused
   | Won(float)
   | Dead(int);
 

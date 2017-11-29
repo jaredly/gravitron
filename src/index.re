@@ -43,6 +43,29 @@ let centerText = (~pos as (x, y), ~font, ~body, env) =>
     Draw.text(~font, ~body, ~pos=(x - width / 2, y), env)
   };
 
+let drawState = (state, env) => {
+    Draw.background(Constants.black, env);
+    if (isPhone) {
+      Draw.pushMatrix(env);
+      Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
+    };
+    open GravDraw;
+    if (state.status === Running || state.status === Paused) {
+      drawMe(state.me, env)
+    };
+    List.iter(drawEnemy(env), state.enemies);
+    List.iter(drawBullet(env), state.bullets);
+    List.iter(drawExplosion(env), state.explosions);
+    if (isPhone) {
+      Draw.popMatrix(env)
+    };
+    drawStatus(state.me, env);
+    /* if (isPhone) {
+         drawJoystick(env)
+       }; */
+    state
+};
+
 let draw = (state, env) =>
   switch state.status {
   | Dead(0) =>
@@ -58,6 +81,7 @@ let draw = (state, env) =>
     } else {
       newGame(env)
     }
+  | Paused => {drawState(state, env); state}
   | Initial =>
     Draw.background(Constants.black, env);
     let w = Env.width(env) / 2;
@@ -101,26 +125,7 @@ let draw = (state, env) =>
         state.level >= Array.length(state.levels) - 1 ?
           {...state, status: Won(0.)} :
           {...state, level: state.level + 1, enemies: state.levels[state.level + 1]};
-    Draw.background(Constants.black, env);
-    if (isPhone) {
-      Draw.pushMatrix(env);
-      Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
-    };
-    open GravDraw;
-    if (state.status === Running) {
-      drawMe(state.me, env)
-    };
-    List.iter(drawEnemy(env), state.enemies);
-    List.iter(drawBullet(env), state.bullets);
-    List.iter(drawExplosion(env), state.explosions);
-    if (isPhone) {
-      Draw.popMatrix(env)
-    };
-    drawStatus(state.me, env);
-    /* if (isPhone) {
-         drawJoystick(env)
-       }; */
-    state
+    drawState(state, env);
   };
 
 let newAtLevel = (env, level) => {
@@ -137,6 +142,11 @@ run(
   ~draw,
   ~keyPressed=((state, env) => switch (Env.keyCode(env)) {
   | Events.R => newGame(env)
+  | Events.Space => switch (state.status) {
+    | Paused => {...state, status: Running}
+    | Running => {...state, status: Paused}
+    | _ => state
+  }
   | Events.Num_1 => newAtLevel(env, 0)
   | Events.Num_2 => newAtLevel(env, 1)
   | Events.Num_3 => newAtLevel(env, 2)
