@@ -97,8 +97,8 @@ let stepEnemy = (env, state, enemy) => {
       }
     | Asteroid(vel, timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
-      let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, state.me.Player.pos), mag: 0.01});
-      let vel = {theta: vel.theta, mag: min(vel.mag, 1.)};
+      /* let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, state.me.Player.pos), mag: 0.01}); */
+      let vel = {theta: vel.theta, mag: min(vel.mag, 2.) *. 0.98};
       let pos = posAdd(enemy.pos, vecToPos(vel));
       if (looped) {
         {
@@ -157,7 +157,7 @@ let asteroidSplitVel = () => {
   let theta = Random.float(Constants.two_pi);
   (
     {theta, mag: 2.},
-    {theta: theta -. Constants.pi, mag: 2.},
+    {theta: theta -. Constants.pi +. Random.float(Constants.pi /. 2.), mag: 2.},
   )
 };
 
@@ -181,7 +181,7 @@ let bulletToEnemiesAndBullets = (bullet, state) => {
                 (true, [{
                   ...enemy,
                   size,
-                  behavior: Asteroid(one, (0., bulletTime), bulletConfig),
+                  behavior: Asteroid(one, (Random.float(bulletTime /. 4.), bulletTime), bulletConfig),
                   health: (current, current)
                 }, {
                   ...enemy,
