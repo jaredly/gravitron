@@ -6,7 +6,7 @@ let fullPlayerHealth = 100;
 
 let isPhone = Reprocessing.target == "native-ios";
 
-let phoneScale = 2.;
+let phoneScale = isPhone ? 2. : 1.;
 
 let getPhonePos = (env) => {
   let w = float_of_int(Env.width(env)) *. phoneScale;
@@ -49,8 +49,8 @@ module Enemy = {
   type behavior =
     | SimpleShooter(counter, bulletConfig)
     | DoubleShooter(counter, bulletConfig)
-    /* size, bullettimer, _ */
-    | Asteroid(vec, counter, bulletConfig)
+    /* target, size, bullettimer, _ */
+    | Asteroid(pos, vec, counter, bulletConfig)
     /* | Asteroid(counter)
     | DoubleShooter(int, float)
     | Splitter */
