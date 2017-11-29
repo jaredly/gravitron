@@ -1,15 +1,13 @@
 open Reprocessing;
 
 open MyUtils;
+
 open GravShared;
-
-
 
 let newGame = (env) => {
   let levels = isPhone ? GravLevels.makePhoneLevels(env) : GravLevels.levels;
   let font =
     Draw.loadFont(~filename="./assets/SFCompactRounded-Black-48.fnt", ~isPixel=false, env);
-  /* let font = Draw.loadFont(~filename="./assets/font.fnt", ~isPixel=false, env); */
   {
     status: Initial,
     level: 0,
@@ -37,14 +35,13 @@ let setup = (env) => {
   newGame(env)
 };
 
-let centerText = (~pos as (x, y), ~font, ~body, env) => {
+let centerText = (~pos as (x, y), ~font, ~body, env) =>
   switch font^ {
   | None => ()
   | Some(innerFont) =>
     let width = Reprocessing_Font.Font.calcStringWidth(env, innerFont, body);
-    Draw.text(~font=font, ~body, ~pos=(x - width / 2, y), env);
+    Draw.text(~font, ~body, ~pos=(x - width / 2, y), env)
   };
-};
 
 let draw = (state, env) =>
   switch state.status {
@@ -71,12 +68,10 @@ let draw = (state, env) =>
     Draw.background(Constants.black, env);
     let w = Env.width(env) / 2;
     let h = Env.height(env) / 2 - 50;
-    let y0 = -50.;
-
+    let y0 = (-50.);
     let percent = animate /. 100.;
     let y = (float_of_int(h) -. y0) *. percent +. y0 |> int_of_float;
     /* TODO ease in or sth */
-
     centerText(~font=state.font, ~body="You won!", ~pos=(w, y), env);
     let delta = Env.deltaTime(env) *. 1000. /. 16.;
     if (animate +. delta < 100.) {
@@ -109,7 +104,7 @@ let draw = (state, env) =>
     Draw.background(Constants.black, env);
     if (isPhone) {
       Draw.pushMatrix(env);
-      Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env);
+      Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
     };
     open GravDraw;
     if (state.status === Running) {
@@ -119,19 +114,25 @@ let draw = (state, env) =>
     List.iter(drawBullet(env), state.bullets);
     List.iter(drawExplosion(env), state.explosions);
     if (isPhone) {
-      Draw.popMatrix(env);
+      Draw.popMatrix(env)
     };
     drawStatus(state.me, env);
     /* if (isPhone) {
-      drawJoystick(env)
-    }; */
+         drawJoystick(env)
+       }; */
     state
   };
 
-run(~setup, ~draw, ~mouseDown=((state, env) => {
-  switch (state.status) {
-  | Won(animate) when animate >= 100. => newGame(env)
-  | Initial => {...state, status: Running}
-  | _ => state
-  }
-}), ());
+run(
+  ~setup,
+  ~draw,
+  ~keyPressed=((state, env) => Env.keyCode(env) === Events.R ? newGame(env) : state),
+  ~mouseDown=
+    (state, env) =>
+      switch state.status {
+      | Won(animate) when animate >= 100. => newGame(env)
+      | Initial => {...state, status: Running}
+      | _ => state
+      },
+  ()
+);

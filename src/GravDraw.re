@@ -90,7 +90,10 @@ let drawEnemy = (env, enemy) => {
     env
   );
   if (warmup === max) {
-    let loaded = fst(enemy.timer) /. snd(enemy.timer);
+    switch (enemy.behavior) {
+    | DoubleShooter(timer, _)
+    | SimpleShooter(timer, _) =>
+    let loaded = fst(timer) /. snd(timer);
     Draw.stroke(withAlpha(Constants.white, 0.4), env);
     Draw.strokeWeight(5, env);
     Draw.arcf(
@@ -104,6 +107,7 @@ let drawEnemy = (env, enemy) => {
       env
     );
     Draw.noStroke(env)
+    }
   }
 };
 

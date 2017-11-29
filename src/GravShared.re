@@ -43,20 +43,25 @@ module Bullet = {
   };
 };
 
-type enemy =
-  | SimpleShooter(int)
-  | DoubleShooter(int, float)
-  | Splitter;
-
 module Enemy = {
+  type bulletConfig = (colorT, float, float);
+  type behavior =
+    | SimpleShooter(counter, bulletConfig)
+    | DoubleShooter(counter, bulletConfig)
+    /* | Asteroid(counter)
+    | DoubleShooter(int, float)
+    | Splitter */
+    ;
+
   type t = {
     pos,
     color: colorT,
     size: float,
-    timer: counter,
+    /* timer: counter, */
     warmup: counter,
     health: counteri,
-    shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t
+    behavior,
+    /* shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t */
   };
   /* let step = (state, enemy) => {
        switch enemy.typ {
@@ -96,9 +101,9 @@ let bulletExplosion = (item) =>
 let posToward = (p1, p2, distance) =>
   posAdd(p1, vecToPos({mag: distance, theta: thetaToward(p1, p2)}));
 
-let shoot = (~color, ~size, ~vel, env, self, player) => {
+let shoot = (~theta=0., (color, size, vel), env, self, player) => {
   open Enemy;
-  let theta = thetaToward(self.pos, player.Player.pos);
+  let theta = thetaToward(self.pos, player.Player.pos) +. theta;
   let pos = vecToPos({mag: self.size +. size +. 5., theta});
   {Bullet.color, size, pos: posAdd(self.pos, pos), vel: {mag: vel, theta}, acc: v0, damage: 10}
 };
