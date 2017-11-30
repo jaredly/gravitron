@@ -1,0 +1,9 @@
+[submodule "reprocessing"]
+	path = reprocessing
+	url = https://github.com/jaredly/reprocessing
+[submodule "reasongl-native"]
+	path = reasongl-native
+	url = https://github.com/jaredly/reasongl-native
+[submodule "reasongl-interface"]
+	path = reasongl-interface
+	url = https://github.com/jaredly/reasongl-interface

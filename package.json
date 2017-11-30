@@ -15,9 +15,9 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^2.0.1"
+    "bs-platform": "bsb-native"
   },
   "dependencies": {
-    "Reprocessing": "schmavery/reprocessing"
+    "Reprocessing": "file:./reprocessing"
   }
 }

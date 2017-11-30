@@ -2,16 +2,17 @@
 # yarn lockfile v1
 
 
-ReasonglInterface@bsansouci/reasongl-interface, "ReasonglInterface@github:bsansouci/reasongl-interface":
+ReasonglInterface@bsansouci/reasongl-interface:
   version "0.1.14"
-  uid "5d24098d575d9d7ed3c7595f63c34e1899650d9a"
   resolved "https://codeload.github.com/bsansouci/reasongl-interface/tar.gz/5d24098d575d9d7ed3c7595f63c34e1899650d9a"
 
-"ReasonglNative@github:bsansouci/reasongl-native":
+"ReasonglInterface@file:reasongl-interface":
+  version "0.1.14"
+
+"ReasonglNative@file:reasongl-native":
   version "0.2.0"
-  resolved "https://codeload.github.com/bsansouci/reasongl-native/tar.gz/951b7b9b9d741d045b70825ca245a856bb91f217"
   dependencies:
-    ReasonglInterface bsansouci/reasongl-interface
+    ReasonglInterface "file:../../../Library/Caches/Yarn/v1/reasongl-interface"
     Tgls bsansouci/tgls
     Tsdl bsansouci/tsdl
 
@@ -22,12 +23,11 @@ ReasonglInterface@bsansouci/reasongl-interface, "ReasonglInterface@github:bsanso
     ReasonglInterface bsansouci/reasongl-interface
     gl-matrix "*"
 
-Reprocessing@schmavery/reprocessing:
+"Reprocessing@file:./reprocessing":
   version "0.1.0"
-  resolved "https://codeload.github.com/schmavery/reprocessing/tar.gz/b078b1e14c1e34d9e3084bad8f59734d92c1401a"
   dependencies:
-    ReasonglInterface "github:bsansouci/reasongl-interface"
-    ReasonglNative "github:bsansouci/reasongl-native"
+    ReasonglInterface "file:../../../Library/Caches/Yarn/v1/reasongl-interface"
+    ReasonglNative "file:../../../Library/Caches/Yarn/v1/reasongl-native"
     ReasonglWeb "github:bsansouci/reasongl-web"
     matchenv bsansouci/matchenv
 
