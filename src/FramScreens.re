@@ -11,8 +11,8 @@ module T = {
 open T;
 
 module Screen = {
-  type screenable('context, 'transition) =
-    | Screen('state, screen('context, 'state, 'transition)): screenable('context, 'transition);
+  type screenable('context, 'transition, 'wrappedState) =
+    | Screen('state, screen('context, 'state, 'transition), 'state => 'wrappedState): screenable('context, 'transition, 'wrappedState);
 };
 
 open Screen;
@@ -23,75 +23,38 @@ let empty = {
   keyPressed: (ctx, state, _) => Same(ctx, state)
 };
 
-let run = (transitionTo, (context, Screen(innerState, screen)), env) => {
+
+let draw = (transitionTo, getScreen, (context, state), env) => {
+  let Screen(innerState, screen, wrapper) = getScreen(state);
   switch (screen.run(context, innerState, env)) {
-  | Same(context, newInnerState) => (context, Screen(newInnerState, screen))
+  | Same(context, newInnerState) => (context, wrapper(newInnerState))
   | Transition(context, transition) => (context, transitionTo(context, transition, env))
   }
 };
 
-let keyPressed = (transitionTo, (context, Screen(innerState, screen)), env) => {
+let keyPressed = (transitionTo, getScreen, (context, state), env) => {
+  let Screen(innerState, screen, wrapper) = getScreen(state);
   switch (screen.keyPressed(context, innerState, env)) {
-  | Same(context, newInnerState) => (context, Screen(newInnerState, screen))
+  | Same(context, newInnerState) => (context, wrapper(newInnerState))
   | Transition(context, transition) => (context, transitionTo(context, transition, env))
   }
 };
 
-let mouseDown = (transitionTo, (context, Screen(innerState, screen)), env) => {
+let mouseDown = (transitionTo, getScreen, (context, state), env) => {
+  let Screen(innerState, screen, wrapper) = getScreen(state);
   switch (screen.mouseDown(context, innerState, env)) {
-  | Same(context, newInnerState) => (context, Screen(newInnerState, screen))
+  | Same(context, newInnerState) => (context, wrapper(newInnerState))
   | Transition(context, transition) => (context, transitionTo(context, transition, env))
   }
 };
 
-let run = (~transitionTo, ~setup, ~perfMonitorFont) => {
+let run = (~transitionTo, ~setup, ~getScreen, ~perfMonitorFont) => {
   Reprocessing.run(
     ~setup,
-    ~draw=run(transitionTo),
-    ~mouseDown=mouseDown(transitionTo),
-    ~keyPressed=keyPressed(transitionTo),
+    ~draw=draw(transitionTo, getScreen),
+    ~mouseDown=mouseDown(transitionTo, getScreen),
+    ~keyPressed=keyPressed(transitionTo, getScreen),
     ~perfMonitorFont,
     ()
   )
-};
-
-let module HotReloadable = {
-  type screenable('context, 'transition, 'wrappedState) =
-    | Screen('state, screen('context, 'state, 'transition), 'state => 'wrappedState): screenable('context, 'transition, 'wrappedState);
-
-  let draw = (transitionTo, getScreen, (context, state), env) => {
-    let Screen(innerState, screen, wrapper) = getScreen(state);
-    switch (screen.run(context, innerState, env)) {
-    | Same(context, newInnerState) => (context, wrapper(newInnerState))
-    | Transition(context, transition) => (context, transitionTo(context, transition, env))
-    }
-  };
-
-  let keyPressed = (transitionTo, getScreen, (context, state), env) => {
-    let Screen(innerState, screen, wrapper) = getScreen(state);
-    switch (screen.keyPressed(context, innerState, env)) {
-    | Same(context, newInnerState) => (context, wrapper(newInnerState))
-    | Transition(context, transition) => (context, transitionTo(context, transition, env))
-    }
-  };
-
-  let mouseDown = (transitionTo, getScreen, (context, state), env) => {
-    let Screen(innerState, screen, wrapper) = getScreen(state);
-    switch (screen.mouseDown(context, innerState, env)) {
-    | Same(context, newInnerState) => (context, wrapper(newInnerState))
-    | Transition(context, transition) => (context, transitionTo(context, transition, env))
-    }
-  };
-
-  let run = (~transitionTo, ~setup, ~getScreen, ~perfMonitorFont) => {
-    Reprocessing.run(
-      ~setup,
-      ~draw=draw(transitionTo, getScreen),
-      ~mouseDown=mouseDown(transitionTo, getScreen),
-      ~keyPressed=keyPressed(transitionTo, getScreen),
-      ~perfMonitorFont,
-      ()
-    )
-  };
-
 };

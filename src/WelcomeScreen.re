@@ -10,7 +10,7 @@ let run = (ctx, env) => {
     let w = Env.width(env) / 2;
     let h = Env.height(env) / 2 - 50;
     DrawUtils.centerText(~font=ctx.titleFont, ~body="Gravitron", ~pos=(w, h), env);
-    DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 100), env);
+    DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env);
     Same(ctx, ())
 };
 
