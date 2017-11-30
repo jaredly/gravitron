@@ -1,5 +1,6 @@
-open GravShared;
+/* open GravShared; */
 open FramScreens.T;
+
 open SharedTypes;
 
 let setup = (env) => {
@@ -8,46 +9,77 @@ let setup = (env) => {
       (Reprocessing.Env.windowWidth(env), Reprocessing.Env.windowHeight(env)) : (800, 800);
   Reprocessing.Env.size(~width=w, ~height=h, env);
   print_endline("setting up");
-  ({
-    userLevels: [||],
-    highScores: [||],
-    font: Reprocessing.Draw.loadFont(~filename="./assets/SFCompactRounded-Black-48.fnt", ~isPixel=false, env),
-  }, Screen((), WelcomeScreen.screen))
+  (
+    {
+      userLevels: [||],
+      highScores: [||],
+      titleFont:
+        Reprocessing.Draw.loadFont(
+          ~filename="./assets/SFCompactRounded-Black-48.fnt",
+          ~isPixel=false,
+          env
+        ),
+      textFont:
+        Reprocessing.Draw.loadFont(
+          ~filename="./assets/SFCompactDisplay-Regular-24.fnt",
+          ~isPixel=false,
+          env
+        )
+    },
+    Screen((), WelcomeScreen.screen)
+  )
 };
 
-type transition = [
-  | `Quit
-  | `Start
-  | `Finished(bool)
-  | `UserLevels
-  | `EditLevel(int)
-];
+type transition = [ | `Quit | `Start | `Finished(bool) | `UserLevels | `EditLevel(int)];
 
-let module DoneScreen = {
-  let initialState = won => (won, 100.);
-  let screen = FramScreens.empty;
+module DoneScreen = {
+  let max = 50.;
+  let initialState = (won) => (won, 0.);
+  let screen = {
+    ...FramScreens.empty,
+    mouseDown: (ctx, (_, animate) as state, env) => {
+      if (animate == max) {
+        Transition(ctx, `Quit)
+      } else {
+        Same(ctx, state)
+      }
+    },
+    run: (ctx, (won, animate), env) => {
+      open Reprocessing;
+
+      Draw.background(Constants.black, env);
+      let w = Env.width(env) / 2;
+      let h = Env.height(env) / 2 - 50;
+      let y0 = (-50.);
+      let percent = animate /. max;
+      let y = (float_of_int(h) -. y0) *. percent +. y0 |> int_of_float;
+      /* TODO ease in or sth */
+      DrawUtils.centerText(~font=ctx.titleFont, ~body=(won ? "You won!" : "You lost..."), ~pos=(w, y), env);
+      let delta = Env.deltaTime(env) *. 1000. /. 16.;
+      if (animate +. delta < max) {
+        Same(ctx, (won, animate +. delta))
+      } else {
+        Same(ctx, (won, max))
+      }
+    }
+  };
 };
 
-let module LevelEditor = {
+module LevelEditor = {
   let blankState = None;
-  let editState = level => Some(level);
+  let editState = (level) => Some(level);
   let screen = FramScreens.empty;
 };
 
-let transitionTo = (_, transition, env) => switch transition {
-| `Quit => Screen(WelcomeScreen.initialState(env), WelcomeScreen.screen)
-| `Start => {print_endline("Start"); Screen(GravGame.initialState(env), GravGame.screen)}
-| `Finished(won) => Screen(DoneScreen.initialState(won), DoneScreen.screen)
-| `UserLevels => Screen(LevelEditor.blankState, LevelEditor.screen)
-| `EditLevel(level) => Screen(LevelEditor.editState(level), LevelEditor.screen)
-};
+let transitionTo = (_, transition, env) =>
+  switch transition {
+  | `Quit => Screen(WelcomeScreen.initialState(env), WelcomeScreen.screen)
+  | `Start =>
+    print_endline("Start");
+    Screen(GravGame.initialState(env), GravGame.screen)
+  | `Finished(won) => Screen(DoneScreen.initialState(won), DoneScreen.screen)
+  | `UserLevels => Screen(LevelEditor.blankState, LevelEditor.screen)
+  | `EditLevel(level) => Screen(LevelEditor.editState(level), LevelEditor.screen)
+  };
 
 FramScreens.run(~transitionTo, ~setup);
-
-/**
- * I feel like I need to establish some normal way
- * of switching between screens.
- * Like a "go to this screen now".
- * I dunno.
- * Maybe using polumorphic variantes?
- */

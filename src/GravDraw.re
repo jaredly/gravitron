@@ -79,16 +79,18 @@ let fldiv = (a, b) => float_of_int(a) /. float_of_int(b);
 
 let drawMe = (me, env) => {
   open Player;
-  drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size, env);
 
   /** Hmm I wonder if there's a better way to communicate this. */
+  drawOnScreen(~color=withAlpha(me.color, 0.3), ~center=me.pos, ~rad=me.size, env);
   let health = fldiv(me.health, fullPlayerHealth);
+
+  drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size *. health, env);
   Draw.noFill(env);
   Draw.stroke(withAlpha(Constants.green, health), env);
   Draw.strokeWeight(2, env);
   circle(
     ~center=me.pos,
-    ~rad=me.size +. 5.,
+    ~rad=me.size,
     env
   );
   Draw.noStroke(env)
