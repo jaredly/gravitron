@@ -80,7 +80,6 @@ let fldiv = (a, b) => float_of_int(a) /. float_of_int(b);
 let drawMe = (me, env) => {
   open Player;
 
-  /** Hmm I wonder if there's a better way to communicate this. */
   drawOnScreen(~color=withAlpha(me.color, 0.3), ~center=me.pos, ~rad=me.size, env);
   let health = fldiv(me.health, fullPlayerHealth);
 
@@ -127,6 +126,7 @@ let drawEnemy = (env, enemy) => {
       );
     }
   };
+
   if (warmup === maxval) {
     switch (enemy.behavior) {
     | Asteroid(_, _, timer, _)

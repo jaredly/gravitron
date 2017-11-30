@@ -53,7 +53,7 @@ let drawState = (state, env) => {
 
 open FramScreens.T;
 
-let mainLoop = (ctx, state, env) =>
+let mainLoop = (ctx, state, env) => {
   switch state.status {
   | Dead(0) =>
     if (state.me.Player.lives > 0) {
@@ -95,7 +95,8 @@ let mainLoop = (ctx, state, env) =>
           {...state, level: state.level + 1, enemies: state.levels[state.level + 1]};
     drawState(state, env);
     Same(ctx, state)
-  };
+  }
+};
 
 let newAtLevel = (env, level) => {
   let state = newGame(env);
