@@ -83,6 +83,7 @@ type highScore = {
 };
 
 type context = {
+  highestBeatenLevel: int,
   userLevels: array(array(Enemy.t)),
   highScores: array(highScore),
   smallFont: Reprocessing.fontT,

@@ -6,82 +6,6 @@ module LevelEditor = {
   let screen = ScreenManager.empty;
 };
 
-module LevelPicker = {
-  let initialState = ();
-  let buttonsInPosition = (env) => {
-    let buttons = ref([]);
-    let w = Reprocessing.Env.width(env);
-    let boxSize = 60;
-    let margin = 10;
-    let rowSize = (w - margin) / (boxSize + margin);
-    for (i in 0 to Array.length(GravLevels.levels) - 1) {
-      let col = i mod rowSize;
-      let row = i / rowSize;
-      let x = col * (boxSize + margin) + margin;
-      let y = row * (boxSize + margin) + margin;
-      buttons := [(
-        string_of_int(i + 1),
-        (x + boxSize / 2, y + boxSize / 2),
-        (x, y),
-        boxSize,
-        boxSize,
-        i
-      ), ...buttons^]
-    };
-    buttons^;
-  };
-
-  let screen =
-    ScreenManager.stateless(
-      ~run=
-        (ctx, env) => {
-          open Reprocessing;
-          Draw.background(Constants.black, env);
-          List.iter(((text, textpos, pos, width, height, i)) => {
-            Draw.noFill(env);
-            Draw.stroke(Constants.white, env);
-            Draw.strokeWeight(3, env);
-            Draw.rect(~pos, ~width, ~height, env);
-            Draw.text(
-              ~font=ctx.textFont,
-              ~body=text,
-              ~pos=textpos,
-              env
-            )
-          }, buttonsInPosition(env));
-          Stateless(ctx)
-        },
-      ~mouseDown=(ctx, env) => {
-        let res = List.fold_left(
-          (current, (_, _, pos, width, height, i)) => switch current {
-            | Some(x) => current
-            | None =>
-              if (MyUtils.rectCollide(Reprocessing.Env.mouse(env), (pos, (width, height)))) {
-                Some(i)
-              } else {
-                None
-              }
-          },
-          None,
-          buttonsInPosition(env)
-        );
-        switch res {
-        | None => Stateless(ctx)
-        | Some(dest) => Transition(ctx, `StartFromLevel(dest))
-        }
-      },
-      ~keyPressed=
-        (ctx, env) =>
-          Reprocessing.(
-            switch (Env.keyCode(env)) {
-            | Events.Escape => Transition(ctx, `Quit)
-            | _ => Stateless(ctx)
-            }
-          ),
-      ()
-    );
-};
-
 let setup = (initialScreen, env) => {
   let (w, h) =
     GravShared.isPhone ?
@@ -89,6 +13,10 @@ let setup = (initialScreen, env) => {
   Reprocessing.Env.size(~width=w, ~height=h, env);
   (
     {
+      highestBeatenLevel: switch (Reprocessing.Env.loadUserData(~key="highest_beaten_level", env)) {
+      | None => -1
+      | Some(x) => x
+      },
       userLevels: [||],
       highScores: [||],
       titleFont:
