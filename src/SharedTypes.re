@@ -89,3 +89,13 @@ type context = {
   textFont: Reprocessing.fontT,
   titleFont: Reprocessing.fontT,
 };
+
+type transition = [
+  | `Start
+  | `StartFromLevel(int)
+  | `Quit
+  | `Finished(bool)
+  | `PickLevel
+  | `UserLevels
+  | `EditLevel(int)
+];

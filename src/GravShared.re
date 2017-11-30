@@ -59,7 +59,6 @@ let circle = (~center, ~rad) => Reprocessing.Draw.ellipsef(~center, ~radx=rad, ~
 type status =
   | Running
   | Paused
-  | Won(float)
   | Dead(int);
 
 type gameState = {

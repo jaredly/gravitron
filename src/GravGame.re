@@ -51,9 +51,8 @@ let drawState = (state, env) => {
   drawStatus(state.me, env)
 };
 
-open FramScreens.T;
-
 let mainLoop = (ctx, state, env) => {
+  open ScreenManager.Screen;
   switch state.status {
   | Dead(0) =>
     if (state.me.Player.lives > 0) {
@@ -87,14 +86,12 @@ let mainLoop = (ctx, state, env) => {
     let state = stepEnemies(state, env);
     let state = {...state, explosions: stepExplosions(state.explosions, env)};
     let state = stepBullets(state, env);
-    let state =
-      state.enemies !== [] || state.status !== Running ?
-        state :
-        state.level >= Array.length(state.levels) - 1 ?
-          {...state, status: Won(0.)} :
-          {...state, level: state.level + 1, enemies: state.levels[state.level + 1]};
     drawState(state, env);
-    Same(ctx, state)
+    state.enemies !== [] || state.status !== Running ?
+      Same(ctx, state) :
+      state.level >= Array.length(state.levels) - 1 ?
+        Transition(ctx, `Finished(true)) :
+        Same(ctx, {...state, level: state.level + 1, enemies: state.levels[state.level + 1]});
   }
 };
 
@@ -109,7 +106,7 @@ let newAtLevel = (env, level) => {
 
 let keyPressed = (ctx, state, env) =>
   switch (Env.keyCode(env)) {
-  | Events.Escape => FramScreens.T.Transition(ctx, `Quit)
+  | Events.Escape => ScreenManager.Screen.Transition(ctx, `Quit)
   | k =>
     Same(
       ctx,
@@ -135,15 +132,8 @@ let keyPressed = (ctx, state, env) =>
     )
   };
 
-let mouseDown = (state, env) =>
-  switch state.status {
-  | Won(animate) when animate >= 100. => newGame(env)
-  | _ => state
-  };
-
-let screen =
-  FramScreens.T.{
-    ...FramScreens.empty,
-    run: (ctx, state, env) => mainLoop(ctx, state, env),
-    keyPressed: (ctx, state, env) => keyPressed(ctx, state, env)
-  };
+let screen = {
+  ...ScreenManager.empty,
+  run: (ctx, state, env) => mainLoop(ctx, state, env),
+  keyPressed: (ctx, state, env) => keyPressed(ctx, state, env)
+};

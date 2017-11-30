@@ -1,5 +1,10 @@
   type pos = (float, float);
 
+let rectCollide = ((x, y), ((a, b), (w, h))) => {
+  x >= a && x <= a + w &&
+  y >= b && y <= b + h
+};
+
 let flDiv = (a, b) => float_of_int(a) /. float_of_int(b);
   type vec = {
     mag: float,

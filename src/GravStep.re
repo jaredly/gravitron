@@ -225,7 +225,6 @@ let stepBullets = (state, env) => {
   List.fold_left(
     (state, bullet) =>
       switch state.status {
-      | Won(_)
       | Paused
       | Dead(_) => bulletToEnemiesAndBullets(moveBullet(bullet, env), state, env)
       | Running =>

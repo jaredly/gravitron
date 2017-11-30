@@ -1,47 +1,85 @@
-/* open GravShared; */
-/* open FramScreens.T; */
-
 open SharedTypes;
-
-type transition = [ | `Quit | `Start | `Finished(bool) | `UserLevels | `EditLevel(int)];
-
-module DoneScreen = {
-  let max = 50.;
-  let initialState = (won) => (won, 0.);
-  let screen = {
-    ...FramScreens.empty,
-    mouseDown: (ctx, (_, animate) as state, env) => {
-      if (animate == max) {
-        Transition(ctx, `Quit)
-      } else {
-        Same(ctx, state)
-      }
-    },
-    run: (ctx, (won, animate), env) => {
-      open Reprocessing;
-
-      Draw.background(Constants.black, env);
-      let w = Env.width(env) / 2;
-      let h = Env.height(env) / 2 - 50;
-      let y0 = (-50.);
-      let percent = animate /. max;
-      let y = (float_of_int(h) -. y0) *. percent +. y0 |> int_of_float;
-      /* TODO ease in or sth */
-      DrawUtils.centerText(~font=ctx.titleFont, ~body=(won ? "You won!" : "You lost..."), ~pos=(w, y), env);
-      let delta = Env.deltaTime(env) *. 1000. /. 16.;
-      if (animate +. delta < max) {
-        Same(ctx, (won, animate +. delta))
-      } else {
-        Same(ctx, (won, max))
-      }
-    }
-  };
-};
 
 module LevelEditor = {
   let blankState = None;
   let editState = (level) => Some(level);
-  let screen = FramScreens.empty;
+  let screen = ScreenManager.empty;
+};
+
+module LevelPicker = {
+  let initialState = ();
+  let buttonsInPosition = (env) => {
+    let buttons = ref([]);
+    let w = Reprocessing.Env.width(env);
+    let boxSize = 60;
+    let margin = 10;
+    let rowSize = (w - margin) / (boxSize + margin);
+    for (i in 0 to Array.length(GravLevels.levels) - 1) {
+      let col = i mod rowSize;
+      let row = i / rowSize;
+      let x = col * (boxSize + margin) + margin;
+      let y = row * (boxSize + margin) + margin;
+      buttons := [(
+        string_of_int(i + 1),
+        (x + boxSize / 2, y + boxSize / 2),
+        (x, y),
+        boxSize,
+        boxSize,
+        i
+      ), ...buttons^]
+    };
+    buttons^;
+  };
+
+  let screen =
+    ScreenManager.stateless(
+      ~run=
+        (ctx, env) => {
+          open Reprocessing;
+          Draw.background(Constants.black, env);
+          List.iter(((text, textpos, pos, width, height, i)) => {
+            Draw.noFill(env);
+            Draw.stroke(Constants.white, env);
+            Draw.strokeWeight(3, env);
+            Draw.rect(~pos, ~width, ~height, env);
+            Draw.text(
+              ~font=ctx.textFont,
+              ~body=text,
+              ~pos=textpos,
+              env
+            )
+          }, buttonsInPosition(env));
+          Stateless(ctx)
+        },
+      ~mouseDown=(ctx, env) => {
+        let res = List.fold_left(
+          (current, (_, _, pos, width, height, i)) => switch current {
+            | Some(x) => current
+            | None =>
+              if (MyUtils.rectCollide(Reprocessing.Env.mouse(env), (pos, (width, height)))) {
+                Some(i)
+              } else {
+                None
+              }
+          },
+          None,
+          buttonsInPosition(env)
+        );
+        switch res {
+        | None => Stateless(ctx)
+        | Some(dest) => Transition(ctx, `StartFromLevel(dest))
+        }
+      },
+      ~keyPressed=
+        (ctx, env) =>
+          Reprocessing.(
+            switch (Env.keyCode(env)) {
+            | Events.Escape => Transition(ctx, `Quit)
+            | _ => Stateless(ctx)
+            }
+          ),
+      ()
+    );
 };
 
 let setup = (initialScreen, env) => {
@@ -76,26 +114,36 @@ let setup = (initialScreen, env) => {
   )
 };
 
-
 let transitionTo = (_, transition, env) =>
   switch transition {
   | `Quit => `WelcomeScreen(WelcomeScreen.initialState(env))
   | `Start =>
     print_endline("Start");
     `Game(GravGame.initialState(env))
+  | `StartFromLevel(level) => `Game(GravGame.newAtLevel(env, level))
   | `Finished(won) => `DoneScreen(DoneScreen.initialState(won))
+  | `PickLevel => `LevelPicker(LevelPicker.initialState)
   | `UserLevels => `LevelEditor(LevelEditor.blankState)
   | `EditLevel(level) => `LevelEditor(LevelEditor.editState(level))
   };
 
-let getScreen = state => FramScreens.Screen.(switch state {
-| `WelcomeScreen(state) => Screen(state, WelcomeScreen.screen, state => `WelcomeScreen(state))
-| `Game(state) => Screen(state, GravGame.screen, state => `Game(state))
-| `DoneScreen(state) => Screen(state, DoneScreen.screen, state => `DoneScreen(state))
-| `LevelEditor(state) => Screen(state, LevelEditor.screen, state => `LevelEditor(state))
-});
+let getScreen = (state) =>
+  ScreenManager.Screen.(
+    switch state {
+    | `WelcomeScreen(state) =>
+      Screen(state, WelcomeScreen.screen, ((state) => `WelcomeScreen(state)))
+    | `LevelPicker(state) => Screen(state, LevelPicker.screen, ((state) => `LevelPicker(state)))
+    | `Game(state) => Screen(state, GravGame.screen, ((state) => `Game(state)))
+    | `DoneScreen(state) => Screen(state, DoneScreen.screen, ((state) => `DoneScreen(state)))
+    | `LevelEditor(state) => Screen(state, LevelEditor.screen, ((state) => `LevelEditor(state)))
+    }
+  );
 
 let initialScreen = `WelcomeScreen(());
-FramScreens.run(
-  ~transitionTo, ~setup=setup(initialScreen), ~getScreen,
-~perfMonitorFont="./assets/SFCompactDisplay-Regular-16.fnt");
+
+ScreenManager.run(
+  ~transitionTo,
+  ~setup=setup(initialScreen),
+  ~getScreen,
+  ~perfMonitorFont="./assets/SFCompactDisplay-Regular-16.fnt"
+);
