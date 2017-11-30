@@ -74,10 +74,24 @@ let drawJoystick = (env) => {
   circle(~center=joystickPos(env), ~rad=35., env)
 };
 
-let drawMe = (me, env) =>
-  Player.(drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size, env));
-
 let fldiv = (a, b) => float_of_int(a) /. float_of_int(b);
+
+let drawMe = (me, env) => {
+  open Player;
+  drawOnScreen(~color=me.color, ~center=me.pos, ~rad=me.size, env);
+
+  /** Hmm I wonder if there's a better way to communicate this. */
+  let health = fldiv(me.health, fullPlayerHealth);
+  Draw.noFill(env);
+  Draw.stroke(withAlpha(Constants.green, health), env);
+  Draw.strokeWeight(2, env);
+  circle(
+    ~center=me.pos,
+    ~rad=me.size +. 5.,
+    env
+  );
+  Draw.noStroke(env)
+};
 
 let drawEnemy = (env, enemy) => {
   open Enemy;
@@ -112,7 +126,7 @@ let drawEnemy = (env, enemy) => {
   if (warmup === max) {
     switch (enemy.behavior) {
     | Asteroid(_, _, timer, _)
-    | DoubleShooter(timer, _)
+    | TripleShooter(timer, _)
     | SimpleShooter(timer, _) =>
     let loaded = fst(timer) /. snd(timer);
     Draw.noFill(env);

@@ -81,19 +81,20 @@ let stepEnemy = (env, state, enemy) => {
     }
   } else {
     switch (enemy.behavior) {
-    | DoubleShooter(timer, bulletConfig) =>
+    | TripleShooter(timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
       if (looped) {
         {
           ...state,
           bullets: [
-            shoot(~theta=0.2, bulletConfig, env, enemy, state.me),
-            shoot(~theta= -0.2, bulletConfig, env, enemy, state.me),
+            shoot(~theta=0.3, bulletConfig, env, enemy, state.me),
+            shoot(~theta= -0.3, bulletConfig, env, enemy, state.me),
+            shoot(~theta= 0., bulletConfig, env, enemy, state.me),
             ...state.bullets],
-          enemies: [{...enemy, warmup, behavior: DoubleShooter(timer, bulletConfig)}, ...state.enemies]
+          enemies: [{...enemy, warmup, behavior: TripleShooter(timer, bulletConfig)}, ...state.enemies]
         }
       } else {
-        {...state, enemies: [{...enemy, warmup, behavior: DoubleShooter(timer, bulletConfig)}, ...state.enemies]}
+        {...state, enemies: [{...enemy, warmup, behavior: TripleShooter(timer, bulletConfig)}, ...state.enemies]}
       }
     | Asteroid(target, vel, timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);

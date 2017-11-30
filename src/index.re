@@ -44,29 +44,26 @@ let centerText = (~pos as (x, y), ~font, ~body, env) =>
   };
 
 let drawState = (state, env) => {
-    Draw.background(Constants.black, env);
-    if (isPhone) {
-      Draw.pushMatrix(env);
-      Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
-    };
-    open GravDraw;
-    if (state.status === Running || state.status === Paused) {
-      drawMe(state.me, env)
-    };
-    List.iter(drawEnemy(env), state.enemies);
-    List.iter(drawBullet(env), state.bullets);
-    List.iter(drawExplosion(env), state.explosions);
-    if (isPhone) {
-      Draw.popMatrix(env)
-    };
-    drawStatus(state.me, env);
-    /* if (isPhone) {
-         drawJoystick(env)
-       }; */
-    state
+  Draw.background(Constants.black, env);
+  if (isPhone) {
+    Draw.pushMatrix(env);
+    Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
+  };
+  open GravDraw;
+  if (state.status === Running || state.status === Paused) {
+    drawMe(state.me, env)
+  };
+  List.iter(drawEnemy(env), state.enemies);
+  List.iter(drawBullet(env), state.bullets);
+  List.iter(drawExplosion(env), state.explosions);
+  if (isPhone) {
+    Draw.popMatrix(env)
+  };
+  drawStatus(state.me, env);
 };
 
-let draw = (state, env) =>
+
+let mainLoop = (state, env) =>
   switch state.status {
   | Dead(0) =>
     if (state.me.Player.lives > 0) {
@@ -126,6 +123,7 @@ let draw = (state, env) =>
           {...state, status: Won(0.)} :
           {...state, level: state.level + 1, enemies: state.levels[state.level + 1]};
     drawState(state, env);
+    state
   };
 
 let newAtLevel = (env, level) => {
@@ -139,7 +137,7 @@ let newAtLevel = (env, level) => {
 
 run(
   ~setup,
-  ~draw,
+  ~draw=mainLoop,
   ~keyPressed=((state, env) => switch (Env.keyCode(env)) {
   | Events.R => newGame(env)
   | Events.Space => switch (state.status) {

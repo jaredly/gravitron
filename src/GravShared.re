@@ -44,11 +44,25 @@ module Bullet = {
   };
 };
 
+/*
+TODO paired bullets
+- triple-shot (replace double prolly)
+- paired-bullet (not 100% sure how to let bullets refer to each other.
+    Orr I could have a "doublebullet" that just has different step rules.
+    Maybe that makes sense?)
+- triple-paired
+- rabbits (wandering multipliers)
+- protected boss (spawns minions that circle around them. if the boss dies,they become wanderers
+    again, not super sure how to have enemies know about each other.
+    in this case though, the number of enemies is probably pretty bounded
+    so I don't need to set up a hashmap or anything)
+*/
+
 module Enemy = {
   type bulletConfig = (colorT, float, float);
   type behavior =
     | SimpleShooter(counter, bulletConfig)
-    | DoubleShooter(counter, bulletConfig)
+    | TripleShooter(counter, bulletConfig)
     /* target, size, bullettimer, _ */
     | Asteroid(pos, vec, counter, bulletConfig)
     /* | Asteroid(counter)
@@ -123,7 +137,12 @@ type status =
   | Won(float)
   | Dead(int);
 
-type state = {
+type highScore = {
+  date: float,
+  time: string,
+};
+
+type gameState = {
   status,
   level: int,
   font: fontT,
@@ -132,4 +151,18 @@ type state = {
   enemies: list(Enemy.t),
   bullets: list(Bullet.t),
   explosions: list(Explosion.t)
+};
+type state = gameState;
+
+type screen =
+  | Welcome /* need state for buttons? maybe an animation tho */
+  | Playing(gameState)
+  | Done(bool, float) /* succeeded, animation! */
+  | LevelEditor(option(int)) /* the index of the level being edited */
+  ;
+
+type globalState = {
+  screen,
+  userLevels: array(array(Enemy.t)),
+  highScores: array(highScore),
 };

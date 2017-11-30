@@ -27,7 +27,7 @@ let green = (~warmup=0., pos) => {
   /* timer: (0., 100.), */
   warmup: (0., 50.),
   health: (2, 2),
-  behavior: DoubleShooter((warmup, 200.), (Reprocessing.Constants.white, 5., 2.))
+  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.white, 5., 2.))
   /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
 
