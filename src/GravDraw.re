@@ -4,6 +4,7 @@ open GravShared;
 
 open MyUtils;
 
+open SharedTypes;
 let rect = (~center as (x, y), ~w, ~h, env) =>
   Draw.rectf(~pos=(x -. w /. 2., y -. h /. 2.), ~width=w, ~height=h, env);
 

@@ -1,4 +1,5 @@
 open GravShared;
+open SharedTypes;
 
 open Reprocessing;
 

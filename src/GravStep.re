@@ -1,5 +1,6 @@
 open GravShared;
 
+open SharedTypes;
 open MyUtils;
 
 open Reprocessing;
@@ -224,7 +225,6 @@ let stepBullets = (state, env) => {
   List.fold_left(
     (state, bullet) =>
       switch state.status {
-      | Initial
       | Won(_)
       | Paused
       | Dead(_) => bulletToEnemiesAndBullets(moveBullet(bullet, env), state, env)
