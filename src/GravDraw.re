@@ -95,11 +95,12 @@ let drawMe = (me, env) => {
 
 let drawEnemy = (env, enemy) => {
   open Enemy;
-  let (warmup, max) = enemy.warmup;
+  let (warmup, maxval) = enemy.warmup;
+  let rad = enemy.size *. warmup /. maxval;
   drawOnScreen(
     ~color=enemy.color,
     ~center=enemy.pos,
-    ~rad=enemy.size *. warmup /. max,
+    ~rad=rad,
     ~stroke=true,
     env
   );
@@ -113,8 +114,8 @@ let drawEnemy = (env, enemy) => {
     for (i in 0 to current - 1) {
       let f = float_of_int(i);
       Draw.arcf(~center=enemy.pos,
-      ~radx = enemy.size -. 10.,
-      ~rady = enemy.size -. 10.,
+      ~radx = max(0., rad -. 10.),
+      ~rady = max(0., rad -. 10.),
       ~start = sweep *. f,
       ~stop = sweep *. f +. sweep,
       ~isOpen = false,
@@ -123,7 +124,7 @@ let drawEnemy = (env, enemy) => {
       );
     }
   };
-  if (warmup === max) {
+  if (warmup === maxval) {
     switch (enemy.behavior) {
     | Asteroid(_, _, timer, _)
     | TripleShooter(timer, _)
@@ -134,8 +135,8 @@ let drawEnemy = (env, enemy) => {
     Draw.strokeWeight(2, env);
     Draw.arcf(
       ~center=enemy.pos,
-      ~radx=enemy.size +. 5.,
-      ~rady=enemy.size +. 5.,
+      ~radx=rad +. 5.,
+      ~rady=rad +. 5.,
       ~start=0.,
       ~stop=Constants.two_pi *. loaded,
       ~isOpen=true,

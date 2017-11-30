@@ -11,7 +11,7 @@ let phoneScale = isPhone ? 2. : 1.;
 let getPhonePos = (env) => {
   let w = float_of_int(Env.width(env)) *. phoneScale;
   let h = float_of_int(Env.height(env)) *. phoneScale;
-  (w /. 2., h -. w /. 2.)
+  (w /. 2., h /. 2.)
 };
 
 let joystickPos = (env) => {

@@ -16,7 +16,7 @@ let newGame = (env) => {
     me: {
       health: fullPlayerHealth,
       lives: 3,
-      pos: isPhone ? getPhonePos(env) : (100., 100.),
+      pos: getPhonePos(env),
       color: Constants.green,
       vel: v0,
       acc: v0,
