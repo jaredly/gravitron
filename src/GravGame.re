@@ -89,9 +89,17 @@ let mainLoop = (ctx, state, env) => {
     drawState(state, env);
     state.enemies !== [] || state.status !== Running ?
       Same(ctx, state) :
-      state.level >= Array.length(state.levels) - 1 ?
-        Transition(ctx, `Finished(true)) :
-        Same(ctx, {...state, level: state.level + 1, enemies: state.levels[state.level + 1]});
+      {
+        let ctx = if (state.level > ctx.highestBeatenLevel) {
+          Reprocessing.Env.saveUserData(~key="highest_beaten_level", ~value=state.level, env) |> ignore;
+          {...ctx, highestBeatenLevel: state.level}
+        } else {
+          ctx
+        };
+        state.level >= Array.length(state.levels) - 1 ?
+          Transition(ctx, `Finished(true)) :
+          Same(ctx, {...state, level: state.level + 1, enemies: state.levels[state.level + 1]})
+      };
   }
 };
 

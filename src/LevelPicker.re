@@ -2,6 +2,7 @@ open SharedTypes;
 
 let initialState = ();
 
+/** TODO show a mini show of the level, so circles for the enemies you'll face */
 let buttonsInPosition = (ctx, env) => {
   let buttons = ref([]);
   let w = Reprocessing.Env.width(env);

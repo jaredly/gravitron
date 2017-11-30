@@ -25,6 +25,11 @@ let buttonsWithPosition = (env, buttons) => {
   }, buttons)
 };
 
+/** TODO I want to make an animation or something on the welcome screen
+ * that shows a bit of what it will be like
+ * so a player going around & getting pursued by bullets. The bullets would spawn offscreen
+ * and come in, and then
+ */
 let run = (ctx, env) => {
   Draw.background(Constants.black, env);
   let w = Env.width(env) / 2;
