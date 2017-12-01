@@ -95,7 +95,7 @@ let drawMe = (me, env) => {
   Draw.noStroke(env)
 };
 
-let getCircleParams = (radius, numCircles) => {
+let getCircleParams = (radius, numCircles, spin) => {
   /* let halfAngle = Constants.pi *. (1. -. 1. /. (numCircles -. 1.)); */
   let halfAngle = Constants.pi *. (numCircles -. 2.) /. numCircles /. 2.;
   let s = cos(halfAngle);
@@ -108,7 +108,7 @@ let getCircleParams = (radius, numCircles) => {
   /* let intt = intt > 3 ? intt : 5; */
   for (i in 0 to int_of_float(numCircles) - 1) {
     let fi = float_of_int(i);
-    let t = by *. fi;
+    let t = by *. fi +. spin;
     let center = (
       cos(t) *. polygonRadius,
       sin(t) *. polygonRadius,
@@ -137,12 +137,12 @@ let drawEnemy = (env, enemy) => {
     Draw.fill(withAlpha(enemy.color, 0.6), env);
     Draw.noStroke(env);
     switch (enemy.behavior) {
-    | Asteroid(_, _, _, _) => {
+    | Asteroid(_, _, _, animate, _) => {
       List.iter(
         ((center, rad)) => {
           circle(~center=posAdd(center, enemy.pos), ~rad, env);
         },
-        getCircleParams(rad, full === 2 ? 2. : float_of_int(full - 1) ** 2.)
+        getCircleParams(rad, full === 2 ? 2. : float_of_int(full - 1) ** 2., -. animate /. 5. /. float_of_int(full))
       )
     }
     | _ => {
@@ -168,7 +168,7 @@ let drawEnemy = (env, enemy) => {
 
   if (warmup === maxval) {
     switch (enemy.behavior) {
-    | Asteroid(_, _, timer, _)
+    | Asteroid(_, _, timer, _, _)
     | TripleShooter(timer, _)
     | SimpleShooter(timer, _) =>
     let loaded = fst(timer) /. snd(timer);

@@ -51,8 +51,10 @@ let withAlpha = ({Reprocessing_Common.r, g, b, a}, alpha) => {
 
 let collides = (p1, p2, d) => dist(posSub(p1, p2)) <= d;
 
+let increment = (env) => Reprocessing_Env.deltaTime(env) *. 1000. /. 16.;
+
 let stepTimer = ((current, max), env) => {
-  let time = Reprocessing_Env.deltaTime(env) *. 1000. /. 16.;
+  let time = increment(env);
   if (current +. time >= max) {
     ((max, max), true)
   } else {
@@ -63,7 +65,7 @@ let stepTimer = ((current, max), env) => {
 let isFullTimer = ((current, max)) => current === max;
 
 let loopTimer = ((current, max), env) => {
-  let time = Reprocessing_Env.deltaTime(env) *. 1000. /. 16.;
+  let time = increment(env);
   if (current +. time >= max) {
     ((0., max), true)
   } else {

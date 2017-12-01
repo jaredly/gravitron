@@ -44,8 +44,8 @@ module Enemy = {
   type behavior =
     | SimpleShooter(counter, bulletConfig)
     | TripleShooter(counter, bulletConfig)
-    /* target, size, bullettimer, _ */
-    | Asteroid(pos, vec, counter, bulletConfig)
+    /* target, size, bullettimer, animate, _ */
+    | Asteroid(pos, vec, counter, float, bulletConfig)
     /* | Asteroid(counter)
     | DoubleShooter(int, float)
     | Splitter */
