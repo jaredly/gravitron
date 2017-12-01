@@ -81,6 +81,19 @@ let stepEnemy = (env, state, enemy) => {
       explosions: [playerExplosion(state.me), enemyExplosion(enemy), ...state.explosions]
     }
   } else {
+    let enemy = switch (enemy.movement) {
+    | Stationary => enemy
+    | GoToPosition(target, vel) => {
+      let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
+      let vel = {theta: vel.theta, mag: min(vel.mag, 2.) *. 0.98};
+      let pos = posAdd(enemy.pos, vecToPos(vel));
+      {
+        ...enemy,
+        pos,
+        movement: GoToPosition(target, vel)
+      }
+    }
+    };
     switch (enemy.behavior) {
     | TripleShooter(timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
@@ -97,20 +110,17 @@ let stepEnemy = (env, state, enemy) => {
       } else {
         {...state, enemies: [{...enemy, warmup, behavior: TripleShooter(timer, bulletConfig)}, ...state.enemies]}
       }
-    | Asteroid(target, vel, timer, animate, bulletConfig) =>
+    | Asteroid(timer, animate, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
       let animate = animate +. increment(env);
-      let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
-      let vel = {theta: vel.theta, mag: min(vel.mag, 2.) *. 0.98};
-      let pos = posAdd(enemy.pos, vecToPos(vel));
       if (looped) {
         {
           ...state,
           bullets: [shoot(bulletConfig, env, enemy, state.me), ...state.bullets],
-          enemies: [{...enemy, pos, warmup, behavior: Asteroid(target, vel, timer, animate, bulletConfig)}, ...state.enemies]
+          enemies: [{...enemy, warmup, behavior: Asteroid(timer, animate, bulletConfig)}, ...state.enemies]
         }
       } else {
-        {...state, enemies: [{...enemy, pos, warmup, behavior: Asteroid(target, vel, timer, animate, bulletConfig)}, ...state.enemies]}
+        {...state, enemies: [{...enemy, warmup, behavior: Asteroid(timer, animate, bulletConfig)}, ...state.enemies]}
       }
     | SimpleShooter(timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
@@ -184,7 +194,7 @@ let bulletToEnemiesAndBullets = (bullet, state, env) => {
               if (dead) {
                 (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
               } else switch enemy.Enemy.behavior {
-              | Asteroid(_, _, (_, bulletTime), animate, (bulletColor, bulletSize, bulletSpeed, bulletDamage)) =>
+              | Asteroid((_, bulletTime), animate, (bulletColor, bulletSize, bulletSpeed, bulletDamage)) =>
                 let w = float_of_int(Env.width(env)) *. phoneScale;
                 let h = float_of_int(Env.height(env)) *. phoneScale;
                 let (current, _) = health;
@@ -195,12 +205,14 @@ let bulletToEnemiesAndBullets = (bullet, state, env) => {
                 (true, [{
                   ...enemy,
                   size,
-                  behavior: Asteroid(randomTarget(w, h), one, (Random.float(bulletTime /. 4.), bulletTime), animate, smallerBullets),
+                  movement: GoToPosition(randomTarget(w, h), one),
+                  behavior: Asteroid((Random.float(bulletTime /. 4.), bulletTime), animate, smallerBullets),
                   health: (current, current)
                 }, {
                   ...enemy,
                   size,
-                  behavior: Asteroid(randomTarget(w, h), two, (0., bulletTime), animate, smallerBullets),
+                  movement: GoToPosition(randomTarget(w, h), two),
+                  behavior: Asteroid((0., bulletTime), animate, smallerBullets),
                   health: (current, current)
                 }, ...enemies], [bulletExplosion(bullet), ...explosions])
               | _ =>

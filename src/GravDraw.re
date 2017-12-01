@@ -137,7 +137,7 @@ let drawEnemy = (env, enemy) => {
     Draw.fill(withAlpha(enemy.color, 0.6), env);
     Draw.noStroke(env);
     switch (enemy.behavior) {
-    | Asteroid(_, _, _, animate, _) => {
+    | Asteroid(_, animate, _) => {
       List.iter(
         ((center, rad)) => {
           circle(~center=posAdd(center, enemy.pos), ~rad, env);
@@ -170,7 +170,7 @@ let drawEnemy = (env, enemy) => {
 
   if (warmup === maxval) {
     switch (enemy.behavior) {
-    | Asteroid(_, _, timer, _, _)
+    | Asteroid(timer, _, _)
     | TripleShooter(timer, _)
     | SimpleShooter(timer, _) =>
     let loaded = fst(timer) /. snd(timer);

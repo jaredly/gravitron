@@ -43,11 +43,18 @@ module Bullet = {
 module Enemy = {
   /* color, size, speed */
   type bulletConfig = (Reprocessing.colorT, float, float, int);
+  type movement =
+    | Stationary
+    /* target, velocity */
+    | GoToPosition(pos, vec)
+    | Wander(pos, vec)
+    | Avoider(vec);
+
   type behavior =
     | SimpleShooter(counter, bulletConfig)
     | TripleShooter(counter, bulletConfig)
-    /* target, size, bullettimer, animate, _ */
-    | Asteroid(pos, vec, counter, float, bulletConfig)
+    /* bullettimer, animate, _ */
+    | Asteroid(counter, float, bulletConfig)
     /* | Asteroid(counter)
     | DoubleShooter(int, float)
     | Splitter */
@@ -60,6 +67,7 @@ module Enemy = {
     /* timer: counter, */
     warmup: counter,
     health: counteri,
+    movement,
     behavior,
     /* shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t */
   };

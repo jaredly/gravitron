@@ -9,6 +9,7 @@ let red = (~warmup=200., pos) => {
   size: 20.,
   warmup: (0., 50.),
   health: (1, 1),
+  movement: Stationary,
   behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5., 3., 5))
 };
 
@@ -18,6 +19,7 @@ let blue = (~warmup=0., pos) => {
   size: 20.,
   warmup: (0., 50.),
   health: (2, 2),
+  movement: Stationary,
   behavior: SimpleShooter((warmup, 100.), (Reprocessing.Constants.white, 5., 2., 5))
 };
 
@@ -28,6 +30,7 @@ let green = (~warmup=0., pos) => {
   /* timer: (0., 100.), */
   warmup: (0., 50.),
   health: (3, 3),
+  movement: Stationary,
   behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.blue, 7., 2., 10))
   /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
@@ -39,8 +42,19 @@ let pink = (~warmup=0., pos) => {
   size: 30.,
   warmup: (0., 50.),
   health: (4, 4),
-  behavior: Asteroid(pos, MyUtils.v0, (warmup, 200.), 0., (colorPink, 10., 2., 15))
+  movement: GoToPosition(pos, MyUtils.v0),
+  behavior: Asteroid((warmup, 200.), 0., (colorPink, 10., 2., 15))
 };
+
+/* let color = Reprocessing.Utils.color(~r=100, ~g=150, ~b=255, ~a=255);
+let scatterShooter = (~warmup=0., pos) => {
+  Enemy.pos,
+  color,
+  size: 40.,
+  warmup: (0., 50.),
+  health: (3, 3),
+  behavior: ScatterShot()
+}; */
 
 /* TODO these should probably be parameterized */
 let levels = [|
