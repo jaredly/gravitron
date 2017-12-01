@@ -16,29 +16,30 @@ let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, ~strokeWeigh
   let (height, width) = isPhone ? (height *. phoneScale, width *. phoneScale) : (height, width);
   Draw.fill(withAlpha(color, 0.6), env);
   Draw.noStroke(env);
+  let size = 8.;
   if (x +. rad < 0.) {
     if (y +. rad < 0.) {
-      rect(~center=(0., 0.), ~w=4., ~h=4., env)
+      rect(~center=(0., 0.), ~w=size, ~h=size, env)
     } else if (y -. rad > height) {
-      rect(~center=(0., height), ~w=4., ~h=4., env)
+      rect(~center=(0., height), ~w=size, ~h=size, env)
     } else {
-      rect(~center=(0., y), ~w=4., ~h=scale(-. x), env)
+      rect(~center=(0., y), ~w=size, ~h=scale(-. x), env)
     }
   } else if (x -. rad > width) {
     if (y +. rad < 0.) {
-      rect(~center=(width, 0.), ~w=4., ~h=4., env)
+      rect(~center=(width, 0.), ~w=size, ~h=size, env)
     } else if (y -. rad > height) {
-      rect(~center=(width, height), ~w=4., ~h=4., env)
+      rect(~center=(width, height), ~w=size, ~h=size, env)
     } else {
       let w = scale(x -. width);
-      rect(~center=(width, y), ~w=4., ~h=w, env)
+      rect(~center=(width, y), ~w=size, ~h=w, env)
     }
   } else if (y +. rad < 0.) {
     let h = scale(-. y);
-    rect(~center=(x, 0.), ~w=h, ~h=4., env)
+    rect(~center=(x, 0.), ~w=h, ~h=size, env)
   } else if (y -. rad > height) {
     let h = scale(y -. height);
-    rect(~center=(x, height), ~w=h, ~h=4., env)
+    rect(~center=(x, height), ~w=h, ~h=size, env)
   } else {
     if (stroke) {
       Draw.stroke(color, env);

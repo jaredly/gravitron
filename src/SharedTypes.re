@@ -34,6 +34,7 @@ module Bullet = {
     | Normal
     /** How many to break into, and timer */
     | Scatter(int, counter, bulletConfig);
+  /* Mortar - explodes with a largish blast radius after a (random?) timer. */
   /* type size = Small | Medium | Large; */
   type t = {
     color: Reprocessing.colorT,
@@ -57,6 +58,12 @@ module Enemy = {
     /* | Avoider(vec) */
     ;
 
+  type dying =
+     /* animation */
+    | Asteroid(float)
+    | Revenge
+    ;
+
   type behavior =
     | SimpleShooter(counter, bulletConfig)
     | TripleShooter(counter, bulletConfig)
@@ -66,6 +73,12 @@ module Enemy = {
     /* | Asteroid(counter)
     | DoubleShooter(int, float)
     | Splitter */
+    ;
+
+  type shooting =
+    | OneShot(counter, bulletConfig)
+    | TripleShot(counter, bulletConfig)
+    | ScatterShot(counter, int, bulletConfig, bulletConfig)
     ;
 
   type t = {
