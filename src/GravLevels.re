@@ -9,7 +9,7 @@ let red = (~warmup=200., pos) => {
   size: 20.,
   warmup: (0., 50.),
   health: (1, 1),
-  behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5., 3.))
+  behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5., 3., 5))
 };
 
 let blue = (~warmup=0., pos) => {
@@ -17,8 +17,8 @@ let blue = (~warmup=0., pos) => {
   color: Reprocessing_Constants.blue,
   size: 20.,
   warmup: (0., 50.),
-  health: (1, 1),
-  behavior: SimpleShooter((warmup, 100.), (Reprocessing.Constants.white, 5., 2.))
+  health: (2, 2),
+  behavior: SimpleShooter((warmup, 100.), (Reprocessing.Constants.white, 5., 2., 5))
 };
 
 let green = (~warmup=0., pos) => {
@@ -27,18 +27,19 @@ let green = (~warmup=0., pos) => {
   size: 25.,
   /* timer: (0., 100.), */
   warmup: (0., 50.),
-  health: (2, 2),
-  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.white, 5., 2.))
+  health: (3, 3),
+  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.blue, 7., 2., 10))
   /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
 
+let colorPink = Reprocessing_Utils.color(~r=255, ~g=100, ~b=200, ~a=255);
 let pink = (~warmup=0., pos) => {
   Enemy.pos,
-  color: Reprocessing_Utils.color(~r=255, ~g=100, ~b=200, ~a=255),
+  color: colorPink,
   size: 30.,
   warmup: (0., 50.),
   health: (4, 4),
-  behavior: Asteroid(pos, MyUtils.v0, (warmup, 200.), 0., (Constants.white, 5., 2.))
+  behavior: Asteroid(pos, MyUtils.v0, (warmup, 200.), 0., (colorPink, 10., 2., 15))
 };
 
 /* TODO these should probably be parameterized */

@@ -150,6 +150,8 @@ let drawEnemy = (env, enemy) => {
       /* Draw.stroke(withAlpha(enemy.color, 0.6), env); */
       /* Draw.strokeWeight(2, env); */
       let sweep = Constants.two_pi /. float_of_int(full);
+      Draw.stroke(enemy.color, env);
+      Draw.noFill(env);
       for (i in 0 to current - 1) {
         let f = float_of_int(i);
         Draw.arcf(~center=enemy.pos,

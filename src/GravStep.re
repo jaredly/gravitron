@@ -184,22 +184,23 @@ let bulletToEnemiesAndBullets = (bullet, state, env) => {
               if (dead) {
                 (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
               } else switch enemy.Enemy.behavior {
-              | Asteroid(_, _, (_, bulletTime), animate, bulletConfig) =>
+              | Asteroid(_, _, (_, bulletTime), animate, (bulletColor, bulletSize, bulletSpeed, bulletDamage)) =>
                 let w = float_of_int(Env.width(env)) *. phoneScale;
                 let h = float_of_int(Env.height(env)) *. phoneScale;
                 let (current, _) = health;
                 let (one, two) = asteroidSplitVel();
                 let size = float_of_int(current) *. 5. +. 10.;
+                let smallerBullets = (bulletColor, float_of_int(2 + current * 2), bulletSpeed, (3 + current * 3));
                 /* let (one, two) = splitAsteroid(enemy.Enemy.pos, bulletTime, bulletConfig); */
                 (true, [{
                   ...enemy,
                   size,
-                  behavior: Asteroid(randomTarget(w, h), one, (Random.float(bulletTime /. 4.), bulletTime), animate, bulletConfig),
+                  behavior: Asteroid(randomTarget(w, h), one, (Random.float(bulletTime /. 4.), bulletTime), animate, smallerBullets),
                   health: (current, current)
                 }, {
                   ...enemy,
                   size,
-                  behavior: Asteroid(randomTarget(w, h), two, (0., bulletTime), animate, bulletConfig),
+                  behavior: Asteroid(randomTarget(w, h), two, (0., bulletTime), animate, smallerBullets),
                   health: (current, current)
                 }, ...enemies], [bulletExplosion(bullet), ...explosions])
               | _ =>

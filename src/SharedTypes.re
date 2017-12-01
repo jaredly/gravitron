@@ -28,6 +28,7 @@ module Player = {
 };
 
 module Bullet = {
+  /* type size = Small | Medium | Large; */
   type t = {
     color: Reprocessing.colorT,
     warmup: counter,
@@ -40,7 +41,8 @@ module Bullet = {
 };
 
 module Enemy = {
-  type bulletConfig = (Reprocessing.colorT, float, float);
+  /* color, size, speed */
+  type bulletConfig = (Reprocessing.colorT, float, float, int);
   type behavior =
     | SimpleShooter(counter, bulletConfig)
     | TripleShooter(counter, bulletConfig)
