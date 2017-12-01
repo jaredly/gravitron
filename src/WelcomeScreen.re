@@ -14,7 +14,7 @@ let buttons: array((string, transition)) = [|
 
 let buttonsWithPosition = (env, buttons) => {
   let w = Env.width(env) / 2;
-  let h = Env.height(env) / 2 - 50;
+  let h = Env.height(env) / 2 - 150;
   let x = w - buttonWidth / 2;
   let y0 = h + 90;
   let margin = 20;
@@ -33,7 +33,7 @@ let buttonsWithPosition = (env, buttons) => {
 let run = (ctx, env) => {
   Draw.background(Constants.black, env);
   let w = Env.width(env) / 2;
-  let h = Env.height(env) / 2 - 50;
+  let h = Env.height(env) / 2 - 150;
   DrawUtils.centerText(~font=ctx.titleFont, ~body="Gravitron", ~pos=(w, h), env);
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
 

@@ -95,6 +95,32 @@ let drawMe = (me, env) => {
   Draw.noStroke(env)
 };
 
+let getCircleParams = (radius, numCircles) => {
+  /* let halfAngle = Constants.pi *. (1. -. 1. /. (numCircles -. 1.)); */
+  let halfAngle = Constants.pi *. (numCircles -. 2.) /. numCircles /. 2.;
+  let s = cos(halfAngle);
+  /* let s = cos(Constants.pi /. float_of_int(numCircles)); */
+  let circleRadius = radius /. (1. +. 1. /. s);
+  let polygonRadius = radius -. circleRadius;
+  let by = Constants.two_pi /. numCircles;
+  let circles = ref([]);
+  /* let intt = int_of_float(numCircles); */
+  /* let intt = intt > 3 ? intt : 5; */
+  for (i in 0 to int_of_float(numCircles) - 1) {
+    let fi = float_of_int(i);
+    let t = by *. fi;
+    let center = (
+      cos(t) *. polygonRadius,
+      sin(t) *. polygonRadius,
+    );
+    circles := [
+      (center, circleRadius),
+      ...circles^
+    ];
+  };
+  circles^
+};
+
 let drawEnemy = (env, enemy) => {
   open Enemy;
   let (warmup, maxval) = enemy.warmup;
@@ -110,20 +136,33 @@ let drawEnemy = (env, enemy) => {
   if (full > 1) {
     Draw.fill(withAlpha(enemy.color, 0.6), env);
     Draw.noStroke(env);
-    /* Draw.stroke(withAlpha(enemy.color, 0.6), env); */
-    /* Draw.strokeWeight(2, env); */
-    let sweep = Constants.two_pi /. float_of_int(full);
-    for (i in 0 to current - 1) {
-      let f = float_of_int(i);
-      Draw.arcf(~center=enemy.pos,
-      ~radx = max(0., rad -. 10.),
-      ~rady = max(0., rad -. 10.),
-      ~start = sweep *. f,
-      ~stop = sweep *. f +. sweep,
-      ~isOpen = false,
-      ~isPie = true,
-      env
-      );
+    switch (enemy.behavior) {
+    | Asteroid(_, _, _, _) => {
+      List.iter(
+        ((center, rad)) => {
+          circle(~center=posAdd(center, enemy.pos), ~rad, env);
+        },
+        getCircleParams(rad, full === 2 ? 2. : float_of_int(full - 1) ** 2.)
+      )
+    }
+    | _ => {
+
+      /* Draw.stroke(withAlpha(enemy.color, 0.6), env); */
+      /* Draw.strokeWeight(2, env); */
+      let sweep = Constants.two_pi /. float_of_int(full);
+      for (i in 0 to current - 1) {
+        let f = float_of_int(i);
+        Draw.arcf(~center=enemy.pos,
+        ~radx = max(0., rad -. 10.),
+        ~rady = max(0., rad -. 10.),
+        ~start = sweep *. f,
+        ~stop = sweep *. f +. sweep,
+        ~isOpen = false,
+        ~isPie = true,
+        env
+        );
+      }
+    }
     }
   };
 

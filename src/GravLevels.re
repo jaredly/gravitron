@@ -41,6 +41,7 @@ let pink = (~warmup=0., pos) => {
   behavior: Asteroid(pos, MyUtils.v0, (warmup, 200.), (Constants.white, 3., 2.))
 };
 
+/* TODO these should probably be parameterized */
 let levels = [|
   [red((600., 600.))],
   [red((200., 200.)), red((600., 600.))],
@@ -67,3 +68,5 @@ let makePhoneLevels = (env) => {
     ]
   |]
 };
+
+let getLevels = (env) => isPhone ? makePhoneLevels(env) : levels;
