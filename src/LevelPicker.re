@@ -14,13 +14,13 @@ type button = {
   height: int,
   i: int,
   status: buttonStatus,
+  enemies: list(Enemy.t),
 };
 
-/** TODO show a mini show of the level, so circles for the enemies you'll face */
 let buttonsInPosition = (ctx, env) => {
   let buttons = ref([]);
   let w = Reprocessing.Env.width(env);
-  let boxSize = 60;
+  let boxSize = 100;
   let margin = 10;
   let rowSize = (w - margin) / (boxSize + margin);
   let levels = GravLevels.getLevels(env);
@@ -37,6 +37,7 @@ let buttonsInPosition = (ctx, env) => {
           width: boxSize,
           height: boxSize,
           i,
+          enemies: levels[i],
           status: ctx.highestBeatenLevel + 1 > i
             ? Beaten
             : (ctx.highestBeatenLevel + 1 === i ? Available : Locked)
@@ -49,6 +50,28 @@ let buttonsInPosition = (ctx, env) => {
 
 let center = ((x, y), w, h) => (x + w/2, y + h/2);
 
+let drawEnemySquare = (env, enemies, (x, y), w, h) => {
+  open Reprocessing;
+  let fullW = Env.width(env);
+  let fullH = Env.height(env);
+  let scaleX = MyUtils.flDiv(w, fullW);
+  let scaleY = MyUtils.flDiv(h, fullH);
+  Draw.pushMatrix(env);
+  Draw.translate(~x=float_of_int(x), ~y=float_of_int(y), env);
+  Draw.scale(~x=scaleX, ~y=scaleY, env);
+  List.iter(enemy => {
+    Draw.noFill(env);
+    Draw.stroke(enemy.Enemy.color, env);
+    Draw.strokeWeight(20, env);
+    GravShared.circle(
+      ~center=enemy.Enemy.pos,
+      ~rad=enemy.Enemy.size *. 2.,
+      env
+    );
+  }, enemies);
+  Draw.popMatrix(env);
+};
+
 let screen =
   ScreenManager.stateless(
     ~run=
@@ -56,16 +79,23 @@ let screen =
         open Reprocessing;
         Draw.background(Constants.black, env);
         List.iter(
-          ({text, pos, width, height, i, status}) => {
+          ({text, pos, width, height, enemies, status}) => {
+            if (status === Beaten) {
+              drawEnemySquare(env, enemies, pos, width, height);
+            } else {
+              Draw.fill(Utils.color(~r=50, ~g=50, ~b=50, ~a=255), env);
+              Draw.noStroke(env);
+              Draw.rect(~pos, ~width, ~height, env);
+            };
             Draw.noFill(env);
             Draw.stroke(switch status {
             | Locked => Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
             | Available => Constants.white
             | Beaten => Constants.green
             }, env);
-            Draw.strokeWeight(3, env);
+            Draw.strokeWeight(1, env);
             Draw.rect(~pos, ~width, ~height, env);
-            Draw.text(~font=ctx.textFont, ~body=text, ~pos=center(pos, width, height), env)
+            /* Draw.text(~font=ctx.textFont, ~body=text, ~pos=center(pos, width, height), env) */
           },
           buttonsInPosition(ctx, env)
         );

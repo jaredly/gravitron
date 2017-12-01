@@ -10,7 +10,7 @@ let rect = (~center as (x, y), ~w, ~h, env) =>
 
 let scale = (d) => sqrt(d);
 
-let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, env) => {
+let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, ~strokeWeight=3, env) => {
   let height = Env.height(env) |> float_of_int;
   let width = Env.width(env) |> float_of_int;
   let (height, width) = isPhone ? (height *. phoneScale, width *. phoneScale) : (height, width);
@@ -42,7 +42,7 @@ let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, env) => {
   } else {
     if (stroke) {
       Draw.stroke(color, env);
-      Draw.strokeWeight(3, env);
+      Draw.strokeWeight(strokeWeight, env);
       Draw.noFill(env)
     } else {
       Draw.fill(color, env);

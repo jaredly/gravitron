@@ -38,7 +38,7 @@ let pink = (~warmup=0., pos) => {
   size: 30.,
   warmup: (0., 50.),
   health: (4, 4),
-  behavior: Asteroid(pos, MyUtils.v0, (warmup, 200.), (Constants.white, 3., 2.))
+  behavior: Asteroid(pos, MyUtils.v0, (warmup, 200.), (Constants.white, 5., 2.))
 };
 
 /* TODO these should probably be parameterized */
