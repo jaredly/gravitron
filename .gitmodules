@@ -7,3 +7,6 @@
 [submodule "reasongl-interface"]
 	path = reasongl-interface
 	url = https://github.com/jaredly/reasongl-interface
+[submodule "reasongl-web"]
+	path = reasongl-web
+	url = https://github.com/jaredly/reasongl-web
