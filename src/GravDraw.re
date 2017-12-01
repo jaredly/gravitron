@@ -172,6 +172,7 @@ let drawEnemy = (env, enemy) => {
     switch (enemy.behavior) {
     | Asteroid(timer, _, _)
     | TripleShooter(timer, _)
+    | ScatterShot(timer, _, _, _)
     | SimpleShooter(timer, _) =>
     let loaded = fst(timer) /. snd(timer);
     Draw.noFill(env);
@@ -192,8 +193,19 @@ let drawEnemy = (env, enemy) => {
   }
 };
 
-let drawBullet = (env, bullet) =>
-  Bullet.(drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env));
+let drawBullet = (env, bullet) => {
+  open Bullet;
+  switch bullet.behavior {
+  | Normal => drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env)
+  | Scatter(_, counter, _) => {
+    let loaded = fst(counter) /. snd(counter);
+    drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size *. (1. -. loaded), env);
+    Draw.noFill(env);
+    Draw.stroke(bullet.color, env);
+    circle(~center=bullet.pos, ~rad=bullet.size, env);
+  }
+  }
+};
 
 let drawExplosion = (env, explosion) => {
   open Explosion;

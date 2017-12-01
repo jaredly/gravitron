@@ -46,15 +46,16 @@ let pink = (~warmup=0., pos) => {
   behavior: Asteroid((warmup, 200.), 0., (colorPink, 10., 2., 15))
 };
 
-/* let color = Reprocessing.Utils.color(~r=100, ~g=150, ~b=255, ~a=255);
-let scatterShooter = (~warmup=0., pos) => {
+let color = Reprocessing.Utils.color(~r=100, ~g=150, ~b=255, ~a=255);
+let scatterShooter = (~warmup=200., pos) => {
   Enemy.pos,
   color,
-  size: 40.,
+  size: 35.,
   warmup: (0., 50.),
-  health: (3, 3),
-  behavior: ScatterShot()
-}; */
+  health: (10, 10),
+  movement: Wander(pos, MyUtils.v0),
+  behavior: ScatterShot((warmup, 500.), 5, (color, 10., 3., 30), (color, 7., 2., 10))
+};
 
 /* TODO these should probably be parameterized */
 let levels = [|
@@ -65,6 +66,7 @@ let levels = [|
   [blue((600., 600.)), blue((200., 200.)), blue((600., 200.)), blue((200., 600.))],
   [green((600., 600.))],
   [pink((600., 600.))],
+  [scatterShooter((600., 600.))],
 |];
 
 let makePhoneLevels = (env) => {

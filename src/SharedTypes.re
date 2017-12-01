@@ -27,10 +27,17 @@ module Player = {
   };
 };
 
+type bulletConfig = (Reprocessing.colorT, float, float, int);
+
 module Bullet = {
+  type behavior =
+    | Normal
+    /** How many to break into, and timer */
+    | Scatter(int, counter, bulletConfig);
   /* type size = Small | Medium | Large; */
   type t = {
     color: Reprocessing.colorT,
+    behavior,
     warmup: counter,
     damage: int,
     size: float,
@@ -42,17 +49,18 @@ module Bullet = {
 
 module Enemy = {
   /* color, size, speed */
-  type bulletConfig = (Reprocessing.colorT, float, float, int);
   type movement =
     | Stationary
     /* target, velocity */
     | GoToPosition(pos, vec)
     | Wander(pos, vec)
-    | Avoider(vec);
+    /* | Avoider(vec) */
+    ;
 
   type behavior =
     | SimpleShooter(counter, bulletConfig)
     | TripleShooter(counter, bulletConfig)
+    | ScatterShot(counter, int, bulletConfig, bulletConfig)
     /* bullettimer, animate, _ */
     | Asteroid(counter, float, bulletConfig)
     /* | Asteroid(counter)

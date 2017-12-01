@@ -1,6 +1,7 @@
 open GravShared;
 
 open SharedTypes;
+
 open MyUtils;
 
 open Reprocessing;
@@ -24,6 +25,11 @@ let clampVec = (vel, min, max, fade) =>
 let springToward = (p1, p2, scale) => {
   let vec = vecToward(p1, p2);
   {...vec, mag: vec.mag *. scale}
+};
+
+let randomTarget = (w, h) => {
+  let margin = 30.;
+  (Random.float(w -. margin *. 2.) +. margin, Random.float(h -. margin *. 2.) +. margin)
 };
 
 let stepMeMouse = ({me} as state, env) =>
@@ -68,7 +74,6 @@ let stepMeKeys = ({me} as state, env) => {
   {...state, me: {...me, pos, vel}}
 };
 
-
 let stepEnemy = (env, state, enemy) => {
   open Enemy;
   let (warmup, loaded) = stepTimer(enemy.warmup, env);
@@ -81,20 +86,25 @@ let stepEnemy = (env, state, enemy) => {
       explosions: [playerExplosion(state.me), enemyExplosion(enemy), ...state.explosions]
     }
   } else {
-    let enemy = switch (enemy.movement) {
-    | Stationary => enemy
-    | GoToPosition(target, vel) => {
-      let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
-      let vel = {theta: vel.theta, mag: min(vel.mag, 2.) *. 0.98};
-      let pos = posAdd(enemy.pos, vecToPos(vel));
-      {
-        ...enemy,
-        pos,
-        movement: GoToPosition(target, vel)
-      }
-    }
-    };
-    switch (enemy.behavior) {
+    let enemy =
+      switch enemy.movement {
+      | Stationary => enemy
+      | Wander(target, vel) =>
+        let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
+        let vel = {theta: vel.theta, mag: min(vel.mag, 4.) *. 0.98};
+        let pos = posAdd(enemy.pos, vecToPos(vel));
+        let target =
+          collides(enemy.pos, target, enemy.size *. 2.)
+          ? randomTarget(Env.width(env) |> float_of_int, Env.height(env) |> float_of_int)
+          : target;
+        {...enemy, pos, movement: Wander(target, vel)}
+      | GoToPosition(target, vel) =>
+        let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
+        let vel = {theta: vel.theta, mag: min(vel.mag, 2.) *. 0.98};
+        let pos = posAdd(enemy.pos, vecToPos(vel));
+        {...enemy, pos, movement: GoToPosition(target, vel)}
+      };
+    switch enemy.behavior {
     | TripleShooter(timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
       if (looped) {
@@ -102,13 +112,46 @@ let stepEnemy = (env, state, enemy) => {
           ...state,
           bullets: [
             shoot(~theta=0.3, bulletConfig, env, enemy, state.me),
-            shoot(~theta= -0.3, bulletConfig, env, enemy, state.me),
-            shoot(~theta= 0., bulletConfig, env, enemy, state.me),
-            ...state.bullets],
-          enemies: [{...enemy, warmup, behavior: TripleShooter(timer, bulletConfig)}, ...state.enemies]
+            shoot(~theta=(-0.3), bulletConfig, env, enemy, state.me),
+            shoot(~theta=0., bulletConfig, env, enemy, state.me),
+            ...state.bullets
+          ],
+          enemies: [
+            {...enemy, warmup, behavior: TripleShooter(timer, bulletConfig)},
+            ...state.enemies
+          ]
         }
       } else {
-        {...state, enemies: [{...enemy, warmup, behavior: TripleShooter(timer, bulletConfig)}, ...state.enemies]}
+        {
+          ...state,
+          enemies: [
+            {...enemy, warmup, behavior: TripleShooter(timer, bulletConfig)},
+            ...state.enemies
+          ]
+        }
+      }
+    | ScatterShot(timer, count, bulletConfig, subConfig) =>
+      let (timer, looped) = loopTimer(timer, env);
+      if (looped) {
+        {
+          ...state,
+          bullets: [
+            shoot(~behavior=Scatter(count, (0., 40.), subConfig), bulletConfig, env, enemy, state.me),
+            ...state.bullets
+          ],
+          enemies: [
+            {...enemy, warmup, behavior: ScatterShot(timer, count, bulletConfig, subConfig)},
+            ...state.enemies
+          ]
+        }
+      } else {
+        {
+          ...state,
+          enemies: [
+            {...enemy, warmup, behavior: ScatterShot(timer, count, bulletConfig, subConfig)},
+            ...state.enemies
+          ]
+        }
       }
     | Asteroid(timer, animate, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
@@ -117,10 +160,19 @@ let stepEnemy = (env, state, enemy) => {
         {
           ...state,
           bullets: [shoot(bulletConfig, env, enemy, state.me), ...state.bullets],
-          enemies: [{...enemy, warmup, behavior: Asteroid(timer, animate, bulletConfig)}, ...state.enemies]
+          enemies: [
+            {...enemy, warmup, behavior: Asteroid(timer, animate, bulletConfig)},
+            ...state.enemies
+          ]
         }
       } else {
-        {...state, enemies: [{...enemy, warmup, behavior: Asteroid(timer, animate, bulletConfig)}, ...state.enemies]}
+        {
+          ...state,
+          enemies: [
+            {...enemy, warmup, behavior: Asteroid(timer, animate, bulletConfig)},
+            ...state.enemies
+          ]
+        }
       }
     | SimpleShooter(timer, bulletConfig) =>
       let (timer, looped) = loopTimer(timer, env);
@@ -128,10 +180,19 @@ let stepEnemy = (env, state, enemy) => {
         {
           ...state,
           bullets: [shoot(bulletConfig, env, enemy, state.me), ...state.bullets],
-          enemies: [{...enemy, warmup, behavior: SimpleShooter(timer, bulletConfig)}, ...state.enemies]
+          enemies: [
+            {...enemy, warmup, behavior: SimpleShooter(timer, bulletConfig)},
+            ...state.enemies
+          ]
         }
       } else {
-        {...state, enemies: [{...enemy, warmup, behavior: SimpleShooter(timer, bulletConfig)}, ...state.enemies]}
+        {
+          ...state,
+          enemies: [
+            {...enemy, warmup, behavior: SimpleShooter(timer, bulletConfig)},
+            ...state.enemies
+          ]
+        }
       }
     }
   }
@@ -170,15 +231,10 @@ let asteroidSplitVel = () => {
   let theta = Random.float(Constants.two_pi);
   (
     {theta, mag: 1.5 +. Random.float(1.)},
-    {theta: theta -. Constants.pi +. Random.float(Constants.pi /. 2.), mag: 1.5 +. Random.float(1.)},
-  )
-};
-
-let randomTarget = (w, h) => {
-  let margin = 30.;
-  (
-    Random.float(w -. margin *. 2.) +. margin,
-    Random.float(h -. margin *. 2.) +. margin
+    {
+      theta: theta -. Constants.pi +. Random.float(Constants.pi /. 2.),
+      mag: 1.5 +. Random.float(1.)
+    }
   )
 };
 
@@ -193,30 +249,57 @@ let bulletToEnemiesAndBullets = (bullet, state, env) => {
               let (health, dead) = countDown(enemy.Enemy.health);
               if (dead) {
                 (true, enemies, [enemyExplosion(enemy), bulletExplosion(bullet), ...explosions])
-              } else switch enemy.Enemy.behavior {
-              | Asteroid((_, bulletTime), animate, (bulletColor, bulletSize, bulletSpeed, bulletDamage)) =>
-                let w = float_of_int(Env.width(env)) *. phoneScale;
-                let h = float_of_int(Env.height(env)) *. phoneScale;
-                let (current, _) = health;
-                let (one, two) = asteroidSplitVel();
-                let size = float_of_int(current) *. 5. +. 10.;
-                let smallerBullets = (bulletColor, float_of_int(2 + current * 2), bulletSpeed, (3 + current * 3));
-                /* let (one, two) = splitAsteroid(enemy.Enemy.pos, bulletTime, bulletConfig); */
-                (true, [{
-                  ...enemy,
-                  size,
-                  movement: GoToPosition(randomTarget(w, h), one),
-                  behavior: Asteroid((Random.float(bulletTime /. 4.), bulletTime), animate, smallerBullets),
-                  health: (current, current)
-                }, {
-                  ...enemy,
-                  size,
-                  movement: GoToPosition(randomTarget(w, h), two),
-                  behavior: Asteroid((0., bulletTime), animate, smallerBullets),
-                  health: (current, current)
-                }, ...enemies], [bulletExplosion(bullet), ...explosions])
-              | _ =>
-                (true, [{...enemy, health}, ...enemies], [bulletExplosion(bullet), ...explosions])
+              } else {
+                switch enemy.Enemy.behavior {
+                | Asteroid(
+                    (_, bulletTime),
+                    animate,
+                    (bulletColor, bulletSize, bulletSpeed, bulletDamage)
+                  ) =>
+                  let w = float_of_int(Env.width(env)) *. phoneScale;
+                  let h = float_of_int(Env.height(env)) *. phoneScale;
+                  let (current, _) = health;
+                  let (one, two) = asteroidSplitVel();
+                  let size = float_of_int(current) *. 5. +. 10.;
+                  let smallerBullets = (
+                    bulletColor,
+                    float_of_int(2 + current * 2),
+                    bulletSpeed,
+                    3 + current * 3
+                  );
+                  /* let (one, two) = splitAsteroid(enemy.Enemy.pos, bulletTime, bulletConfig); */
+                  (
+                    true,
+                    [
+                      {
+                        ...enemy,
+                        size,
+                        movement: GoToPosition(randomTarget(w, h), one),
+                        behavior:
+                          Asteroid(
+                            (Random.float(bulletTime /. 4.), bulletTime),
+                            animate,
+                            smallerBullets
+                          ),
+                        health: (current, current)
+                      },
+                      {
+                        ...enemy,
+                        size,
+                        movement: GoToPosition(randomTarget(w, h), two),
+                        behavior: Asteroid((0., bulletTime), animate, smallerBullets),
+                        health: (current, current)
+                      },
+                      ...enemies
+                    ],
+                    [bulletExplosion(bullet), ...explosions]
+                  )
+                | _ => (
+                    true,
+                    [{...enemy, health}, ...enemies],
+                    [bulletExplosion(bullet), ...explosions]
+                  )
+                }
               }
             } else {
               (false, [enemy, ...enemies], explosions)
@@ -231,6 +314,31 @@ let bulletToEnemiesAndBullets = (bullet, state, env) => {
     let (bullets, explosions) = bulletToBullet(bullet, state.bullets, state.explosions);
     {...state, bullets, explosions}
   }
+};
+
+let makeScatterBullets = (bullet, (color, size, speed, damage), count) => {
+  open Bullet;
+  let by = Constants.two_pi /. float_of_int(count);
+  let rec loop = (i) =>
+    i > 0 ?
+      {
+        let theta = by *. float_of_int(i);
+        [
+          {
+            color,
+            behavior: Normal,
+            warmup: (0., 20.),
+            size,
+            pos: bullet.pos,
+            vel: {mag: speed, theta},
+            acc: v0,
+            damage,
+          },
+          ...loop(i - 1)
+        ]
+      } :
+      [];
+  loop(count)
 };
 
 let stepBullets = (state, env) => {
@@ -264,7 +372,20 @@ let stepBullets = (state, env) => {
           let pos = posAdd(bullet.pos, vecToPos(vel));
           let (warmup, isFull) = stepTimer(bullet.warmup, env);
           if (isFull) {
-            bulletToEnemiesAndBullets({...bullet, warmup, acc, vel, pos}, state, env)
+            switch bullet.behavior {
+            | Normal => bulletToEnemiesAndBullets({...bullet, warmup, acc, vel, pos}, state, env)
+            | Scatter(count, timer, bulletConfig) =>
+              let (timer, maxed) = stepTimer(timer, env);
+              if (maxed) {
+                {...state, bullets: makeScatterBullets(bullet, bulletConfig, count) @ state.bullets}
+              } else {
+                bulletToEnemiesAndBullets(
+                  {...bullet, behavior: Scatter(count, timer, bulletConfig), warmup, acc, vel, pos},
+                  state,
+                  env
+                )
+              }
+            }
           } else {
             {...state, bullets: [{...bullet, acc, vel, pos, warmup}, ...state.bullets]}
           }
