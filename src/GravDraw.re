@@ -53,7 +53,17 @@ let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, ~strokeWeigh
   }
 };
 
-let drawStatus = (me, env) => {
+let drawHelp = (ctx, player, env) => {
+  let (x, y) = player.Player.pos;
+  let x = int_of_float(x);
+  let y = int_of_float(y) + 30;
+  DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y), ~body="Arrow keys to move", env);
+  DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y + 25), ~body="Avoid the missiles", env);
+  DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y + 50), ~body="Gravity is your only weapon", env);
+  ()
+};
+
+let drawStatus = (ctx, level, me, env) => {
   let percent = flDiv(me.Player.health, fullPlayerHealth);
   Draw.strokeWeight(1, env);
   Draw.stroke(Constants.white, env);
@@ -64,7 +74,13 @@ let drawStatus = (me, env) => {
   Draw.rect(~pos=(10, 10), ~width=int_of_float(100. *. percent), ~height=10, env);
   for (i in 0 to me.Player.lives) {
     circle(~center=(float_of_int(i * 15 + 100 + 20), 15.), ~rad=5., env)
-  }
+  };
+  DrawUtils.textRightJustified(
+    ~font=ctx.smallFont,
+    ~body="Level " ++ string_of_int(level + 1),
+    ~pos=(Env.width(env) - 10, 5),
+    env
+  )
 };
 
 let drawJoystick = (env) => {

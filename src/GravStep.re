@@ -41,7 +41,7 @@ let stepMeMouse = ({me} as state, env) =>
       let vel = springToward(me.pos, mousePos, 0.1);
       let vel = clampVec(vel, 0.01, 7., 0.98);
       let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta)));
-      {...state, me: {...me, pos, vel}}
+      {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
       state
     }
@@ -54,7 +54,7 @@ let stepMeJoystick = ({me} as state, env) =>
       let vel = clampVec(vel, 1., 7., 0.98);
       let delta = Env.deltaTime(env) *. 1000. /. 16.;
       let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta)));
-      {...state, me: {...me, pos, vel}}
+      {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
       state
     }
@@ -71,7 +71,9 @@ let stepMeKeys = ({me} as state, env) => {
   let vel = clampVec(vel, 0.01, 7., 0.98);
   let delta = Env.deltaTime(env) *. 1000. /. 16.;
   let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta)));
-  {...state, me: {...me, pos, vel}}
+  {...state, me: {...me, pos, vel},
+    hasMoved: state.hasMoved || vel.mag > 0.01
+  }
 };
 
 let stepEnemy = (env, state, enemy) => {

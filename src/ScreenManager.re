@@ -61,13 +61,14 @@ let module Helpers = {
   };
 };
 
-let run = (~transitionTo, ~setup, ~getScreen, ~perfMonitorFont) => {
+let run = (~title=?, ~perfMonitorFont=?, ~transitionTo, ~setup, ~getScreen, ()) => {
   Reprocessing.run(
     ~setup,
     ~draw=Helpers.draw(transitionTo, getScreen),
     ~mouseDown=Helpers.mouseDown(transitionTo, getScreen),
     ~keyPressed=Helpers.keyPressed(transitionTo, getScreen),
-    ~perfMonitorFont,
+    ~perfMonitorFont=?perfMonitorFont,
+    ~title=?title,
     ()
   )
 };

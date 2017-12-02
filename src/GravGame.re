@@ -12,6 +12,7 @@ let newGame = (env) => {
     Draw.loadFont(~filename="./assets/SFCompactRounded-Black-48.fnt", ~isPixel=false, env);
   {
     status: Running,
+    hasMoved: false,
     level: 0,
     levels,
     font,
@@ -32,7 +33,7 @@ let newGame = (env) => {
 
 let initialState = newGame;
 
-let drawState = (state, env) => {
+let drawState = (ctx, state, env) => {
   Draw.background(Constants.black, env);
   if (isPhone) {
     Draw.pushMatrix(env);
@@ -48,7 +49,10 @@ let drawState = (state, env) => {
   if (isPhone) {
     Draw.popMatrix(env)
   };
-  drawStatus(state.me, env)
+  drawStatus(ctx, state.level, state.me, env);
+  if (!state.hasMoved) {
+    drawHelp(ctx, state.me, env);
+  }
 };
 
 let mainLoop = (ctx, state, env) => {
@@ -68,7 +72,7 @@ let mainLoop = (ctx, state, env) => {
       Transition(ctx, `Finished(false))
     }
   | Paused =>
-    drawState(state, env);
+    drawState(ctx, state, env);
     Same(ctx, state)
   | _ =>
     let state = {
@@ -86,7 +90,7 @@ let mainLoop = (ctx, state, env) => {
     let state = stepEnemies(state, env);
     let state = {...state, explosions: stepExplosions(state.explosions, env)};
     let state = stepBullets(state, env);
-    drawState(state, env);
+    drawState(ctx, state, env);
     state.enemies !== [] || state.status !== Running ?
       Same(ctx, state) :
       {

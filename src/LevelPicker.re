@@ -102,11 +102,17 @@ let screen =
               Draw.rect(~pos, ~width, ~height, env);
             };
             Draw.noFill(env);
-            Draw.stroke(switch status {
+            let hovered = MyUtils.rectCollide(Reprocessing.Env.mouse(env), (pos, (width, height)));
+            Draw.stroke(if (hovered) {
+              switch status {
+              | Locked => Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
+              | _ => Constants.green
+              }
+            } else switch status {
             | Locked | Beaten => Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
             | Available => Constants.white
             }, env);
-            Draw.strokeWeight(1, env);
+            Draw.strokeWeight(hovered && status !== Locked ? 3 : 1, env);
             Draw.rect(~pos, ~width, ~height, env);
             /* Draw.text(~font=ctx.textFont, ~body=text, ~pos=center(pos, width, height), env) */
           },

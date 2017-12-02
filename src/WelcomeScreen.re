@@ -38,9 +38,13 @@ let run = (ctx, env) => {
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
 
   buttonsWithPosition(env, buttons) |> Array.iter((((x, y), (text, _))) => {
-    Draw.stroke(Constants.white, env);
-    Draw.strokeWeight(3, env);
-    Draw.noFill(env);
+    Draw.fill(MyUtils.withAlpha(Constants.white, 0.2), env);
+    Draw.noStroke(env);
+    if (MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
+      Draw.strokeWeight(2, env);
+      Draw.stroke(Utils.color(~r=100, ~g=100, ~b=100, ~a=255), env);
+    };
+    /* Draw.noFill(env); */
     Draw.rect(~pos=(x, y), ~width=buttonWidth, ~height=buttonHeight, env);
     DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 10), env);
   });

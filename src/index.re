@@ -71,8 +71,10 @@ let getScreen = (state) =>
 let initialScreen = `WelcomeScreen(());
 
 ScreenManager.run(
+  ~title="Gravitron",
   ~transitionTo,
   ~setup=setup(initialScreen),
   ~getScreen,
-  ~perfMonitorFont="./assets/SFCompactDisplay-Regular-16.fnt"
+  ()
+  /* ~perfMonitorFont="./assets/SFCompactDisplay-Regular-16.fnt" */
 );

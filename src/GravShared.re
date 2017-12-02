@@ -64,6 +64,7 @@ type status =
 
 type gameState = {
   status,
+  hasMoved: bool,
   level: int,
   font: fontT,
   levels: array(list(Enemy.t)),
