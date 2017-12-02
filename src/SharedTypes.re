@@ -34,6 +34,7 @@ module Bullet = {
     | Normal
     /** How many to break into, and timer */
     | Scatter(int, counter, bulletConfig);
+  /* Mine - goes a certain distance & stops (not affected by gravity)  */
   /* Mortar - explodes with a largish blast radius after a (random?) timer. */
   /* type size = Small | Medium | Large; */
   type t = {

@@ -2,6 +2,6 @@
 .merlin
 .bsb.lock
 npm-debug.log
-/lib/bs/
+/lib/
 /node_modules/
 user_data_highest_beaten_level
