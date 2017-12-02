@@ -7,6 +7,7 @@ module LevelEditor = {
 };
 
 let setup = (initialScreen, env) => {
+  Reprocessing.Env.resizeable(false, env);
   let (w, h) =
     GravShared.isPhone ?
       (Reprocessing.Env.windowWidth(env), Reprocessing.Env.windowHeight(env)) : (800, 800);

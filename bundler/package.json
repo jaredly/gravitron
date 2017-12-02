@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "rollup": "^0.52.0",
+    "rollup-analyzer-plugin": "^1.1.1",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-visualizer": "^0.3.1",
     "webpack": "^3.9.1"
   }
 }

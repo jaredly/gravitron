@@ -19,7 +19,10 @@ type button = {
 
 let buttonsInPosition = (ctx, env) => {
   let buttons = ref([]);
+  let top = 100;
   let w = Reprocessing.Env.width(env);
+  let left = w / 8;
+  let w = w - left - left;
   let boxSize = 100;
   let margin = 10;
   let rowSize = (w - margin) / (boxSize + margin);
@@ -27,8 +30,8 @@ let buttonsInPosition = (ctx, env) => {
   for (i in 0 to Array.length(levels) - 1) {
     let col = i mod rowSize;
     let row = i / rowSize;
-    let x = col * (boxSize + margin) + margin;
-    let y = row * (boxSize + margin) + margin;
+    let x = col * (boxSize + margin) + left;
+    let y = row * (boxSize + margin) + top;
     buttons :=
       [
         {
@@ -52,8 +55,10 @@ let center = ((x, y), w, h) => (x + w/2, y + h/2);
 
 let drawEnemySquare = (env, enemies, (x, y), w, h) => {
   open Reprocessing;
-  let fullW = Env.width(env);
-  let fullH = Env.height(env);
+  let fullW = 800;
+  /* Env.width(env); */
+  let fullH = 800;
+  /* Env.height(env); */
   let scaleX = MyUtils.flDiv(w, fullW);
   let scaleY = MyUtils.flDiv(h, fullH);
   Draw.pushMatrix(env);
@@ -78,6 +83,12 @@ let screen =
       (ctx, env) => {
         open Reprocessing;
         Draw.background(Constants.black, env);
+        DrawUtils.centerText(
+          ~font=ctx.titleFont,
+          ~pos=(Env.width(env) / 2, 20),
+          ~body="Pick a level",
+          env
+        );
         List.iter(
           ({text, pos, width, height, enemies, status}) => {
             if (status === Beaten) {

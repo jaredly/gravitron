@@ -57,12 +57,18 @@ module Enemy = {
     | GoToPosition(pos, vec)
     | Wander(pos, vec)
     /* | Avoider(vec) */
+    /* | Guard(enemyId) */
     ;
 
   type dying =
      /* animation */
     | Asteroid(float)
     | Revenge
+    ;
+
+  type stepping =
+    | Rabbit(float) /* timer */
+    | Protected(float) /* spawn protector */
     ;
 
   type behavior =
