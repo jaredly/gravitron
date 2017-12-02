@@ -8,3 +8,5 @@ user_data_highest_beaten_level
 bundler/node_modules
 docs
 .vscode
+bundler/Gravitron.app
+bundler/Gravitron.zip

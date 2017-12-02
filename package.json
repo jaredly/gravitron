@@ -10,6 +10,7 @@
     "clean": "bsb -clean-world",
     "js": "./node_modules/bs-platform/bin/bsb -backend js -make-world && webpack",
     "deploy": "npm run js && cp assets/* docs/assets && cd docs && surge . -d gravitron.surge.sh",
+    "deploy-native": "npm run build:native && cd bundler && ./bundle.sh",
     "byte": "./node_modules/bs-platform/bin/bsb -w -make-world"
   },
   "keywords": [
