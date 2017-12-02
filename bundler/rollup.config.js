@@ -1,8 +1,5 @@
 // rollup.config.js
 import resolve from 'rollup-plugin-node-resolve';
-import analyze from 'rollup-analyzer-plugin'
-import Visualize from 'rollup-plugin-visualizer'
-const opts = {limit: 15, filter: [], root: '/'}
 
 export default {
   input: '../lib/es6/src/index.js',
@@ -12,8 +9,6 @@ export default {
   },
   name: 'Gravitron',
   plugins: [
-    Visualize(),
-    analyze(opts),
     resolve({
       // use "module" field for ES6 module if possible
       module: true, // Default: true

@@ -94,15 +94,17 @@ let screen =
             if (status === Beaten) {
               drawEnemySquare(env, enemies, pos, width, height);
             } else {
-              Draw.fill(Utils.color(~r=50, ~g=50, ~b=50, ~a=255), env);
+              Draw.fill(status === Locked
+                ? Utils.color(~r=50, ~g=50, ~b=50, ~a=255)
+                : Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
+                , env);
               Draw.noStroke(env);
               Draw.rect(~pos, ~width, ~height, env);
             };
             Draw.noFill(env);
             Draw.stroke(switch status {
-            | Locked => Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
+            | Locked | Beaten => Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
             | Available => Constants.white
-            | Beaten => Constants.green
             }, env);
             Draw.strokeWeight(1, env);
             Draw.rect(~pos, ~width, ~height, env);

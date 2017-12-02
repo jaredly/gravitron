@@ -2,7 +2,7 @@
   "name": "gravitron",
   "sources": "src",
   "bs-dependencies": ["reprocessing"],
-  "package-specs": ["es6"],
+  "package-specs": ["commonjs", "es6"],
   "entries": [{
     "backend": "bytecode",
     "main-module": "Indexhot"

@@ -7,7 +7,8 @@
     "build": "bsb -make-world",
     "build:web": "bsb -make-world -backend js",
     "build:native": "bsb -make-world -backend native",
-    "clean": "bsb -clean-world"
+    "clean": "bsb -clean-world",
+    "deploy": "./node_modules/bs-platform/bin/bsb -backend js -make-world && rm -rf docs/assets && cp -r assets docs/assets && webpack && cd docs && surge . -d gravitron.surge.sh"
   },
   "keywords": [
     "BuckleScript"
