@@ -6,7 +6,8 @@ module LevelEditor = {
   let screen = ScreenManager.empty;
 };
 
-let setup = (initialScreen, env) => {
+let (/+) = Filename.concat;
+let setup = (assetDir, initialScreen, env) => {
   Reprocessing.Env.resizeable(false, env);
   let (w, h) =
     GravShared.isPhone ?
@@ -22,19 +23,19 @@ let setup = (initialScreen, env) => {
       highScores: [||],
       titleFont:
         Reprocessing.Draw.loadFont(
-          ~filename="./assets/SFCompactRounded-Black-48.fnt",
+          ~filename=assetDir /+ "SFCompactRounded-Black-48.fnt",
           ~isPixel=false,
           env
         ),
       textFont:
         Reprocessing.Draw.loadFont(
-          ~filename="./assets/SFCompactDisplay-Regular-24.fnt",
+          ~filename=assetDir /+ "SFCompactDisplay-Regular-24.fnt",
           ~isPixel=false,
           env
         ),
       smallFont:
         Reprocessing.Draw.loadFont(
-          ~filename="./assets/SFCompactDisplay-Regular-16.fnt",
+          ~filename=assetDir /+ "SFCompactDisplay-Regular-16.fnt",
           ~isPixel=false,
           env
         )
@@ -70,11 +71,12 @@ let getScreen = (state) =>
 
 let initialScreen = `WelcomeScreen(());
 
+let run = (assetDir, showPerf) =>
 ScreenManager.run(
   ~title="Gravitron",
   ~transitionTo,
-  ~setup=setup(initialScreen),
+  ~setup=setup(assetDir, initialScreen),
   ~getScreen,
+  ~perfMonitorFont=?(showPerf ? Some(assetDir /+ "SFCompactDisplay-Regular-16.fnt") : None),
   ()
-  /* ~perfMonitorFont="./assets/SFCompactDisplay-Regular-16.fnt" */
 );

@@ -8,14 +8,11 @@ open GravShared;
 
 let newGame = (env) => {
   let levels = isPhone ? GravLevels.makePhoneLevels(env) : GravLevels.levels;
-  let font =
-    Draw.loadFont(~filename="./assets/SFCompactRounded-Black-48.fnt", ~isPixel=false, env);
   {
     status: Running,
     hasMoved: false,
     level: 0,
     levels,
-    font,
     me: {
       health: fullPlayerHealth,
       lives: 3,

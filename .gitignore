@@ -6,3 +6,5 @@ npm-debug.log
 /node_modules/
 user_data_highest_beaten_level
 bundler/node_modules
+docs
+.vscode
