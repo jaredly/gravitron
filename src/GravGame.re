@@ -24,7 +24,8 @@ let newGame = (env) => {
     },
     enemies: levels[0],
     bullets: [],
-    explosions: []
+    explosions: [],
+    wallType: BouncyWalls,
   }
 };
 
@@ -32,10 +33,10 @@ let initialState = newGame;
 
 let drawState = (ctx, state, env) => {
   Draw.background(Constants.black, env);
-  if (isPhone) {
+  /* if (true || isPhone) {
     Draw.pushMatrix(env);
     Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
-  };
+  }; */
   open GravDraw;
   if (state.status === Running || state.status === Paused) {
     drawMe(state.me, env)
@@ -43,9 +44,9 @@ let drawState = (ctx, state, env) => {
   List.iter(drawEnemy(env), state.enemies);
   List.iter(drawBullet(env), state.bullets);
   List.iter(drawExplosion(env), state.explosions);
-  if (isPhone) {
+  /* if (true || isPhone) {
     Draw.popMatrix(env)
-  };
+  }; */
   drawStatus(ctx, state.level, state.me, env);
   if (!state.hasMoved) {
     drawHelp(ctx, state.me, env);
@@ -127,6 +128,9 @@ let keyPressed = (ctx, state, env) =>
         | Running => {...state, status: Paused}
         | _ => state
         }
+      | Events.F => {...state, wallType: FireWalls}
+      | Events.B => {...state, wallType: BouncyWalls}
+      | Events.M => {...state, wallType: Minimapped}
       | Events.Num_1 => newAtLevel(env, 0)
       | Events.Num_2 => newAtLevel(env, 1)
       | Events.Num_3 => newAtLevel(env, 2)

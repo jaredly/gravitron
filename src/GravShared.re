@@ -8,7 +8,7 @@ let fullPlayerHealth = 100;
 
 let isPhone = Reprocessing.target == "native-ios";
 
-let phoneScale = isPhone ? 2. : 1.;
+let phoneScale = isPhone ? 1. : 1.;
 
 let getPhonePos = (env) => {
   let w = float_of_int(Env.width(env)) *. phoneScale;
@@ -62,6 +62,12 @@ type status =
   | Paused
   | Dead(int);
 
+type wallType =
+  | NoWalls
+  | Minimapped
+  | BouncyWalls
+  | FireWalls;
+
 type gameState = {
   status,
   hasMoved: bool,
@@ -70,7 +76,10 @@ type gameState = {
   me: Player.t,
   enemies: list(Enemy.t),
   bullets: list(Bullet.t),
-  explosions: list(Explosion.t)
+  explosions: list(Explosion.t),
+
+  /* settings */
+  wallType: wallType
 };
 type state = gameState;
 

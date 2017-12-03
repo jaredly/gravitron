@@ -343,9 +343,31 @@ let makeScatterBullets = (bullet, (color, size, speed, damage), count) => {
   loop(count)
 };
 
+type offscreen = Left | Top | Right | Bottom | OnScreen;
+let offscreen = ((x, y), w, h) => {
+  let x = int_of_float(x);
+  let y = int_of_float(y);
+  if (x < 0) Left
+  else if (y < 0) Top
+  else if (x > w) Right
+  else if (y > h) Bottom
+  else OnScreen
+};
+
+let bounceVel = (vel, off) => {
+  mag: vel.mag *. 0.5,
+  theta: switch off {
+  | OnScreen => vel.theta
+  | Left | Right => if (vel.theta < Constants.pi) {Constants.pi -. vel.theta} else { Constants.pi *. 3. -. vel.theta }
+  | Top | Bottom => Constants.two_pi -. vel.theta
+  }
+};
+
 let stepBullets = (state, env) => {
   open Bullet;
   let player = state.me;
+  let w = Env.width(env);
+  let h = Env.height(env);
   List.fold_left(
     (state, bullet) =>
       switch state.status {
@@ -373,23 +395,36 @@ let stepBullets = (state, env) => {
           let vel = vecAdd(bullet.vel, acc);
           let pos = posAdd(bullet.pos, vecToPos(vel));
           let (warmup, isFull) = stepTimer(bullet.warmup, env);
-          if (isFull) {
+          let (bullet, dead) = switch (state.wallType, offscreen(pos, w, h)) {
+          | (_, OnScreen) => ({...bullet, acc, vel, pos}, false)
+          | (FireWalls, _) => (bullet, true)
+          | (BouncyWalls, off) => {
+            print_endline("BOUNCE");
+            let vel = bounceVel(vel, off);
+            let pos = posAdd(bullet.pos, vecToPos(vel));
+            ({...bullet, vel, pos}, false)
+          }
+          | _ => ({...bullet, acc, vel, pos}, false)
+          };
+          if (dead) {
+            {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
+          } else if (isFull) {
             switch bullet.behavior {
-            | Normal => bulletToEnemiesAndBullets({...bullet, warmup, acc, vel, pos}, state, env)
+            | Normal => bulletToEnemiesAndBullets({...bullet, warmup}, state, env)
             | Scatter(count, timer, bulletConfig) =>
               let (timer, maxed) = stepTimer(timer, env);
               if (maxed) {
                 {...state, bullets: makeScatterBullets(bullet, bulletConfig, count) @ state.bullets}
               } else {
                 bulletToEnemiesAndBullets(
-                  {...bullet, behavior: Scatter(count, timer, bulletConfig), warmup, acc, vel, pos},
+                  {...bullet, behavior: Scatter(count, timer, bulletConfig), warmup},
                   state,
                   env
                 )
               }
             }
           } else {
-            {...state, bullets: [{...bullet, acc, vel, pos, warmup}, ...state.bullets]}
+            {...state, bullets: [{...bullet, warmup}, ...state.bullets]}
           }
         }
       },
