@@ -5,10 +5,10 @@
   "package-specs": ["commonjs", "es6"],
   "entries": [{
     "backend": "bytecode",
-    "main-module": "Dev"
+    "main-module": "Indexhot"
   },{
     "backend": "js",
-    "main-module": "Index"
+    "main-module": "Web"
   },{
     "backend": "native",
     "main-module": "Prod"

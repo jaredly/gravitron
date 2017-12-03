@@ -1,1 +1,1 @@
-Reprocessing.hotreload("src/indexhot.re");
+Reprocessing.hotreload("src/dev.re");

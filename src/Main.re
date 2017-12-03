@@ -11,7 +11,7 @@ let setup = (assetDir, initialScreen, env) => {
   Reprocessing.Env.resizeable(false, env);
   let (w, h) =
     GravShared.isPhone ?
-      (Reprocessing.Env.windowWidth(env), Reprocessing.Env.windowHeight(env)) : (800, 800);
+      (Reprocessing.Env.width(env), Reprocessing.Env.height(env)) : (800, 800);
   Reprocessing.Env.size(~width=w, ~height=h, env);
   (
     {
