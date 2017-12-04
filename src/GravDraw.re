@@ -126,10 +126,44 @@ let drawMe = (me, env) => {
   Draw.strokeWeight(2, env);
   circle(
     ~center=me.pos,
-    ~rad=me.size,
+    ~rad=me.size +. 1.,
     env
   );
   Draw.noStroke(env)
+};
+
+let drawMinimap = (bullets, env) => {
+  let w = Env.width(env) |> float_of_int;
+  let h = Env.height(env) |> float_of_int;
+  let size = 100.;
+  let scale = 3.;
+  let ow = w *. scale;
+  let oh = h *. scale;
+  let xs = size /. ow;
+  let ys = size /. oh;
+  let dx = w;
+  let dy = h;
+
+  let mpos = (w -. size, h -. size);
+  let toMapCoords = ((x, y)) => {
+    let x = (x +. dx) *. xs;
+    let y = (y +. dy) *. ys;
+    posAdd((x, y), mpos)
+  };
+
+  Draw.noStroke(env);
+  List.iter(
+    bullet => {
+      open Bullet;
+      let (x, y) = toMapCoords(bullet.pos);
+      Draw.fill(bullet.color, env);
+      Draw.rectf(~pos=(x -. 1., y -. 1.), ~width=2., ~height=2., env);
+    },
+    bullets
+  );
+
+  Draw.fill(Reprocessing.Utils.color(~r=255, ~g=255, ~b=255, ~a=50), env);
+  Draw.rectf(~pos=toMapCoords((0., 0.)), ~width=(w *. xs), ~height=(h *. ys), env);
 };
 
 let getCircleParams = (radius, numCircles, spin) => {
