@@ -83,7 +83,24 @@ let drawHelp = (ctx, player, env) => {
   ()
 };
 
+let drawWalls = (env, color) => {
+  Draw.noStroke(env);
+  Draw.fill(color, env);
+  let w = Env.width(env) |> float_of_int;
+  let h = Env.height(env) |> float_of_int;
+  Draw.rectf(~pos=(0., 0.), ~width=w, ~height=GravStep.wallSize, env);
+  Draw.rectf(~pos=(0., 0.), ~width=GravStep.wallSize, ~height=h, env);
+  Draw.rectf(~pos=(0., h -. GravStep.wallSize), ~width=w, ~height=GravStep.wallSize, env);
+  Draw.rectf(~pos=(w -. GravStep.wallSize, 0.), ~width=GravStep.wallSize, ~height=h, env);
+};
+
+
 let drawStatus = (ctx, level, me, env) => {
+  switch (currentWallType(ctx)) {
+  | FireWalls => drawWalls(env, fireWallColor)
+  | BouncyWalls => drawWalls(env, bouncyWallColor)
+  | Minimapped => ()
+  };
   let percent = flDiv(me.Player.health, fullPlayerHealth);
   Draw.strokeWeight(1, env);
   Draw.stroke(Constants.white, env);

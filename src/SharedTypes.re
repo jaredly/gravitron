@@ -235,3 +235,8 @@ let updateCurrentWallType = (env, ctx, wallType) => {
   ...ctx,
   userData: UserData.setCurrentWallType(env, ctx.userData, wallType)
 };
+
+let fireWallColor = Reprocessing.Utils.color(~r=255, ~g=100, ~b=100, ~a=255);
+let fireWallColor = Reprocessing.Utils.color(~r=100, ~g=100, ~b=100, ~a=255);
+
+let bouncyWallColor = Reprocessing.Utils.color(~r=100, ~g=100, ~b=200, ~a=255);

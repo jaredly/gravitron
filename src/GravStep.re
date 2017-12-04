@@ -32,7 +32,7 @@ let randomTarget = (w, h) => {
   (Random.float(w -. margin *. 2.) +. margin, Random.float(h -. margin *. 2.) +. margin)
 };
 
-let wallSize = 10.;
+let wallSize = 5.;
 
 type offscreen = Left | Top | Right | Bottom | OnScreen;
 let offscreen = ((x, y), w, h, size) => {
