@@ -9,16 +9,14 @@ module LevelEditor = {
 let (/+) = Filename.concat;
 let setup = (assetDir, initialScreen, env) => {
   Reprocessing.Env.resizeable(false, env);
+  let userData = SharedTypes.UserData.load(env);
   let (w, h) =
     GravShared.isPhone ?
       (Reprocessing.Env.width(env), Reprocessing.Env.height(env)) : (800, 800);
   Reprocessing.Env.size(~width=w, ~height=h, env);
   (
     {
-      highestBeatenLevel: switch (Reprocessing.Env.loadUserData(~key="highest_beaten_level", env)) {
-      | None => -1
-      | Some(x) => x
-      },
+      userData,
       userLevels: [||],
       highScores: [||],
       titleFont:
@@ -44,12 +42,12 @@ let setup = (assetDir, initialScreen, env) => {
   )
 };
 
-let transitionTo = (_, transition, env) =>
+let transitionTo = (ctx, transition, env) =>
   switch transition {
   | `Quit => `WelcomeScreen(WelcomeScreen.initialState(env))
   | `Start =>
     print_endline("Start");
-    `Game(GravGame.initialState(env))
+    `Game(GravGame.initialState(~wallType=currentWallType(ctx), env))
   | `StartFromLevel(level) => `Game(GravGame.newAtLevel(env, level))
   | `Finished(won) => `DoneScreen(DoneScreen.initialState(won))
   | `PickLevel => `LevelPicker(LevelPicker.initialState)

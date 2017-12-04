@@ -120,8 +120,93 @@ type highScore = {
   time: string,
 };
 
+type wallType =
+  | Minimapped
+  | BouncyWalls
+  | FireWalls;
+
+let optBind = (fn, v) => switch (v) { | None => None | Some(v) => fn(v) };
+let optOr = (default, v) => switch v { | None => default | Some(v) => v };
+
+module UserData = {
+  let key = "gravitron_data";
+  type t = {
+    currentWallType: wallType,
+    highestBeatenLevels: (int, int, int),
+  };
+  type t0 = t;
+  let userDataVersion = 0;
+
+  let default: t = {
+    currentWallType: FireWalls,
+    highestBeatenLevels: (0, 0, 0),
+  };
+
+  let convertUp = (version, _value) => {
+    switch version {
+    | _ => None
+    }
+  };
+
+  let rec convertToLatest = ((version, value)): option(t) => {
+    if (version > userDataVersion) {
+      None
+    } else if (version == userDataVersion) {
+      Some(Obj.magic(value))
+    } else {
+      convertToLatest((version + 1, convertUp(version, value)))
+    }
+  };
+
+  let load = env => {
+    Reprocessing.Env.loadUserData(~key, env)
+    |> optBind(convertToLatest)
+    |> optOr(default)
+  };
+
+  let setHighest = (highest, wall, level) => {
+    let (fire, bouncy, mini) = highest;
+    switch wall {
+    | FireWalls => ((max(fire, level), bouncy, mini), level > fire)
+    | BouncyWalls => ((fire, max(bouncy, level), mini), level > bouncy)
+    | Minimapped => ((fire, bouncy, max(mini, level)), level > mini)
+    }
+  };
+
+  let saveUserData = (env, userData) => {
+    let _saved = Reprocessing.Env.saveUserData(~key, ~value=(userDataVersion, userData), env);
+    userData
+  };
+
+  let updateHighestLevel = (env, userData, level) => {
+    let (highest, updated) = setHighest(userData.highestBeatenLevels, userData.currentWallType, level);
+    if (updated) {
+      saveUserData(env, {...userData, highestBeatenLevels: highest});
+    } else {
+      userData
+    }
+  };
+
+  let highestBeatenLevel = ({highestBeatenLevels, currentWallType}) => {
+    let (fire, bouncy, mini) = highestBeatenLevels;
+    switch currentWallType {
+    | FireWalls => fire
+    | BouncyWalls => bouncy
+    | Minimapped => mini
+    }
+  };
+
+  let setCurrentWallType = (env, userData, typ) => {
+    if (typ === userData.currentWallType) {
+      userData
+    } else {
+      saveUserData(env, {...userData, currentWallType: typ})
+    }
+  };
+};
+
 type context = {
-  highestBeatenLevel: int,
+  userData: UserData.t,
   userLevels: array(array(Enemy.t)),
   highScores: array(highScore),
   smallFont: Reprocessing.fontT,
@@ -138,3 +223,9 @@ type transition = [
   | `UserLevels
   | `EditLevel(int)
 ];
+
+let updateHighestBeatenLevel = (env, ctx, level) => {
+  {...ctx, userData: UserData.updateHighestLevel(env, ctx.userData, level)}
+};
+
+let currentWallType = (ctx) => ctx.userData.UserData.currentWallType;

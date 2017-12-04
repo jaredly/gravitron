@@ -41,9 +41,9 @@ let buttonsInPosition = (ctx, env) => {
           height: boxSize,
           i,
           enemies: levels[i],
-          status: ctx.highestBeatenLevel + 1 > i
+          status: UserData.highestBeatenLevel(ctx.userData) + 1 > i
             ? Beaten
-            : (ctx.highestBeatenLevel + 1 === i ? Available : Locked)
+            : (UserData.highestBeatenLevel(ctx.userData) + 1 === i ? Available : Locked)
         },
         ...buttons^
       ]
@@ -114,7 +114,10 @@ let screen =
             }, env);
             Draw.strokeWeight(hovered && status !== Locked ? 3 : 1, env);
             Draw.rect(~pos, ~width, ~height, env);
-            /* Draw.text(~font=ctx.textFont, ~body=text, ~pos=center(pos, width, height), env) */
+            if (status !== Beaten) {
+              let (x, y) = center(pos, width, height);
+              DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x, y - 16), env)
+            }
           },
           buttonsInPosition(ctx, env)
         );

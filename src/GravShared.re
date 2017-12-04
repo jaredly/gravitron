@@ -62,12 +62,6 @@ type status =
   | Paused
   | Dead(int);
 
-type wallType =
-  | NoWalls
-  | Minimapped
-  | BouncyWalls
-  | FireWalls;
-
 type gameState = {
   status,
   hasMoved: bool,

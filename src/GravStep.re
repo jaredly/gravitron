@@ -75,7 +75,6 @@ let stepMeMouse = ({me} as state, env) =>
       let vel = springToward(me.pos, mousePos, 0.1);
       let vel = clampVec(vel, 0.01, 7., 0.98);
       let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
-      /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
       state
@@ -107,7 +106,6 @@ let stepMeKeys = ({me} as state, env) => {
   let vel = clampVec(vel, 0.01, 7., 0.98);
   let delta = Env.deltaTime(env) *. 1000. /. 16.;
   let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
-  /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
   {...state, me: {...me, pos, vel},
     hasMoved: state.hasMoved || vel.mag > 0.01
   }
@@ -416,7 +414,6 @@ let stepBullets = (state, env) => {
           | (_, OnScreen) => ({...bullet, acc, vel, pos}, false)
           | (FireWalls, _) => (bullet, true)
           | (BouncyWalls, off) => {
-            /* print_endline("BOUNCE"); */
             let vel = bounceVel(vel, off);
             let pos = posAdd(bullet.pos, vecToPos(vel));
             ({...bullet, vel, pos}, false)
