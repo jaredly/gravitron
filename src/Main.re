@@ -51,6 +51,7 @@ let transitionTo = (ctx, transition, env) =>
   | `StartFromLevel(level) => `Game(GravGame.newAtLevel(env, level))
   | `Finished(won) => `DoneScreen(DoneScreen.initialState(won))
   | `PickLevel => `LevelPicker(LevelPicker.initialState)
+  | `PickWalls => `WallScreen(WallScreen.initialState)
   | `UserLevels => `LevelEditor(LevelEditor.blankState)
   | `EditLevel(level) => `LevelEditor(LevelEditor.editState(level))
   };
@@ -64,6 +65,7 @@ let getScreen = (state) =>
     | `Game(state) => Screen(state, GravGame.screen, ((state) => `Game(state)))
     | `DoneScreen(state) => Screen(state, DoneScreen.screen, ((state) => `DoneScreen(state)))
     | `LevelEditor(state) => Screen(state, LevelEditor.screen, ((state) => `LevelEditor(state)))
+    | `WallScreen(state) => Screen(state, WallScreen.screen, (state) => `WallScreen(state))
     }
   );
 

@@ -139,7 +139,7 @@ module UserData = {
 
   let default: t = {
     currentWallType: FireWalls,
-    highestBeatenLevels: (0, 0, 0),
+    highestBeatenLevels: (-1, -1, -1),
   };
 
   let convertUp = (version, _value) => {
@@ -219,6 +219,7 @@ type transition = [
   | `StartFromLevel(int)
   | `Quit
   | `Finished(bool)
+  | `PickWalls
   | `PickLevel
   | `UserLevels
   | `EditLevel(int)
@@ -229,3 +230,8 @@ let updateHighestBeatenLevel = (env, ctx, level) => {
 };
 
 let currentWallType = (ctx) => ctx.userData.UserData.currentWallType;
+
+let updateCurrentWallType = (env, ctx, wallType) => {
+  ...ctx,
+  userData: UserData.setCurrentWallType(env, ctx.userData, wallType)
+};
