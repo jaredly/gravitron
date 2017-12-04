@@ -10,6 +10,20 @@ let rect = (~center as (x, y), ~w, ~h, env) =>
 
 let scale = (d) => sqrt(d);
 
+let triangle = (~tip as (x, y), ~size as (w, h), ~angle, env) => {
+  let theta = atan2(w /. 2., h);
+  let sideLen = MyUtils.dist((w /. 2., h));
+  let p2 = (
+    x +. cos(angle +. theta) *. sideLen,
+    y +. sin(angle +. theta) *. sideLen,
+  );
+  let p3 = (
+    x +. cos(angle -.theta) *. sideLen,
+    y +. sin(angle -.theta) *. sideLen,
+  );
+  Draw.trianglef(~p1=(x, y), ~p2, ~p3, env);
+};
+
 let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, ~strokeWeight=3, env) => {
   let height = Env.height(env) |> float_of_int;
   let width = Env.width(env) |> float_of_int;
@@ -17,29 +31,35 @@ let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, ~strokeWeigh
   Draw.fill(withAlpha(color, 0.6), env);
   Draw.noStroke(env);
   let size = 8.;
+  let tri = (tip) => {
+    let dist = MyUtils.dist(MyUtils.posSub(tip, (x, y)));
+    let alpha = max(0., min(1., 1. -. dist /. 1000.));
+    Draw.fill(withAlpha(color, alpha), env);
+    Draw.stroke(withAlpha(color, 0.6), env);
+    triangle(~tip, ~size=(8., 16.), ~angle=MyUtils.thetaToward((x, y), tip), env);
+  };
   if (x +. rad < 0.) {
     if (y +. rad < 0.) {
-      rect(~center=(0., 0.), ~w=size, ~h=size, env)
+      /* let size = (8., 8.); */
+      tri((0., 0.))
+      /* triangle(~tip=(0., 0.), ~size, ~angle=Constants.pi /. 2., env); */
     } else if (y -. rad > height) {
-      rect(~center=(0., height), ~w=size, ~h=size, env)
+      tri((0., height));
     } else {
-      rect(~center=(0., y), ~w=size, ~h=scale(-. x), env)
+      tri((0., y));
     }
   } else if (x -. rad > width) {
     if (y +. rad < 0.) {
-      rect(~center=(width, 0.), ~w=size, ~h=size, env)
+      tri((width, 0.));
     } else if (y -. rad > height) {
-      rect(~center=(width, height), ~w=size, ~h=size, env)
+      tri((width, height));
     } else {
-      let w = scale(x -. width);
-      rect(~center=(width, y), ~w=size, ~h=w, env)
+      tri((width, y));
     }
   } else if (y +. rad < 0.) {
-    let h = scale(-. y);
-    rect(~center=(x, 0.), ~w=h, ~h=size, env)
+    tri((x, 0.));
   } else if (y -. rad > height) {
-    let h = scale(y -. height);
-    rect(~center=(x, height), ~w=h, ~h=size, env)
+    tri((x, height));
   } else {
     if (stroke) {
       Draw.stroke(color, env);

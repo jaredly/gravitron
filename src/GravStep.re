@@ -32,15 +32,50 @@ let randomTarget = (w, h) => {
   (Random.float(w -. margin *. 2.) +. margin, Random.float(h -. margin *. 2.) +. margin)
 };
 
+type offscreen = Left | Top | Right | Bottom | OnScreen;
+let offscreen = ((x, y), w, h) => {
+  let x = int_of_float(x);
+  let y = int_of_float(y);
+  if (x < 0) Left
+  else if (y < 0) Top
+  else if (x > w) Right
+  else if (y > h) Bottom
+  else OnScreen
+};
+
+let bounceVel = (vel, off) => {
+  mag: off === OnScreen ? vel.mag : vel.mag *. 0.5,
+  theta: switch off {
+  | OnScreen => vel.theta
+  | Left | Right => if (vel.theta < Constants.pi) {Constants.pi -. vel.theta} else { Constants.pi *. 3. -. vel.theta }
+  | Top | Bottom => Constants.two_pi -. vel.theta
+  }
+};
+
+let keepOnScreen = ((x, y), w, h) => (max(0., min(x, w)), max(0., min(y, h)));
+
+let bouncePos = (vel, pos, w, h, delta) => {
+  let off = offscreen(pos, w, h);
+  switch off {
+    | OnScreen => (vel, posAdd(pos, vecToPos(scaleVec(vel, delta))))
+    | _ =>
+      let vel = bounceVel(vel, off);
+      (vel, keepOnScreen(posAdd(pos, vecToPos(scaleVec(vel, delta))), float_of_int(w), float_of_int(h)))
+  }
+};
+
+let deltaTime = (env) => Env.deltaTime(env) *. 1000. /. 16.;
+
 let stepMeMouse = ({me} as state, env) =>
   Player.(
     if (Env.mousePressed(env)) {
-      let delta = Env.deltaTime(env) *. 1000. /. 16.;
+      let delta = deltaTime(env);
       let mousePos = floatPos(Reprocessing_Env.mouse(env));
       let mousePos = isPhone ? scalePos(mousePos, phoneScale) : mousePos;
       let vel = springToward(me.pos, mousePos, 0.1);
       let vel = clampVec(vel, 0.01, 7., 0.98);
-      let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta)));
+      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta);
+      /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
       state
@@ -52,8 +87,9 @@ let stepMeJoystick = ({me} as state, env) =>
     if (Env.mousePressed(env)) {
       let vel = springToward(joystickPos(env), floatPos(Reprocessing_Env.mouse(env)), 0.1);
       let vel = clampVec(vel, 1., 7., 0.98);
-      let delta = Env.deltaTime(env) *. 1000. /. 16.;
-      let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta)));
+      let delta = deltaTime(env);
+      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta);
+      /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
       state
@@ -70,7 +106,8 @@ let stepMeKeys = ({me} as state, env) => {
     );
   let vel = clampVec(vel, 0.01, 7., 0.98);
   let delta = Env.deltaTime(env) *. 1000. /. 16.;
-  let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta)));
+  let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta);
+  /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
   {...state, me: {...me, pos, vel},
     hasMoved: state.hasMoved || vel.mag > 0.01
   }
@@ -341,26 +378,6 @@ let makeScatterBullets = (bullet, (color, size, speed, damage), count) => {
       } :
       [];
   loop(count)
-};
-
-type offscreen = Left | Top | Right | Bottom | OnScreen;
-let offscreen = ((x, y), w, h) => {
-  let x = int_of_float(x);
-  let y = int_of_float(y);
-  if (x < 0) Left
-  else if (y < 0) Top
-  else if (x > w) Right
-  else if (y > h) Bottom
-  else OnScreen
-};
-
-let bounceVel = (vel, off) => {
-  mag: vel.mag *. 0.5,
-  theta: switch off {
-  | OnScreen => vel.theta
-  | Left | Right => if (vel.theta < Constants.pi) {Constants.pi -. vel.theta} else { Constants.pi *. 3. -. vel.theta }
-  | Top | Bottom => Constants.two_pi -. vel.theta
-  }
 };
 
 let stepBullets = (state, env) => {
