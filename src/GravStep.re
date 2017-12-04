@@ -33,13 +33,13 @@ let randomTarget = (w, h) => {
 };
 
 type offscreen = Left | Top | Right | Bottom | OnScreen;
-let offscreen = ((x, y), w, h) => {
+let offscreen = ((x, y), w, h, size) => {
   let x = int_of_float(x);
   let y = int_of_float(y);
-  if (x < 0) Left
-  else if (y < 0) Top
-  else if (x > w) Right
-  else if (y > h) Bottom
+  if (x - size < 0) Left
+  else if (y - size < 0) Top
+  else if (x + size > w) Right
+  else if (y + size > h) Bottom
   else OnScreen
 };
 
@@ -52,15 +52,15 @@ let bounceVel = (vel, off) => {
   }
 };
 
-let keepOnScreen = ((x, y), w, h) => (max(0., min(x, w)), max(0., min(y, h)));
+let keepOnScreen = ((x, y), w, h, size) => (max(size, min(x, w -. size)), max(size, min(y, h -. size)));
 
-let bouncePos = (vel, pos, w, h, delta) => {
-  let off = offscreen(pos, w, h);
+let bouncePos = (vel, pos, w, h, delta, size) => {
+  let off = offscreen(pos, w, h, int_of_float(size));
   switch off {
     | OnScreen => (vel, posAdd(pos, vecToPos(scaleVec(vel, delta))))
     | _ =>
       let vel = bounceVel(vel, off);
-      (vel, keepOnScreen(posAdd(pos, vecToPos(scaleVec(vel, delta))), float_of_int(w), float_of_int(h)))
+      (vel, keepOnScreen(posAdd(pos, vecToPos(scaleVec(vel, delta))), float_of_int(w), float_of_int(h), size))
   }
 };
 
@@ -74,7 +74,7 @@ let stepMeMouse = ({me} as state, env) =>
       let mousePos = isPhone ? scalePos(mousePos, phoneScale) : mousePos;
       let vel = springToward(me.pos, mousePos, 0.1);
       let vel = clampVec(vel, 0.01, 7., 0.98);
-      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta);
+      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
       /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
@@ -88,7 +88,7 @@ let stepMeJoystick = ({me} as state, env) =>
       let vel = springToward(joystickPos(env), floatPos(Reprocessing_Env.mouse(env)), 0.1);
       let vel = clampVec(vel, 1., 7., 0.98);
       let delta = deltaTime(env);
-      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta);
+      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
       /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
@@ -106,7 +106,7 @@ let stepMeKeys = ({me} as state, env) => {
     );
   let vel = clampVec(vel, 0.01, 7., 0.98);
   let delta = Env.deltaTime(env) *. 1000. /. 16.;
-  let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta);
+  let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
   /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
   {...state, me: {...me, pos, vel},
     hasMoved: state.hasMoved || vel.mag > 0.01
@@ -412,11 +412,11 @@ let stepBullets = (state, env) => {
           let vel = vecAdd(bullet.vel, acc);
           let pos = posAdd(bullet.pos, vecToPos(vel));
           let (warmup, isFull) = stepTimer(bullet.warmup, env);
-          let (bullet, dead) = switch (state.wallType, offscreen(pos, w, h)) {
+          let (bullet, dead) = switch (state.wallType, offscreen(pos, w, h, int_of_float(bullet.size))) {
           | (_, OnScreen) => ({...bullet, acc, vel, pos}, false)
           | (FireWalls, _) => (bullet, true)
           | (BouncyWalls, off) => {
-            print_endline("BOUNCE");
+            /* print_endline("BOUNCE"); */
             let vel = bounceVel(vel, off);
             let pos = posAdd(bullet.pos, vecToPos(vel));
             ({...bullet, vel, pos}, false)
