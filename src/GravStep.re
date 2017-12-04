@@ -32,8 +32,11 @@ let randomTarget = (w, h) => {
   (Random.float(w -. margin *. 2.) +. margin, Random.float(h -. margin *. 2.) +. margin)
 };
 
+let wallSize = 10.;
+
 type offscreen = Left | Top | Right | Bottom | OnScreen;
 let offscreen = ((x, y), w, h, size) => {
+  let size = size + int_of_float(wallSize);
   let x = int_of_float(x);
   let y = int_of_float(y);
   if (x - size < 0) Left
@@ -52,12 +55,16 @@ let bounceVel = (vel, off) => {
   }
 };
 
-let keepOnScreen = ((x, y), w, h, size) => (max(size, min(x, w -. size)), max(size, min(y, h -. size)));
+let keepOnScreen = ((x, y), w, h, size) => {
+  let size = size +. wallSize;
+  (max(size, min(x, w -. size)), max(size, min(y, h -. size)))
+};
 
-let bouncePos = (vel, pos, w, h, delta, size) => {
+let bouncePos = (wallType, vel, pos, w, h, delta, size) => {
   let off = offscreen(pos, w, h, int_of_float(size));
-  switch off {
-    | OnScreen => (vel, posAdd(pos, vecToPos(scaleVec(vel, delta))))
+  switch (wallType, off) {
+    | (Minimapped, _)
+    | (_, OnScreen) => (vel, posAdd(pos, vecToPos(scaleVec(vel, delta))))
     | _ =>
       let vel = bounceVel(vel, off);
       (vel, keepOnScreen(posAdd(pos, vecToPos(scaleVec(vel, delta))), float_of_int(w), float_of_int(h), size))
@@ -74,7 +81,7 @@ let stepMeMouse = ({me} as state, env) =>
       let mousePos = isPhone ? scalePos(mousePos, phoneScale) : mousePos;
       let vel = springToward(me.pos, mousePos, 0.1);
       let vel = clampVec(vel, 0.01, 7., 0.98);
-      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
+      let (vel, pos) = bouncePos(state.wallType, vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
       state
@@ -87,7 +94,7 @@ let stepMeJoystick = ({me} as state, env) =>
       let vel = springToward(joystickPos(env), floatPos(Reprocessing_Env.mouse(env)), 0.1);
       let vel = clampVec(vel, 1., 7., 0.98);
       let delta = deltaTime(env);
-      let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
+      let (vel, pos) = bouncePos(state.wallType, vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
       /* let pos = posAdd(me.pos, vecToPos(scaleVec(vel, delta))); */
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
@@ -105,7 +112,7 @@ let stepMeKeys = ({me} as state, env) => {
     );
   let vel = clampVec(vel, 0.01, 7., 0.98);
   let delta = Env.deltaTime(env) *. 1000. /. 16.;
-  let (vel, pos) = bouncePos(vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
+  let (vel, pos) = bouncePos(state.wallType, vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
   {...state, me: {...me, pos, vel},
     hasMoved: state.hasMoved || vel.mag > 0.01
   }

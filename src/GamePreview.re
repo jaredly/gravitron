@@ -46,7 +46,7 @@ let drawState = (ctx, state, env) => {
   List.iter(drawExplosion(env), state.explosions);
 
   if (state.wallType === Minimapped) {
-    drawMinimap(state.bullets, env);
+    drawMinimap(state.bullets, state.me, env);
   };
   /* if (true || isPhone) {
     Draw.popMatrix(env)

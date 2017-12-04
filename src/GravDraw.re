@@ -132,7 +132,7 @@ let drawMe = (me, env) => {
   Draw.noStroke(env)
 };
 
-let drawMinimap = (bullets, env) => {
+let drawMinimap = (bullets, me, env) => {
   let w = Env.width(env) |> float_of_int;
   let h = Env.height(env) |> float_of_int;
   let size = 100.;
@@ -161,6 +161,10 @@ let drawMinimap = (bullets, env) => {
     },
     bullets
   );
+
+  let (x, y) = toMapCoords(me.Player.pos);
+  Draw.fill(me.Player.color, env);
+  Draw.rectf(~pos=(x -. 2., y -. 2.), ~width=4., ~height=4., env);
 
   Draw.fill(Reprocessing.Utils.color(~r=255, ~g=255, ~b=255, ~a=50), env);
   Draw.rectf(~pos=toMapCoords((0., 0.)), ~width=(w *. xs), ~height=(h *. ys), env);
