@@ -51,7 +51,7 @@ let drawState = (ctx, state, env) => {
   /* if (true || isPhone) {
     Draw.popMatrix(env)
   }; */
-  drawStatus(ctx, state.level, state.me, env);
+  drawStatus(ctx, state.wallType, state.level, state.me, env);
   if (!state.hasMoved) {
     drawHelp(ctx, state.me, env);
   }

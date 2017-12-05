@@ -180,7 +180,7 @@ let stepEnemy = (env, state, enemy) => {
         {
           ...state,
           bullets: [
-            shoot(~behavior=Scatter(count, (0., 40.), subConfig), bulletConfig, env, enemy, state.me),
+            shoot(~behavior=Scatter(count, (0., 20.), subConfig), bulletConfig, env, enemy, state.me),
             ...state.bullets
           ],
           enemies: [

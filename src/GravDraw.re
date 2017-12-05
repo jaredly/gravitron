@@ -94,9 +94,8 @@ let drawWalls = (env, color) => {
   Draw.rectf(~pos=(w -. GravStep.wallSize, 0.), ~width=GravStep.wallSize, ~height=h, env);
 };
 
-
-let drawStatus = (ctx, level, me, env) => {
-  switch (currentWallType(ctx)) {
+let drawStatus = (ctx, wallType, level, me, env) => {
+  switch (wallType) {
   | FireWalls => drawWalls(env, fireWallColor)
   | BouncyWalls => drawWalls(env, bouncyWallColor)
   | Minimapped => ()

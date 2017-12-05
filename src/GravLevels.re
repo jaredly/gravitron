@@ -13,14 +13,26 @@ let red = (~warmup=200., pos) => {
   behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5., 3., 5))
 };
 
-let blue = (~warmup=0., pos) => {
+let blue = (~warmup=100., pos) => {
   Enemy.pos,
   color: Reprocessing_Constants.blue,
   size: 20.,
   warmup: (0., 50.),
   health: (2, 2),
   movement: Stationary,
-  behavior: SimpleShooter((warmup, 100.), (Reprocessing.Constants.white, 5., 2., 5))
+  behavior: SimpleShooter((warmup, 200.), (Reprocessing.Constants.blue, 5., 2., 3))
+};
+
+let smallGreen = (~warmup=0., pos) => {
+  Enemy.pos,
+  color: Reprocessing_Constants.green,
+  size: 15.,
+  /* timer: (0., 100.), */
+  warmup: (0., 50.),
+  health: (3, 3),
+  movement: Stationary,
+  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.green, 3., 2., 2))
+  /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
 
 let green = (~warmup=0., pos) => {
@@ -29,9 +41,9 @@ let green = (~warmup=0., pos) => {
   size: 25.,
   /* timer: (0., 100.), */
   warmup: (0., 50.),
-  health: (3, 3),
+  health: (5, 5),
   movement: Stationary,
-  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.blue, 7., 2., 10))
+  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.green, 7., 2., 10))
   /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
 
@@ -54,19 +66,21 @@ let scatterShooter = (~warmup=200., pos) => {
   warmup: (0., 50.),
   health: (10, 10),
   movement: Wander(pos, MyUtils.v0),
-  behavior: ScatterShot((warmup, 500.), 5, (color, 10., 3., 30), (color, 7., 2., 10))
+  behavior: ScatterShot((warmup, 300.), 5, (color, 10., 3., 10), (color, 7., 2., 10))
 };
 
 /* TODO these should probably be parameterized */
 let levels = [|
   [red((600., 600.))],
   [red((200., 200.)), red((600., 600.))],
-  [blue((600., 600.))],
+  [red((200., 200.)), blue((600., 600.))],
   [blue((600., 600.)), blue((200., 200.))],
-  [blue((600., 600.)), blue((200., 200.)), blue((600., 200.)), blue((200., 600.))],
+  [blue(~warmup=50., (600., 600.)), blue(~warmup=100., (200., 200.)), blue(~warmup=150., (600., 200.)), blue(~warmup=0., (200., 600.))],
+  [smallGreen((600., 600.))],
+  [red((200., 200.)), smallGreen((600., 600.)), blue((600., 200.))],
   [green((600., 600.))],
-  [pink((600., 600.))],
   [scatterShooter((600., 600.))],
+  [pink((600., 600.))],
 |];
 
 let makePhoneLevels = (env) => {
