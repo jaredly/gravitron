@@ -81,6 +81,10 @@ let levels = [|
   [green((600., 600.))],
   [scatterShooter((600., 600.))],
   [pink((600., 600.))],
+  List.mapi(
+    (i, f) => f((100. +. float_of_int(i) *. 100., 100.)),
+    [red, blue, green, pink, scatterShooter]
+  ),
 |];
 
 let makePhoneLevels = (env) => {

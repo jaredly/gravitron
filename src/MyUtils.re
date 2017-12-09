@@ -42,6 +42,16 @@ let scaleVec = ({mag, theta}, scale) => {mag: mag *. scale, theta};
 
 let scalePos = ((x, y), scale) => (x *. scale, y *. scale);
 
+let range = (num) => {
+  let rec loop = (num, collect) => num <= 0 ? collect : loop(num - 1, [num - 1, ...collect]);
+  loop(num)
+};
+
+let withRange = (num, fn) => {
+  let rec loop = i => num <= 0 ? [] : [fn(num - 1), ...loop(num - 1)];
+  loop(num);
+};
+
 let withAlpha = ({Reprocessing_Common.r, g, b, a}, alpha) => {
   Reprocessing_Common.r,
   g,

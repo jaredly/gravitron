@@ -237,21 +237,20 @@ let drawEnemy = (env, enemy) => {
       )
     }
     | _ => {
-
-      /* Draw.stroke(withAlpha(enemy.color, 0.6), env); */
-      /* Draw.strokeWeight(2, env); */
       let sweep = Constants.two_pi /. float_of_int(full);
-      Draw.stroke(enemy.color, env);
+      Draw.stroke(withAlpha(enemy.color, 0.6), env);
+      let width = int_of_float(rad) - 10;
+      Draw.strokeWeight(width, env);
       Draw.noFill(env);
       for (i in 0 to current - 1) {
         let f = float_of_int(i);
         Draw.arcf(~center=enemy.pos,
-        ~radx = max(0., rad -. 10.),
-        ~rady = max(0., rad -. 10.),
+        ~radx = max(0., rad -. float_of_int(width) /. 2.),
+        ~rady = max(0., rad -. float_of_int(width) /. 2.),
         ~start = sweep *. f,
         ~stop = sweep *. f +. sweep,
-        ~isOpen = false,
-        ~isPie = true,
+        ~isOpen = true,
+        ~isPie = false,
         env
         );
       }

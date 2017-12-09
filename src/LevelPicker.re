@@ -91,7 +91,7 @@ let screen =
         );
         List.iter(
           ({text, pos, width, height, enemies, status}) => {
-            if (status === Beaten) {
+            if (status === Beaten || true) {
               drawEnemySquare(env, enemies, pos, width, height);
             } else {
               Draw.fill(status === Locked
@@ -131,7 +131,7 @@ let screen =
               switch current {
               | Some(_) => current
               | None =>
-                if (status !== Locked
+                if ((status !== Locked || true)
                     && MyUtils.rectCollide(Reprocessing.Env.mouse(env), (pos, (width, height)))) {
                   Some(i)
                 } else {
