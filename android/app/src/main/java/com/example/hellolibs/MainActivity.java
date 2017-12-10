@@ -19,12 +19,14 @@ public class MainActivity extends Activity {
     private static class Renderer implements GLSurfaceView.Renderer {
         OCamlBindings bindings = new OCamlBindings();
         long lastDrawTime = SystemClock.elapsedRealtimeNanos();
+        MyAssetManager mMyAssetManager;
         GLSurfaceView view;
         Context context;
 
         public Renderer(GLSurfaceView view, Context context) {
             super();
 
+            mMyAssetManager = new MyAssetManager(context.getAssets(), context.getSharedPreferences("reasongl", MODE_PRIVATE));
             this.view = view;
             this.context = context;
             view.setEGLContextClientVersion(2);
@@ -43,7 +45,7 @@ public class MainActivity extends Activity {
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            bindings.reasonglMain(view, new MyAssetManager(context.getAssets(), context.getSharedPreferences("reasongl", MODE_PRIVATE)));
+            bindings.reasonglMain(view, mMyAssetManager);
         }
     }
 
