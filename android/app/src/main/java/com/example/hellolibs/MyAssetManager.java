@@ -1,10 +1,16 @@
 package com.example.hellolibs;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLUtils;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 
@@ -13,11 +19,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class MyAssetManager {
-    private AssetManager amgr;
-    private SharedPreferences mSharedPreferences;
-    MyAssetManager(AssetManager amgr, SharedPreferences sharedPreferences) {
-        this.amgr = amgr;
-        mSharedPreferences = sharedPreferences;
+    private final AssetManager amgr;
+    private final Context mContext;
+    private final SharedPreferences mSharedPreferences;
+    private boolean mShowingDialog = false;
+    MyAssetManager(Context context) {
+        this.amgr = context.getAssets();
+        mContext = context;
+        mSharedPreferences = context.getSharedPreferences("reasongl", MODE_PRIVATE);
     }
 
     public String readFileContents(String path) {
@@ -33,6 +42,36 @@ public class MyAssetManager {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    public void showAlert(final String title, final String message) {
+        if (mShowingDialog) {
+            Log.e("reasongl", "Not showing alert, because one is already open. " + title + " : " + message);
+            return;
+        }
+        mShowingDialog = true;
+
+        Handler mainHandler = new Handler(mContext.getMainLooper());
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                new AlertDialog.Builder(mContext)
+                        .setMessage(message)
+                        .setTitle(title)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mShowingDialog = false;
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+
+            } // This is your code
+        };
+        mainHandler.post(myRunnable);
+
     }
 
     public Bitmap openBitmap(String path)

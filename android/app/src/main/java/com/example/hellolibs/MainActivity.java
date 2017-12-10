@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
         public Renderer(GLSurfaceView view, Context context) {
             super();
 
-            mMyAssetManager = new MyAssetManager(context.getAssets(), context.getSharedPreferences("reasongl", MODE_PRIVATE));
+            mMyAssetManager = new MyAssetManager(context);
             this.view = view;
             this.context = context;
             view.setEGLContextClientVersion(2);
@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
         }
 
         public void onSurfaceChanged(GL10 gl, int width, int height) {
+            bindings.reasonglResize(width, height);
             // TODO
         }
 
@@ -52,6 +53,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+
         glView = new GLSurfaceView(this);
         renderer = new Renderer(glView, this);
         setContentView(glView);

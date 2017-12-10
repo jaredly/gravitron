@@ -8,7 +8,9 @@ module LevelEditor = {
 
 let (/+) = Filename.concat;
 let setup = (assetDir, initialScreen, env) => {
-  Reprocessing.Env.resizeable(false, env);
+  if (!GravShared.isPhone) {
+    Reprocessing.Env.resizeable(false, env);
+  };
 
   let didSave: bool = Reprocessing.Env.saveUserData(~key="awesome", ~value="Something", env);
   switch (Reprocessing.Env.loadUserData(~key="awesome", env)) {
@@ -21,10 +23,11 @@ let setup = (assetDir, initialScreen, env) => {
   });
 
   let userData = SharedTypes.UserData.load(env);
-  let (w, h) =
-    GravShared.isPhone ?
-      (Reprocessing.Env.width(env), Reprocessing.Env.height(env)) : (800, 800);
-  Reprocessing.Env.size(~width=w, ~height=h, env);
+
+  if (!GravShared.isPhone) {
+    Reprocessing.Env.size(~width=800, ~height=800, env);
+  };
+
   (
     {
       userData,

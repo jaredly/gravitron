@@ -169,9 +169,8 @@ compile({
   name: "gravitron",
   shared: true,
   mainFile: "./src/android.re",
-  /* mainFile: "./flap/FlappyBird.re", */
   cOpts: "-fno-omit-frame-pointer -O3 -fPIC -llog -landroid -lGLESv3 -lEGL",
-  mlOpts: "-runtime-variant _pic",
+  mlOpts: "-runtime-variant _pic -g",
   dependencyDirs: ["./reasongl-interface/src", "./reasongl-android/src", "./reprocessing/src"],
   buildDir: "_build",
   env: "BSB_BACKEND=native-android",

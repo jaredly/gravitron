@@ -84,6 +84,12 @@ let run = (ctx, env) => {
     DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 10), env);
   });
 
+  Draw.fill(Constants.red, env);
+  Draw.rect(~pos=Env.mouse(env), ~width=5, ~height=5, env);
+
+  let (x,y) = Env.mouse(env);
+  Draw.text(~font=ctx.smallFont, ~pos=(x, y), ~body=Printf.sprintf("%d, %d", x, y), env);
+
   ()
 };
 
