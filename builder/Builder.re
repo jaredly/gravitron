@@ -123,7 +123,7 @@ let compileC = (config, force, sourcePath) => {
 };
 
 let compileShared = (config, cmxs, os) => {
-  let dest = Filename.concat(config.outDir, "lib" ++ config.name ++ ".so");
+  let dest = Filename.concat(config.outDir, "libreasongl" ++ ".so");
   let sourceFiles = [
     Filename.concat(config.ocamlDir, "lib/ocaml/libasmrun.a"),
     "bigarray.cmx",
@@ -166,7 +166,7 @@ let compile = config => {
 };
 
 compile({
-  name: "gravitron",
+  name: "reasongl",
   shared: true,
   mainFile: "./src/android.re",
   cOpts: "-fno-omit-frame-pointer -O3 -fPIC -llog -landroid -lGLESv3 -lEGL",
