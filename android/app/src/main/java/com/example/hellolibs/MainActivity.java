@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,6 +49,23 @@ public class MainActivity extends Activity {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             bindings.reasonglMain(view, mMyAssetManager);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        glView.queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if (!bindings.reasonglBackPressed()) {
+                    new Handler(getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            MainActivity.super.onBackPressed();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @Override

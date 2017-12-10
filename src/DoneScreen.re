@@ -4,6 +4,7 @@ let max = 50.;
 let initialState = (won) => (won, 0.);
 let screen = {
   ...ScreenManager.empty,
+  backPressed: (ctx, _, _) => Some(Transition(ctx, `Quit)),
   mouseDown: (ctx, (_, animate) as state, env) => {
     if (animate == max) {
       Transition(ctx, `Quit)

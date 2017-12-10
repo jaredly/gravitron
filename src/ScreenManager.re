@@ -11,6 +11,7 @@ module Screen = {
     run: transitionFn('context, 'state, 'transition),
     keyPressed: transitionFn('context, 'state, 'transition),
     mouseDown: transitionFn('context, 'state, 'transition),
+    backPressed: ('context, 'state, Reprocessing.glEnvT) => option(nextScreen('context, 'state, 'transition)),
   };
   type screenable('context, 'transition, 'wrappedState) =
     | Screen('state, screen('context, 'state, 'transition), 'state => 'wrappedState): screenable('context, 'transition, 'wrappedState);
@@ -21,18 +22,21 @@ open Screen;
 let empty = {
   run: (ctx, state, _) => Same(ctx, state),
   mouseDown: (ctx, state, _) => Same(ctx, state),
-  keyPressed: (ctx, state, _) => Same(ctx, state)
+  keyPressed: (ctx, state, _) => Same(ctx, state),
+  backPressed: (_, _, _) => None,
 };
 
 let stateless = (
   ~run=(ctx, _) => Stateless(ctx),
   ~mouseDown=(ctx, _) => Stateless(ctx),
   ~keyPressed=(ctx, _) => Stateless(ctx),
+  ~backPressed=(_, _) => None,
   ()
 ) => {
   run: (ctx, (), env) => run(ctx, env),
   mouseDown: (ctx, (), env) => mouseDown(ctx, env),
   keyPressed: (ctx, (), env) => keyPressed(ctx, env),
+  backPressed: (ctx, (), env) => backPressed(ctx, env),
 };
 
 let module Helpers = {
@@ -59,6 +63,19 @@ let module Helpers = {
     let Screen(innerState, screen, wrapper) = getScreen(state);
     process(~transitionTo, ~context, ~env, ~innerState, ~wrapper, screen.mouseDown);
   };
+
+  let backPressed = (transitionTo, getScreen, (context, state), env) => {
+    let Screen(innerState, screen, wrapper) = getScreen(state);
+    switch (screen.backPressed(context, innerState, env)) {
+    | None => None
+    | Some(value) => Some(switch value {
+      | Same(context, newInnerState) => (context, wrapper(newInnerState))
+      | Transition(context, transition) => (context, transitionTo(context, transition, env))
+      | Stateless(context) => (context, wrapper(innerState))
+      | TransitionNoContext(transition) => (context, transitionTo(context, transition, env))
+    })
+    }
+  };
 };
 
 let run = (~title=?, ~perfMonitorFont=?, ~transitionTo, ~setup, ~getScreen, ()) => {
@@ -68,6 +85,7 @@ let run = (~title=?, ~perfMonitorFont=?, ~transitionTo, ~setup, ~getScreen, ()) 
     ~mouseDown=Helpers.mouseDown(transitionTo, getScreen),
     ~keyPressed=Helpers.keyPressed(transitionTo, getScreen),
     ~perfMonitorFont=?perfMonitorFont,
+    ~backPressed=Helpers.backPressed(transitionTo, getScreen),
     ~title=?title,
     ()
   )

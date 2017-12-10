@@ -12,16 +12,6 @@ let setup = (assetDir, initialScreen, env) => {
     Reprocessing.Env.resizeable(false, env);
   };
 
-  let didSave: bool = Reprocessing.Env.saveUserData(~key="awesome", ~value="Something", env);
-  switch (Reprocessing.Env.loadUserData(~key="awesome", env)) {
-  | None => Capi.logAndroid("No data")
-  | Some(x) => Capi.logAndroid("Some data: " ++ x)
-  };
-  SharedTypes.UserData.saveUserData(env, {
-    SharedTypes.UserData.currentWallType: BouncyWalls,
-    highestBeatenLevels: (-1, -1, -1),
-  });
-
   let userData = SharedTypes.UserData.load(env);
 
   if (!GravShared.isPhone) {

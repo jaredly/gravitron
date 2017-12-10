@@ -154,5 +154,6 @@ let screen =
           | _ => Stateless(ctx)
           }
         ),
+    ~backPressed= (ctx, _) => Some(Transition(ctx, `Quit)),
     ()
   );

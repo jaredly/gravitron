@@ -149,5 +149,9 @@ let keyPressed = (ctx, state, env) =>
 let screen = {
   ...ScreenManager.empty,
   run: (ctx, state, env) => mainLoop(ctx, state, env),
-  keyPressed: (ctx, state, env) => keyPressed(ctx, state, env)
+  keyPressed: (ctx, state, env) => keyPressed(ctx, state, env),
+  backPressed: (ctx, _, _) => {
+    Capi.logAndroid("Grav game plz quit");
+    Some(Transition(ctx, `Quit))
+  }
 };

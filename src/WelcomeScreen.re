@@ -94,6 +94,7 @@ let run = (ctx, env) => {
 };
 
 let screen = ScreenManager.Screen.{
+  ...ScreenManager.empty,
   run: (ctx, _, env) => Same(ctx, run(ctx, env)),
   mouseDown: (ctx, _, env) => {
     let w = Env.width(env) / 2;
