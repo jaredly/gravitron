@@ -168,8 +168,8 @@ let compile = config => {
 compile({
   name: "gravitron",
   shared: true,
-  /* mainFile: "./src/prod.re", */
-  mainFile: "./flap/FlappyBird.re",
+  mainFile: "./src/android.re",
+  /* mainFile: "./flap/FlappyBird.re", */
   cOpts: "-fno-omit-frame-pointer -O3 -fPIC -llog -landroid -lGLESv3 -lEGL",
   mlOpts: "-runtime-variant _pic",
   dependencyDirs: ["./reasongl-interface/src", "./reasongl-android/src", "./reprocessing/src"],

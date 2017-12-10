@@ -12,3 +12,9 @@ bundler/Gravitron.app
 bundler/Gravitron.zip
 user_data_gravitron_data
 _build
+*.iml
+*.apk
+android/app/build
+android/build
+.gradle
+.idea
