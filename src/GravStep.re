@@ -6,16 +6,6 @@ open MyUtils;
 
 open Reprocessing;
 
-let arrowAccs = {
-  let speed = 0.3;
-  [
-    (Events.Left, vecFromPos((-. speed, 0.))),
-    (Events.Up, vecFromPos((0., -. speed))),
-    (Events.Down, vecFromPos((0., speed))),
-    (Events.Right, vecFromPos((speed, 0.)))
-  ]
-};
-
 let floatPos = ((a, b)) => (float_of_int(a), float_of_int(b));
 
 let clampVec = (vel, min, max, fade) =>
@@ -75,7 +65,7 @@ let deltaTime = (env) => Env.deltaTime(env) *. 1000. /. 16.;
 
 let stepMeMouse = ({me} as state, env) =>
   Player.(
-    if (Env.mousePressed(env)) {
+    if (true || Env.mousePressed(env)) {
       let delta = deltaTime(env);
       let mousePos = floatPos(Reprocessing_Env.mouse(env));
       let mousePos = isPhone ? scalePos(mousePos, phoneScale) : mousePos;
@@ -102,6 +92,16 @@ let stepMeJoystick = ({me} as state, env) =>
     }
   );
 
+let arrowAccs = {
+  let speed = 0.9;
+  [
+    (Events.Left, vecFromPos((-. speed, 0.))),
+    (Events.Up, vecFromPos((0., -. speed))),
+    (Events.Down, vecFromPos((0., speed))),
+    (Events.Right, vecFromPos((speed, 0.)))
+  ]
+};
+
 let stepMeKeys = ({me} as state, env) => {
   open Player;
   let vel =
@@ -110,7 +110,7 @@ let stepMeKeys = ({me} as state, env) => {
       me.vel,
       arrowAccs
     );
-  let vel = clampVec(vel, 0.01, 7., 0.98);
+  let vel = clampVec(vel, 0.01, 7., 0.90);
   let delta = Env.deltaTime(env) *. 1000. /. 16.;
   let (vel, pos) = bouncePos(state.wallType, vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
   {...state, me: {...me, pos, vel},

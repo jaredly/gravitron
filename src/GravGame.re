@@ -88,7 +88,9 @@ let mainLoop = (ctx, state, env) => {
     open GravStep;
     let state =
       state.status === Running ?
-        isPhone ? stepMeMouse(state, env) : stepMeKeys(state, env) : state;
+        true
+        ? stepMeMouse(state, env)
+        : stepMeKeys(state, env) : state;
     let state = stepEnemies(state, env);
     let state = {...state, explosions: stepExplosions(state.explosions, env)};
     let state = stepBullets(state, env);

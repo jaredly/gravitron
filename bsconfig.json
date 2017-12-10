@@ -1,17 +1,27 @@
 {
   "name": "gravitron",
-  "sources": "src",
-  "bs-dependencies": ["reprocessing"],
+  "bsc-flags": "-w -27",
+  "warnings": {
+    "number": "-40+6+7-26-27+32..39+44+45",
+  },
+  "sources": [
+    // "src",
+    {"backend": "native", "dir": "builder"}
+  ],
+  // "bs-dependencies": ["reprocessing"],
   "package-specs": ["commonjs", "es6"],
   "entries": [{
-    "backend": "bytecode",
-    "main-module": "Indexhot"
-  },{
-    "backend": "js",
-    "main-module": "Web"
-  },{
+  //   "backend": "bytecode",
+  //   "main-module": "Indexhot"
+  // },{
+  //   "backend": "js",
+  //   "main-module": "Web"
+  // },{
+  //   "backend": "native",
+  //   "main-module": "Prod"
+  // },{
     "backend": "native",
-    "main-module": "Prod"
+    "main-module": "Builder"
   }],
   "refmt": 3,
 }
