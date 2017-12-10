@@ -168,13 +168,15 @@ let compile = config => {
 compile({
   name: "gravitron",
   shared: true,
-  mainFile: "./src/prod.re",
+  /* mainFile: "./src/prod.re", */
+  mainFile: "./flap/FlappyBird.re",
   cOpts: "-fno-omit-frame-pointer -O3 -fPIC -llog -landroid -lGLESv3 -lEGL",
   mlOpts: "-runtime-variant _pic",
   dependencyDirs: ["./reasongl-interface/src", "./reasongl-android/src", "./reprocessing/src"],
   buildDir: "_build",
   env: "BSB_BACKEND=native-android",
-  outDir: "./",
+
+  outDir: "./android/app/src/main/jniLibs/armeabi-v7a/",
   ppx: ["./reasongl-android/matchenv.ppx"],
   ocamlDir: "~/.opam/4.04.0-android32/android-sysroot",
   refmt: "~/.opam/4.04.2/bin/refmt",
