@@ -12,6 +12,14 @@ Download the osx native version from the [releases](https://github.com/jaredly/g
 
 I'm depending on forked versions of reprocessing, resongl-web, and reasongl-native, so the build setup is pretty hard to get through. I'll fix this later.
 
+### Android
+
+```
+$ adb shell stop
+$ adb shell setprop log.redirect-stdio true
+$ adb shell start
+```
+
 ## License
 
 This code is licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode) (CC BY-NC 4.0). If you use this code, you must attribute me (Jared Forsyth), and link back to this repository.

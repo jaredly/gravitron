@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.opengl.GLUtils;
 import android.os.Handler;
 import android.util.Base64;
@@ -85,6 +86,12 @@ public class MyAssetManager {
 
     public void texImage2DWithBitmap(int target, int level, Bitmap bitmap, int border) {
         GLUtils.texImage2D(target, level, bitmap, border);
+    }
+
+    public void fillTextureWithColor(int target, int level, int red, int green, int blue, int alpha) {
+        Bitmap image = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        image.eraseColor(Color.argb(alpha, red, green, blue));
+        GLUtils.texImage2D(target, level, image, 0);
     }
 
     public int getBitmapWidth(Bitmap bmp) { return bmp.getWidth(); }
