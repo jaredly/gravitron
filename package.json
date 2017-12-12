@@ -28,7 +28,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "bsb-native"
+    "bs-platform": "bsansouci/bsb-native"
   },
   "dependencies": {
     "Reprocessing": "file:./reprocessing"
