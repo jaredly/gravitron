@@ -1,5 +1,6 @@
 include ':app'
-
+include ':reasongl-android'
+project(':reasongl-android').projectDir = new File(rootProject.projectDir, '../reasongl-android/android')
 
 
 

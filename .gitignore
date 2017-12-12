@@ -19,3 +19,4 @@ android/build
 .gradle
 .idea
 ios/Build
+*.xcuserdatad
