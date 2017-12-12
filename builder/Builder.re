@@ -74,8 +74,9 @@ let copyAndSort = ({mainFile, dependencyDirs, buildDir, ocamlDir, refmt}) => {
 let ocamlopt = config => {
   let ppxFlags = String.concat(" ", List.map(name => "-ppx " ++ name, config.ppx));
   Printf.sprintf(
-    "%s %s %s %s %s -I %s -w -40 -pp '%s --print binary'",
+    "%s %s %s %s %s %s -I %s -w -40 -pp '%s --print binary' -verbose",
     config.env,
+    Filename.concat(config.ocamlDir, "bin/ocamlrun"),
     Filename.concat(config.ocamlDir, "bin/ocamlopt"),
     ppxFlags,
     Str.split(Str.regexp(" "), config.cOpts) |> List.map(x => "-ccopt " ++ x) |> String.concat(" "),
@@ -89,7 +90,7 @@ let compileMl = (config, force, sourcePath) => {
   let cmx = Filename.chop_extension(sourcePath) ++ ".cmx";
   if (force || isNewer(sourcePath, cmx)) {
     BuildUtils.readCommand(Printf.sprintf(
-      "%s -c -I %s -o %s -impl %s",
+      "%s -c -S -I %s -o %s -impl %s",
       ocamlopt(config),
       Filename.dirname(sourcePath),
       cmx,

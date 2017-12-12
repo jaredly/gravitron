@@ -1,10 +1,8 @@
 
 
 let buildForArch = (arch, ocamlarch, sdkName) => {
-  /* let arch = "x86_64"; */
   let sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/" ++ sdkName ++ ".platform/Developer/SDKs/" ++ sdkName ++ ".sdk";
   let ocaml = Filename.concat(Sys.getenv("HOME"), ".opam/4.04.0+ios+" ++ ocamlarch ++ "/ios-sysroot");
-  /* let ocaml = "./reasongl-ios/bin/4.04.0+ios+" ++ ocamlarch; */
 
   Builder.compile(Builder.{
     name: "reasongl_" ++ arch,
@@ -20,12 +18,8 @@ let buildForArch = (arch, ocamlarch, sdkName) => {
     outDir: "./ios/",
     ppx: ["'~/.opam/4.04.0+ios+amd64/bin/ocamlrun ./reasongl-ios/matchenv.ppx'"],
     ocamlDir: ocaml,
-    refmt: "~/.opam/4.04.2/bin/refmt",
-    /* ppx: ["node_modules/matchenv/lib/bs/native/index.native"], */
-    /* ocamlDir: "./node_modules/bs-platform/vendor/ocaml", */
-    /* refmt: "./node_modules/bs-platform/bin/refmt3.exe" */
+    refmt: "./reasongl-ios/refmt", /* HACK */
   });
-
 };
 
 buildForArch("x86_64", "amd64", "iPhoneSimulator");

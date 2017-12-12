@@ -7,7 +7,7 @@ open SharedTypes;
 let fullPlayerHealth = 100;
 
 let isPhone =
-Reprocessing.target == "native-ios" || Reprocessing.target === "native-android";
+Reprocessing.target == "native-ios" || Reprocessing.target == "native-android";
 
 let phoneScale = isPhone ? 1. : 1.;
 
