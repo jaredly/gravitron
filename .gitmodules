@@ -10,3 +10,9 @@
 [submodule "reasongl-web"]
 	path = reasongl-web
 	url = https://github.com/jaredly/reasongl-web
+[submodule "reasongl-android"]
+	path = reasongl-android
+	url = https://github.com/jaredly/reasongl-android.git
+[submodule "reasongl-ios"]
+	path = reasongl-ios
+	url = https://github.com/jaredly/reasongl-ios.git

@@ -20,6 +20,13 @@ $ adb shell setprop log.redirect-stdio true
 $ adb shell start
 ```
 
+## Contributing
+
+### Android
+Some good resources
+- https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/types.html
+- https://caml.inria.fr/pub/docs/manual-ocaml/intfc.html
+
 ## License
 
 This code is licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode) (CC BY-NC 4.0). If you use this code, you must attribute me (Jared Forsyth), and link back to this repository.
