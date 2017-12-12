@@ -11,8 +11,10 @@
 
     "build:ios": "bsb -make-world && ./lib/bs/native/buildios.native",
     "build:android": "bsb -make-world && ./lib/bs/native/buildandroid.native",
+    "run:android": "npm run build:android && cd android && ./gradlew installDebug",
 
-    "setup:android": "./android-install.sh",
+    "setup:android": "./reasongl-android/setup_opam.sh",
+    "setup:ios": "./reasongl-ios/setup_opam.sh",
 
     "js": "./node_modules/bs-platform/bin/bsb -backend js -make-world && webpack",
     "deploy": "npm run js && cp assets/* docs/assets && cd docs && surge . -d gravitron.surge.sh",

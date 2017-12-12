@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+//        getWindowManager().getDefaultDisplay().
         glView = new ReasonGLView(this);
         setContentView(glView);
     }

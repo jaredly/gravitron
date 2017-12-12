@@ -24,9 +24,11 @@ public class MyAssetManager {
     private final Context mContext;
     private final SharedPreferences mSharedPreferences;
     private boolean mShowingDialog = false;
-    MyAssetManager(Context context) {
+    public double pixelDensity;
+    MyAssetManager(Context context, float pixelDensity) {
         this.amgr = context.getAssets();
         mContext = context;
+        this.pixelDensity = pixelDensity;
         mSharedPreferences = context.getSharedPreferences("reasongl", MODE_PRIVATE);
     }
 
