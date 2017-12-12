@@ -9,7 +9,7 @@ let buildForArch = (arch, ocamlarch, sdkName) => {
   Builder.compile(Builder.{
     name: "reasongl_" ++ arch,
     shared: false,
-    mainFile: "./src/PurpleRain.re",
+    mainFile: "./src/ios.re",
     cOpts: "-arch " ++ arch ++ " -isysroot " ++ sdk ++ " -isystem " ++ ocaml ++ "/lib/ocaml -DCAML_NAME_SPACE -I./ios/OCamlIOS -I" ++ ocaml ++ "/lib/ocaml/caml -fno-objc-arc -miphoneos-version-min=7.0",
     mlOpts: "bigarray.cmxa -verbose",
     dependencyDirs: ["./reasongl-interface/src", "./reasongl-ios/src", "./reprocessing/src"],

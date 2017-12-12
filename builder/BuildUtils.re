@@ -51,7 +51,7 @@ let readCommand = (command) => {
     | WEXITED(_)
     | WSIGNALED(_)
     | WSTOPPED(_) =>
-      print_endline("Unable to determine dependency order of files");
+      print_endline("Command ended with non-zero exit code");
       None
     }
   } {

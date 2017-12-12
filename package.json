@@ -9,6 +9,9 @@
     "build:native": "bsb -make-world -backend native",
     "clean": "bsb -clean-world",
 
+    "build:ios": "bsb -make-world && ./lib/bs/native/buildios.native",
+    "build:android": "bsb -make-world && ./lib/bs/native/buildandroid.native",
+
     "setup:android": "./android-install.sh",
 
     "js": "./node_modules/bs-platform/bin/bsb -backend js -make-world && webpack",

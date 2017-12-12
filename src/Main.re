@@ -16,6 +16,11 @@ let setup = (assetDir, initialScreen, env) => {
 
   if (!GravShared.isPhone) {
     Reprocessing.Env.size(~width=800, ~height=800, env);
+  /* switch (Reprocessing.target) {
+  | "native" | "web" => Reprocessing.Env.size(~width=800, ~height=800, env)
+  /* | "native-ios" => Reprocessing.Env.size(~width=Reprocessing.Env.width(env), ~height=Reprocessing.Env.height(env), env) */
+  | _ => ()
+  }; */
   };
 
   (

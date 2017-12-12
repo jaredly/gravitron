@@ -130,7 +130,7 @@ let compileShared = (config, cmxs, os) => {
   let dest = Filename.concat(config.outDir, "lib" ++ config.name ++ ".so");
   let sourceFiles = [
     Filename.concat(config.ocamlDir, "lib/ocaml/libasmrun.a"),
-    "bigarray.cmx",
+    "bigarray.cmxa",
     ...List.append(cmxs, os)
   ];
   BuildUtils.readCommand(Printf.sprintf(
