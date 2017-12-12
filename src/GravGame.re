@@ -106,8 +106,8 @@ let mainLoop = (ctx, state, env) => {
   }
 };
 
-let newAtLevel = (env, level) => {
-  let state = newGame(env);
+let newAtLevel = (~wallType, env, level) => {
+  let state = newGame(~wallType, env);
   if (level >= Array.length(state.levels)) {
     state
   } else {
@@ -132,15 +132,15 @@ let keyPressed = (ctx, state, env) =>
       /* | Events.F => {...state, wallType: FireWalls}
       | Events.B => {...state, wallType: BouncyWalls}
       | Events.M => {...state, wallType: Minimapped} */
-      | Events.Num_1 => newAtLevel(env, 0)
-      | Events.Num_2 => newAtLevel(env, 1)
-      | Events.Num_3 => newAtLevel(env, 2)
-      | Events.Num_4 => newAtLevel(env, 3)
-      | Events.Num_5 => newAtLevel(env, 4)
-      | Events.Num_6 => newAtLevel(env, 5)
-      | Events.Num_7 => newAtLevel(env, 6)
-      | Events.Num_8 => newAtLevel(env, 7)
-      | Events.Num_9 => newAtLevel(env, 8)
+      | Events.Num_1 => newAtLevel(~wallType=state.wallType, env, 0)
+      | Events.Num_2 => newAtLevel(~wallType=state.wallType, env, 1)
+      | Events.Num_3 => newAtLevel(~wallType=state.wallType, env, 2)
+      | Events.Num_4 => newAtLevel(~wallType=state.wallType, env, 3)
+      | Events.Num_5 => newAtLevel(~wallType=state.wallType, env, 4)
+      | Events.Num_6 => newAtLevel(~wallType=state.wallType, env, 5)
+      | Events.Num_7 => newAtLevel(~wallType=state.wallType, env, 6)
+      | Events.Num_8 => newAtLevel(~wallType=state.wallType, env, 7)
+      | Events.Num_9 => newAtLevel(~wallType=state.wallType, env, 8)
       | _ => state
       }
     )

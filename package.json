@@ -16,8 +16,9 @@
     "setup:android": "./reasongl-android/setup_opam.sh",
     "setup:ios": "./reasongl-ios/setup_opam.sh",
 
-    "js": "./node_modules/bs-platform/bin/bsb -backend js -make-world && webpack",
-    "deploy": "npm run js && cp assets/* docs/assets && cd docs && surge . -d gravitron.surge.sh",
+    "js": "./node_modules/bs-platform/bin/bsb -backend js -make-world && webpack && cp assets/* docs/assets",
+    "js:serve": "cd docs && http-server -p 3121",
+    "deploy": "npm run js && cd docs && surge . -d gravitron.surge.sh",
     "deploy-native": "npm run build:native && cd bundler && ./bundle.sh",
     "byte": "./node_modules/bs-platform/bin/bsb -w -make-world"
   },
