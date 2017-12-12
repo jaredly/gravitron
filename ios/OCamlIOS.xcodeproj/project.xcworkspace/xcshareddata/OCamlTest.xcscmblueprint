@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "8E05851A0CC76F451431915BBC433AA850D431F2",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "61BBD15622E96048305185FEA7CDC0BB1B536343" : 9223372036854775807,
+    "8E05851A0CC76F451431915BBC433AA850D431F2" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "7A3F09D0-3E9C-4C79-B357-E8902CA475E9",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "61BBD15622E96048305185FEA7CDC0BB1B536343" : "reasongl-ios\/bin\/ocaml-iPhoneSimulator-64\/",
+    "8E05851A0CC76F451431915BBC433AA850D431F2" : "reasongl-ios\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "OCamlTest",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "OCamlTest\/OCamlTest.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/whitequark\/ocaml.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "61BBD15622E96048305185FEA7CDC0BB1B536343"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/bsansouci\/gobi.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "8E05851A0CC76F451431915BBC433AA850D431F2"
+    }
+  ]
+}

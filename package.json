@@ -8,6 +8,9 @@
     "build:web": "bsb -make-world -backend js",
     "build:native": "bsb -make-world -backend native",
     "clean": "bsb -clean-world",
+
+    "setup:android": "./android-install.sh",
+
     "js": "./node_modules/bs-platform/bin/bsb -backend js -make-world && webpack",
     "deploy": "npm run js && cp assets/* docs/assets && cd docs && surge . -d gravitron.surge.sh",
     "deploy-native": "npm run build:native && cd bundler && ./bundle.sh",

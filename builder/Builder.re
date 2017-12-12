@@ -52,6 +52,7 @@ type config = {
   outDir: string,
   buildDir: string,
   ocamlDir: string,
+  cc: string,
   refmt: string,
   ppx: list(string),
 };
@@ -105,17 +106,20 @@ let compileMl = (config, force, sourcePath) => {
 let compileC = (config, force, sourcePath) => {
   let dest = Filename.chop_extension(sourcePath) ++ ".o";
   if (force || isNewer(sourcePath, dest)) {
-    let out = Filename.basename(dest);
+    /* let out = Filename.basename(dest); */
     BuildUtils.readCommand(Printf.sprintf(
-      "%s -I %s -c -ccopt -std=c11 %s",
-      ocamlopt(config),
+      "%s %s -I %s -c -std=c11 %s -o %s",
+      config.cc,
+      config.cOpts,
+      /* ocamlopt(config), */
       Filename.dirname(sourcePath),
-      sourcePath
+      sourcePath,
+      dest
     )) |> unwrap(
       "Failed to build " ++ sourcePath
     ) |> ignore;
-    BuildUtils.copy(out, dest);
-    Unix.unlink(out);
+    /* BuildUtils.copy(out, dest); */
+    /* Unix.unlink(out); */
     (true, dest)
   } else {
     (false, dest)
@@ -123,7 +127,7 @@ let compileC = (config, force, sourcePath) => {
 };
 
 let compileShared = (config, cmxs, os) => {
-  let dest = Filename.concat(config.outDir, "libreasongl" ++ ".so");
+  let dest = Filename.concat(config.outDir, "lib" ++ config.name ++ ".so");
   let sourceFiles = [
     Filename.concat(config.ocamlDir, "lib/ocaml/libasmrun.a"),
     "bigarray.cmx",
@@ -140,7 +144,35 @@ let compileShared = (config, cmxs, os) => {
   ) |> ignore;
 };
 
-let compileStatic = (config, cmxs, os) => failwith("not impl static");
+let compileStatic = (config, cmxs, os) => {
+  let ofile = Filename.concat(config.buildDir, "libcustom" ++ ".o");
+  let dest = Filename.concat(config.outDir, "lib" ++ config.name ++ ".a");
+  let sourceFiles = [
+    Filename.concat(config.ocamlDir, "lib/ocaml/libasmrun.a"),
+    /* "bigarray.cmx", */
+    ...List.append(cmxs, os)
+  ];
+  BuildUtils.readCommand(Printf.sprintf(
+    "%s -I %s -I %s -ccopt -lasmrun -cclib -static  -output-obj %s -o %s",
+    ocamlopt(config),
+    config.buildDir,
+    config.ocamlDir,
+    String.concat(" ", sourceFiles),
+    ofile
+  )) |> unwrap(
+    "Failed to build " ++ dest
+  ) |> ignore;
+  BuildUtils.copy(
+    Filename.concat(config.ocamlDir, "lib/ocaml/libasmrun.a"),
+    dest
+  );
+  BuildUtils.readCommand(Printf.sprintf(
+    "ar -r %s %s %s",
+    dest,
+    String.concat(" ", os),
+    ofile
+  )) |> unwrap("failed to link") |> ignore;
+};
 
 let mapNewer = (fn, files) => {
   List.fold_left(
@@ -159,27 +191,9 @@ let compile = config => {
   /** Build .cmx's */
   let cmxs = mapNewer(compileMl(config), filesInOrder);
   /** Build .o's */
-  let os = mapNewer(compileC(config), List.filter(name => Filename.check_suffix(name, ".c"), allNames));
+  let os = mapNewer(compileC(config),
+    List.filter(name => Filename.check_suffix(name, ".c") || Filename.check_suffix(name, ".m"), allNames));
   /** Build them together */
   config.shared ? compileShared(config, cmxs, os) : compileStatic(config, cmxs, os);
   print_endline("Built!");
 };
-
-compile({
-  name: "reasongl",
-  shared: true,
-  mainFile: "./src/android.re",
-  cOpts: "-fno-omit-frame-pointer -O3 -fPIC -llog -landroid -lGLESv3 -lEGL",
-  mlOpts: "-runtime-variant _pic -g",
-  dependencyDirs: ["./reasongl-interface/src", "./reasongl-android/src", "./reprocessing/src"],
-  buildDir: "_build",
-  env: "BSB_BACKEND=native-android",
-
-  outDir: "./android/app/src/main/jniLibs/armeabi-v7a/",
-  ppx: ["./reasongl-android/matchenv.ppx"],
-  ocamlDir: "~/.opam/4.04.0-android32/android-sysroot",
-  refmt: "~/.opam/4.04.2/bin/refmt",
-  /* ppx: ["node_modules/matchenv/lib/bs/native/index.native"], */
-  /* ocamlDir: "./node_modules/bs-platform/vendor/ocaml", */
-  /* refmt: "./node_modules/bs-platform/bin/refmt3.exe" */
-});

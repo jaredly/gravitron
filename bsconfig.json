@@ -21,7 +21,10 @@
   //   "main-module": "Prod"
   // },{
     "backend": "native",
-    "main-module": "Builder"
+    "main-module": "BuildAndroid"
+  }, {
+    "backend": "native",
+    "main-module": "BuildIOS"
   }],
   "refmt": 3,
 }

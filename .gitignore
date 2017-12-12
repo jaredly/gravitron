@@ -18,3 +18,4 @@ android/app/build
 android/build
 .gradle
 .idea
+ios/Build

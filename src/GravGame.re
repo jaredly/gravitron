@@ -151,7 +151,7 @@ let screen = {
   run: (ctx, state, env) => mainLoop(ctx, state, env),
   keyPressed: (ctx, state, env) => keyPressed(ctx, state, env),
   backPressed: (ctx, _, _) => {
-    Capi.logAndroid("Grav game plz quit");
+    /* Capi.logAndroid("Grav game plz quit"); */
     Some(Transition(ctx, `Quit))
   }
 };
