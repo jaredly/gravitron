@@ -45,6 +45,7 @@ Now you've got a mac app in `./bundler/Gravitron.app`.
 ### Android
 
 NOTE: You must have opam setup for this to work.
+ALSO NOTE: Ocaml currently produces binaries that have "text relocations", which android is unhappy about. So you'll get a popup in the dev build, but it doesn't show in the release build.
 
 ```
 ./reasongl-android/setup_opam.sh # this is idempotent

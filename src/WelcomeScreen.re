@@ -38,6 +38,8 @@ let buttonsWithPosition = (env, w, h, buttons) => {
 
 let wallButtonOffset = 180;
 
+let verticalOffset = -200;
+
 /** TODO I want to make an animation or something on the welcome screen
  * that shows a bit of what it will be like
  * so a player going around & getting pursued by bullets. The bullets would spawn offscreen
@@ -46,7 +48,7 @@ let wallButtonOffset = 180;
 let run = (ctx, env) => {
   Draw.background(Constants.black, env);
   let w = Env.width(env) / 2;
-  let h = Env.height(env) / 2 - 150;
+  let h = Env.height(env) / 2 + verticalOffset;
   DrawUtils.centerText(~font=ctx.titleFont, ~body="Gravitron", ~pos=(w, h), env);
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
 
@@ -84,11 +86,11 @@ let run = (ctx, env) => {
     DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 10), env);
   });
 
-  Draw.fill(Constants.red, env);
-  Draw.rect(~pos=Env.mouse(env), ~width=5, ~height=5, env);
+  /* Draw.fill(Constants.red, env); */
+  /* Draw.rect(~pos=Env.mouse(env), ~width=5, ~height=5, env); */
 
-  let (x,y) = Env.mouse(env);
-  Draw.text(~font=ctx.smallFont, ~pos=(x, y), ~body=Printf.sprintf("%d, %d", x, y), env);
+  /* let (x,y) = Env.mouse(env);
+  Draw.text(~font=ctx.smallFont, ~pos=(x, y), ~body=Printf.sprintf("%d, %d", x, y), env); */
 
   ()
 };
@@ -98,7 +100,7 @@ let screen = ScreenManager.Screen.{
   run: (ctx, _, env) => Same(ctx, run(ctx, env)),
   mouseDown: (ctx, _, env) => {
     let w = Env.width(env) / 2;
-    let h = Env.height(env) / 2 - 150;
+    let h = Env.height(env) / 2 + verticalOffset;
     let dest = buttonsWithPosition(env, w, h, buttons(currentWallType(ctx))) |> Array.fold_left(
       (current, (pos, (_, dest))) => {
         if (current == None) {

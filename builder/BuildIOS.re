@@ -1,5 +1,4 @@
 
-
 let buildForArch = (arch, ocamlarch, sdkName) => {
   let sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/" ++ sdkName ++ ".platform/Developer/SDKs/" ++ sdkName ++ ".sdk";
   let ocaml = Filename.concat(Sys.getenv("HOME"), ".opam/4.04.0+ios+" ++ ocamlarch ++ "/ios-sysroot");

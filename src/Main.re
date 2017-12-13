@@ -21,6 +21,8 @@ let setup = (assetDir, initialScreen, env) => {
   /* | "native-ios" => Reprocessing.Env.size(~width=Reprocessing.Env.width(env), ~height=Reprocessing.Env.height(env), env) */
   | _ => ()
   }; */
+  } else if (GravShared.fakePhone) {
+    Reprocessing.Env.size(~width=340, ~height=640, env);
   };
 
   (
@@ -86,6 +88,6 @@ ScreenManager.run(
   ~transitionTo,
   ~setup=setup(assetDir, initialScreen),
   ~getScreen,
-  ~perfMonitorFont=?(showPerf ? Some(assetDir /+ "SFCompactDisplay-Regular-16.fnt") : None),
+  /* ~perfMonitorFont=?(showPerf ? Some(assetDir /+ "SFCompactDisplay-Regular-16.fnt") : None), */
   ()
 );

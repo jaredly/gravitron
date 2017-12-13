@@ -5,6 +5,7 @@
     "start": "./lib/bs/bytecode/indexhot.byte",
     "start:native": "./lib/bs/native/index.native",
     "build": "bsb -make-world",
+    "watch": "bsb -make-world -w",
     "build:web": "bsb -make-world -backend js",
     "build:native": "bsb -make-world -backend native",
     "clean": "bsb -clean-world",
