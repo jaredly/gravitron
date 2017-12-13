@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf8>
+    <title>Gravitron</title>
+  </head>
+  <body style="display:flex;flex-wrap:wrap">
+    <script src="./assets/bundle.js" ></script>
+    <div>
+      <script>
+        window.addEventListener("keydown", evt => {
+          switch (evt.key) {
+            case 'ArrowUp': evt.preventDefault()
+            case 'ArrowDown': evt.preventDefault()
+            case 'ArrowLeft': evt.preventDefault()
+            case 'ArrowRight': evt.preventDefault()
+          }
+        });
+        function toggle(){
+          var f = document.querySelector("iframe")
+          if (f.style.display === 'none') {
+            f.style.display = 'block'
+          } else {
+            f.style.display = 'none'
+          }
+        }
+      </script>
+      <div>
+      <button onclick="toggle()">show/hide form</button>
+      </div>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc-ttNlraRVue3Bnt99y2q4yp-f9Vf5KYnLaL0mJAgr9fFfoA/viewform?embedded=true" width="760" height="800" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+    </div>
+  </body>
+</html>

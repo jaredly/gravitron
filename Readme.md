@@ -10,15 +10,59 @@ Download the osx native version from the [releases](https://github.com/jaredly/g
 
 ## Building
 
-I'm depending on forked versions of reprocessing, resongl-web, and reasongl-native, so the build setup is pretty hard to get through. I'll fix this later.
+```
+git submodule update --init --recursive
+yarn
+```
+
+### Web
+
+(assuming you have `http-server` installed, via `yarn global add http-server`)
+```
+npm run js && npm run js:serve
+```
+
+Then open your browser to `http://localhost:3121`
+
+If you don't have http-server, you can run `npm run js` and start your favorite webserver in the `docs` directory.
+
+### Native macOS
+
+(development)
+```
+npm run build
+npm start
+```
+
+(release, make a mac app)
+```
+npm run build:native
+cd bundler && ./bundle.sh
+```
+
+Now you've got a mac app in `./bundler/Gravitron.app`.
 
 ### Android
 
+NOTE: You must have opam setup for this to work.
+
 ```
-$ adb shell stop
-$ adb shell setprop log.redirect-stdio true
-$ adb shell start
+./reasongl-android/setup_opam.sh # this is idempotent
+npm run build:android
 ```
+
+If you also want to install the debug apk to a simulator or device, do `npm run run:android`.
+
+### iOS
+
+NOTE: You must have opam setup for this to work.
+
+```
+./reasongl-ios/setup_opam.sh # this is idempotent
+npm run build:ios
+```
+
+Then open the project `./ios/OcamlIOS.xcodeproj` in Xcode, and you should be able to build & run.
 
 ## Contributing
 
@@ -30,4 +74,4 @@ Some good resources
 ## License
 
 This code is licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode) (CC BY-NC 4.0). If you use this code, you must attribute me (Jared Forsyth), and link back to this repository.
-If you want me to license parts of the codebase under a more permissive license, such as one that allows commercial use, please ask me.
+If you want me to license parts of the codebase under a more permissive license, such as one that allows commercial use, you're welcome to ask.
