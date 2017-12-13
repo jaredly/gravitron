@@ -23,22 +23,24 @@ let buttonsInPosition = (ctx, env) => {
   let w = Reprocessing.Env.width(env);
   let left = w / 8;
   let w = w - left - left;
-  let boxSize = 100;
+  let ratio = float_of_int(Reprocessing.Env.width(env)) /. float_of_int(Reprocessing.Env.height(env));
+  let boxHeight = 100;
+  let boxWidth = int_of_float(float_of_int(boxHeight) *. ratio);
   let margin = 10;
-  let rowSize = (w - margin) / (boxSize + margin);
+  let rowSize = (w - margin) / (boxWidth + margin);
   let levels = GravLevels.getLevels(env);
   for (i in 0 to Array.length(levels) - 1) {
     let col = i mod rowSize;
     let row = i / rowSize;
-    let x = col * (boxSize + margin) + left;
-    let y = row * (boxSize + margin) + top;
+    let x = col * (boxWidth + margin) + left;
+    let y = row * (boxHeight + margin) + top;
     buttons :=
       [
         {
           text: string_of_int(i + 1),
           pos: (x, y),
-          width: boxSize,
-          height: boxSize,
+          width: boxWidth,
+          height: boxHeight,
           i,
           enemies: levels[i],
           status: UserData.highestBeatenLevel(ctx.userData) + 1 > i
@@ -55,10 +57,10 @@ let center = ((x, y), w, h) => (x + w/2, y + h/2);
 
 let drawEnemySquare = (env, enemies, (x, y), w, h) => {
   open Reprocessing;
-  let fullW = 800;
-  /* Env.width(env); */
-  let fullH = 800;
-  /* Env.height(env); */
+  let fullW =
+  Env.width(env);
+  let fullH =
+  Env.height(env);
   let scaleX = MyUtils.flDiv(w, fullW);
   let scaleY = MyUtils.flDiv(h, fullH);
   Draw.pushMatrix(env);
