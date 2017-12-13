@@ -1,6 +1,6 @@
 {
   "name": "gravitron",
-  "bsc-flags": "-w -27",
+  "bsc-flags": "-w -27 -g",
   "warnings": {
     "number": "-40+6+7-26-27+32..39+44+45",
   },
@@ -14,11 +14,17 @@
     "backend": "bytecode",
     "main-module": "Indexhot"
   },{
+    "backend": "bytecode",
+    "main-module": "Dev"
+  },{
     "backend": "js",
     "main-module": "Web"
   },{
     "backend": "native",
     "main-module": "Prod"
+  },{
+    "backend": "native",
+    "main-module": "Dev"
   },{
     "backend": "native",
     "main-module": "BuildAndroid"

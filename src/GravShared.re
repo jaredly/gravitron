@@ -6,7 +6,7 @@ open SharedTypes;
 
 let fullPlayerHealth = 100;
 
-let fakePhone = Sys.getenv("PHONE") != "";
+let fakePhone = try {Sys.getenv("PHONE");true} { | Not_found => false };
 let isPhone = Reprocessing.target == "native-ios" || Reprocessing.target == "native-android" || fakePhone;
 
 let phoneScale = isPhone ? 1. : 1.;
