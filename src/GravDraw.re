@@ -100,21 +100,23 @@ let drawStatus = (ctx, wallType, level, me, env) => {
   | BouncyWalls => drawWalls(env, bouncyWallColor)
   | Minimapped => ()
   };
+  let margin = 20;
+  let fmargin = float_of_int(margin);
   let percent = flDiv(me.Player.health, fullPlayerHealth);
   Draw.strokeWeight(1, env);
   Draw.stroke(Constants.white, env);
   Draw.noFill(env);
-  Draw.rect(~pos=(10, 10), ~width=100, ~height=10, env);
+  Draw.rect(~pos=(margin, margin), ~width=100, ~height=10, env);
   Draw.fill(Constants.white, env);
   Draw.noStroke(env);
-  Draw.rect(~pos=(10, 10), ~width=int_of_float(100. *. percent), ~height=10, env);
+  Draw.rect(~pos=(margin, margin), ~width=int_of_float(100. *. percent), ~height=10, env);
   for (i in 0 to me.Player.lives) {
-    circle(~center=(float_of_int(i * 15 + 100 + 20), 15.), ~rad=5., env)
+    circle(~center=(float_of_int(i * 15 + 100 + 10 + margin), fmargin +. 5.), ~rad=5., env)
   };
   DrawUtils.textRightJustified(
     ~font=ctx.smallFont,
     ~body="Level " ++ string_of_int(level + 1),
-    ~pos=(Env.width(env) - 10, 5),
+    ~pos=(Env.width(env) - margin, margin - 5),
     env
   )
 };
@@ -239,7 +241,7 @@ let drawEnemy = (env, enemy) => {
     | _ => {
       let sweep = Constants.two_pi /. float_of_int(full);
       Draw.stroke(withAlpha(enemy.color, 0.6), env);
-      let width = int_of_float(rad) - 10;
+      let width = int_of_float(rad) - 5;
       Draw.strokeWeight(width, env);
       Draw.noFill(env);
       for (i in 0 to current - 1) {

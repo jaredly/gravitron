@@ -71,7 +71,7 @@ let mainLoop = (ctx, state, env) => {
         bullets: []
       })
     } else {
-      Transition(ctx, `Finished(false))
+      Transition(ctx, `Finished(false, state.level, Array.length(state.levels)))
     }
   | Paused =>
     drawState(ctx, state, env);
@@ -100,7 +100,7 @@ let mainLoop = (ctx, state, env) => {
       {
         let ctx = SharedTypes.updateHighestBeatenLevel(env, ctx, state.level);
         state.level >= Array.length(state.levels) - 1 ?
-          Transition(ctx, `Finished(true)) :
+          Transition(ctx, `Finished(true, state.level, Array.length(state.levels))) :
           Same(ctx, {...state, level: state.level + 1, enemies: state.levels[state.level + 1]})
       };
   }

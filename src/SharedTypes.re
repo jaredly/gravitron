@@ -218,7 +218,7 @@ type transition = [
   | `Start
   | `StartFromLevel(int)
   | `Quit
-  | `Finished(bool)
+  | `Finished(bool, int, int)
   | `PickWalls
   | `PickLevel
   | `UserLevels

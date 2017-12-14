@@ -84,10 +84,10 @@ let levels = [|
   [green((600., 600.))],
   [scatterShooter((600., 600.))],
   [pink((600., 600.))],
-  List.mapi(
+  /* List.mapi(
     (i, f) => f((100. +. float_of_int(i) *. 100., 100.)),
     [red, blue, green, pink, scatterShooter]
-  ),
+  ), */
 |];
 
 let makePhoneLevels = (env) => {
@@ -99,12 +99,12 @@ let makePhoneLevels = (env) => {
     [red(~warmup=50., (w /. 2., v)), red((w /. 2., h -. v))],
     [red((w /. 2., v)), blue((w /. 2., h -. v))],
     [blue(~warmup=150., (w /. 2., v)), blue((w /. 2., h -. v))],
-    [
-      blue((w /. 3., w /. 3.)),
-      blue((w *. 2. /. 3., w /. 3.)),
-      blue((w /. 3., h -. w /. 3.)),
-      blue((w *. 2. /. 3., h -. w /. 3.))
-    ]
+    [blue(~warmup=50., (v, v)), blue((v *. 3., v)), blue((v, h -. v)), blue((v *. 3., h -. v))],
+    [smallGreen((w /. 2., v))],
+    [red((v, v)), smallGreen((w -. v, h -. v)), blue((v, h -. v))],
+    [green((w /. 2., h -. v))],
+    [scatterShooter((w /. 2., v))],
+    [pink((w /. 2., h -. v))],
   |]
 };
 

@@ -81,6 +81,6 @@ type state = gameState;
 type screen =
   | Welcome /* need state for buttons? maybe an animation tho */
   | Playing(gameState)
-  | Done(bool, float) /* succeeded, animation! */
+  | Done(bool, int, int, float) /* succeeded, level reached, total levels, animation! */
   | LevelEditor(option(int)) /* the index of the level being edited */
   ;
