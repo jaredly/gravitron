@@ -75,6 +75,8 @@ let mainLoop = (ctx, state, env) => {
     }
   | Paused =>
     drawState(ctx, state, env);
+    PauseOverlay.draw(ctx, env);
+
     Same(ctx, state)
   | _ =>
     let state = {
@@ -129,9 +131,6 @@ let keyPressed = (ctx, state, env) =>
         | Running => {...state, status: Paused}
         | _ => state
         }
-      /* | Events.F => {...state, wallType: FireWalls}
-      | Events.B => {...state, wallType: BouncyWalls}
-      | Events.M => {...state, wallType: Minimapped} */
       | Events.Num_1 => newAtLevel(~wallType=state.wallType, env, 0)
       | Events.Num_2 => newAtLevel(~wallType=state.wallType, env, 1)
       | Events.Num_3 => newAtLevel(~wallType=state.wallType, env, 2)
@@ -150,7 +149,12 @@ let mouseDown = (ctx, state, env) => {
   open ScreenManager.Screen;
   switch (state.status) {
   | Paused => {
-    Same(ctx, {...state, status: Running})
+    switch (PauseOverlay.mouseDown(ctx, env)) {
+      | None => Same(ctx, state)
+      | Some(`Resume) => Same(ctx, {...state, status: Running})
+      | Some(`Quit) => Transition(ctx, `Quit)
+    }
+    /* Same(ctx, {...state, status: Running}) */
   }
   | Running => {
     if (Utils.rectCollide(Env.mouse(env), ((0, 0), (50, 50)))) {

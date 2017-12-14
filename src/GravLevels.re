@@ -23,7 +23,7 @@ let blue = (~warmup=100., pos) => {
   warmup: (0., 50.),
   health: (2, 2),
   movement: Stationary,
-  behavior: SimpleShooter((warmup, 200.), (Reprocessing.Constants.blue, 5. *. sizeFactor,initialSpeed, 3))
+  behavior: SimpleShooter((warmup, 200.), (Utils.color(~r=150, ~g=150, ~b=255, ~a=255), 4. *. sizeFactor,initialSpeed, 3))
 };
 
 let smallGreen = (~warmup=0., pos) => {
@@ -34,7 +34,7 @@ let smallGreen = (~warmup=0., pos) => {
   warmup: (0., 50.),
   health: (3, 3),
   movement: Stationary,
-  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.green, 3. *. sizeFactor,initialSpeed, 2))
+  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.green, 4. *. sizeFactor,initialSpeed, 5))
   /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
 };
 
