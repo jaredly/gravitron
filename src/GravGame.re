@@ -146,9 +146,27 @@ let keyPressed = (ctx, state, env) =>
     )
   };
 
-let screen = {
-  ...ScreenManager.empty,
+let mouseDown = (ctx, state, env) => {
+  open ScreenManager.Screen;
+  switch (state.status) {
+  | Paused => {
+    Same(ctx, {...state, status: Running})
+  }
+  | Running => {
+    if (Utils.rectCollide(Env.mouse(env), ((0, 0), (50, 50)))) {
+      Same(ctx, {...state, status: Paused})
+    } else {
+      Same(ctx, state)
+    };
+  }
+  | _ => Same(ctx, state)
+  }
+};
+
+let screen = ScreenManager.Screen.{
+  /* ...ScreenManager.empty, */
   run: (ctx, state, env) => mainLoop(ctx, state, env),
+  mouseDown,
   keyPressed: (ctx, state, env) => keyPressed(ctx, state, env),
   backPressed: (ctx, _, _) => {
     /* Capi.logAndroid("Grav game plz quit"); */

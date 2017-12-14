@@ -77,7 +77,7 @@ let drawHelp = (ctx, player, env) => {
   let (x, y) = player.Player.pos;
   let x = int_of_float(x);
   let y = int_of_float(y) + 30;
-  DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y), ~body="Arrow keys to move", env);
+  /* DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y), ~body="Arrow keys to move", env); */
   DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y + 25), ~body="Avoid the missiles", env);
   DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y + 50), ~body="Gravity is your only weapon", env);
   ()
@@ -102,17 +102,52 @@ let drawStatus = (ctx, wallType, level, me, env) => {
   };
   let margin = 20;
   let fmargin = float_of_int(margin);
+
+  /* Pause button */
+  if (Utils.rectCollide(Env.mouse(env), ((0, 0), (50, 50)))) {
+    Draw.stroke(Constants.white, env);
+  } else {
+    Draw.noStroke(env);
+  };
+  Draw.fill(withAlpha(Constants.white, 0.3), env);
+  Draw.rect(
+    ~pos=(margin - 5, margin - 5),
+    ~width=20,
+    ~height=20,
+    env
+  );
+    Draw.noStroke(env);
+  Draw.fill(withAlpha(Constants.white, 0.6), env);
+  Draw.rect(
+    ~pos=(margin - 1, margin - 2),
+    ~width=5,
+    ~height=14,
+    env
+  );
+  Draw.rect(
+    ~pos=(margin - 5 + 11, margin - 2),
+    ~width=5,
+    ~height=14,
+    env
+  );
+
+  let pauseSize = 25;
+  /* Health bar */
   let percent = flDiv(me.Player.health, fullPlayerHealth);
   Draw.strokeWeight(1, env);
   Draw.stroke(Constants.white, env);
   Draw.noFill(env);
-  Draw.rect(~pos=(margin, margin), ~width=100, ~height=10, env);
+  Draw.rect(~pos=(margin + pauseSize, margin), ~width=100, ~height=10, env);
   Draw.fill(Constants.white, env);
   Draw.noStroke(env);
-  Draw.rect(~pos=(margin, margin), ~width=int_of_float(100. *. percent), ~height=10, env);
+  Draw.rect(~pos=(margin + pauseSize, margin), ~width=int_of_float(100. *. percent), ~height=10, env);
+
+  /* Lives */
   for (i in 0 to me.Player.lives) {
-    circle(~center=(float_of_int(i * 15 + 100 + 10 + margin), fmargin +. 5.), ~rad=5., env)
+    circle(~center=(float_of_int(i * 15 + 100 + 10 + margin + pauseSize), fmargin +. 5.), ~rad=5., env)
   };
+
+  /* Level */
   DrawUtils.textRightJustified(
     ~font=ctx.smallFont,
     ~body="Level " ++ string_of_int(level + 1),
