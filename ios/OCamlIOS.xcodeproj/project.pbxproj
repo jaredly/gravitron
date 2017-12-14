@@ -301,7 +301,7 @@
 					"\"$(SRCROOT)/../Build\"",
 					"$(PROJECT_DIR)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sansouci.Reasongl;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaredforsyth.gravitron;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SYMROOT = _build;
@@ -326,7 +326,7 @@
 					"\"$(SRCROOT)/../Build\"",
 					"$(PROJECT_DIR)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sansouci.Reasongl;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaredforsyth.gravitron;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SYMROOT = _build;

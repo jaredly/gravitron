@@ -68,6 +68,7 @@ let run = (ctx, env) => {
 
   let current = currentWallType(ctx);
   buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons) |> Array.iter((((x, y), (text, wallType, color))) => {
+    /* let selected = current == wallType; */
     let textWidth = switch ctx.textFont^ {
     | None => 0
     | Some(font) => Reprocessing_Font.Font.calcStringWidth(env, font, text)
@@ -76,7 +77,7 @@ let run = (ctx, env) => {
     if (current == wallType || MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
       Draw.noStroke(env);
       Draw.fill(current === wallType ? Constants.white : MyUtils.withAlpha(Constants.white, 0.5), env);
-      Draw.rect(~pos=(x + buttonWidth / 2 - textWidth / 2, y + 10 + 24 + 2), ~width=textWidth, ~height=2, env);
+      Draw.rect(~pos=(x + buttonWidth / 2 - textWidth / 2, y + 10 + 24 + 2), ~width=textWidth, ~height=4, env);
     };
 
     Draw.noFill(env);

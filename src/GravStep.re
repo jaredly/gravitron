@@ -63,18 +63,23 @@ let bouncePos = (wallType, vel, pos, w, h, delta, size) => {
 
 let deltaTime = (env) => Env.deltaTime(env) *. 1000. /. 16.;
 
+let maxSpeed = isPhone ? 10. : 7.;
 let stepMeMouse = ({me} as state, env) =>
   Player.(
-    if (true || Env.mousePressed(env)) {
+    if (Env.mousePressed(env)) {
       let delta = deltaTime(env);
       let mousePos = floatPos(Reprocessing_Env.mouse(env));
       let mousePos = isPhone ? scalePos(mousePos, phoneScale) : mousePos;
-      let vel = springToward(me.pos, mousePos, 0.1);
-      let vel = clampVec(vel, 0.01, 7., 0.98);
+      let vel = springToward(me.pos, mousePos, isPhone ? 0.5 : 0.1);
+      let vel = clampVec(vel, 0.01, maxSpeed, 0.98);
       let (vel, pos) = bouncePos(state.wallType, vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
       {...state, me: {...me, pos, vel}, hasMoved: true}
     } else {
-      state
+      let delta = deltaTime(env);
+      let vel = clampVec(me.vel, 0.01, maxSpeed, 0.8);
+      let (vel, pos) = bouncePos(state.wallType, vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
+      {...state, me: {...me, pos, vel}}
+      /* state */
     }
   );
 
@@ -127,6 +132,11 @@ let stepEnemy = (env, state, enemy) => {
     {
       ...state,
       status: Dead(100),
+      me: {
+        ...state.me,
+        health: 0,
+        pos: GravShared.getPhonePos(env)
+      },
       explosions: [playerExplosion(state.me), enemyExplosion(enemy), ...state.explosions]
     }
   } else {
@@ -394,7 +404,42 @@ let stepBullets = (state, env) => {
     (state, bullet) =>
       switch state.status {
       | Paused
-      | Dead(_) => bulletToEnemiesAndBullets(moveBullet(bullet, env), state, env)
+      | Dead(_) => {
+          let delta = Env.deltaTime(env) *. 1000. /. 16.;
+          let pos = posAdd(bullet.pos, vecToPos(scaleVec(bullet.vel, delta)));
+          let (warmup, isFull) = stepTimer(bullet.warmup, env);
+          let (bullet, dead) = switch (state.wallType, offscreen(pos, w, h, int_of_float(bullet.size))) {
+          | (_, OnScreen) => ({...bullet, pos}, false)
+          | (FireWalls, _) => (bullet, true)
+          | (BouncyWalls, off) => {
+            let vel = bounceVel(bullet.vel, off);
+            let pos = posAdd(bullet.pos, vecToPos(vel));
+            ({...bullet, vel, pos}, false)
+          }
+          | _ => ({...bullet, pos}, false)
+          };
+          if (dead) {
+            {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
+          } else if (isFull) {
+            switch bullet.behavior {
+            | Normal => bulletToEnemiesAndBullets({...bullet, warmup}, state, env)
+            | Scatter(count, timer, bulletConfig) =>
+              let (timer, maxed) = stepTimer(timer, env);
+              if (maxed) {
+                {...state, bullets: makeScatterBullets(bullet, bulletConfig, count) @ state.bullets}
+              } else {
+                bulletToEnemiesAndBullets(
+                  {...bullet, behavior: Scatter(count, timer, bulletConfig), warmup},
+                  state,
+                  env
+                )
+              }
+            }
+          } else {
+            {...state, bullets: [{...bullet, warmup}, ...state.bullets]}
+          }
+        /* bulletToEnemiesAndBullets(moveBullet(bullet, env), state, env) */
+      }
       | Running =>
         let {theta, mag} = vecToward(bullet.pos, player.Player.pos);
         if (mag < bullet.size +. player.Player.size) {
@@ -408,14 +453,20 @@ let stepBullets = (state, env) => {
             {
               ...state,
               status: Dead(100),
-              me: {...state.me, health: 0},
+              me: {
+                ...state.me,
+                health: 0,
+                pos: GravShared.getPhonePos(env)
+              },
               explosions: [playerExplosion(player), bulletExplosion(bullet), ...state.explosions]
             }
           }
         } else {
-          let acc = {theta, mag: 20. /. mag};
+          let speedFactor = isPhone ? 10. : 20.;
+          let acc = {theta, mag: speedFactor /. mag};
           let vel = vecAdd(bullet.vel, acc);
-          let pos = posAdd(bullet.pos, vecToPos(vel));
+          let delta = Env.deltaTime(env) *. 1000. /. 16.;
+          let pos = posAdd(bullet.pos, vecToPos(scaleVec(vel, delta)));
           let (warmup, isFull) = stepTimer(bullet.warmup, env);
           let (bullet, dead) = switch (state.wallType, offscreen(pos, w, h, int_of_float(bullet.size))) {
           | (_, OnScreen) => ({...bullet, acc, vel, pos}, false)

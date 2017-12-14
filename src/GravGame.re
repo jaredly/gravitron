@@ -20,7 +20,7 @@ let newGame = (~wallType=FireWalls, env) => {
       color: Constants.green,
       vel: v0,
       acc: v0,
-      size: 15.
+      size: 15. *. GravLevels.sizeFactor,
     },
     enemies: levels[0],
     bullets: [],
