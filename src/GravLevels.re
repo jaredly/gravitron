@@ -145,6 +145,23 @@ let levels = [|
   [green((600., 600.))],
   [scatterShooter((600., 600.))],
   [pink((600., 600.))],
+  [
+    {
+    ...red((600., 600.)),
+    movement: Wander((600., 600.), MyUtils.v0),
+    stepping: Rabbit((350., 400.))
+  },
+    {
+    ...red((200., 600.)),
+    movement: Wander((200., 600.), MyUtils.v0),
+    stepping: Rabbit((200., 400.))
+  },
+    {
+    ...red((600., 200.)),
+    movement: Wander((600., 200.), MyUtils.v0),
+    stepping: Rabbit((0., 400.))
+  }
+  ]
   /* List.mapi(
     (i, f) => f((100. +. float_of_int(i) *. 100., 100.)),
     [red, blue, green, pink, scatterShooter]

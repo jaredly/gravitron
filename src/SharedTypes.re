@@ -157,17 +157,12 @@ module Enemy = {
   type dying =
     | Normal
     | Asteroid
-    | Revenge
+    | Revenge(int, Bullet.t)
     ;
 
   type shooting =
     | OneShot(Bullet.t)
     | TripleShot(Bullet.t)
-    ;
-
-  type defense =
-    | NoDefense
-    | AAMissiles
     ;
 
   /* type behavior =

@@ -63,11 +63,7 @@ let bulletToBullet = (bullet, bullets, explosions) => {
       (false, [], explosions),
       bullets
     );
-  if (removed) {
-    (bullets, explosions)
-  } else {
-    ([bullet, ...bullets], explosions)
-  }
+  (bullets, explosions, removed)
 };
 
 let bomb = bullet => {
@@ -96,46 +92,162 @@ let scatterBullets = (number, subBullet, pos) => {
   loop(number)
 };
 
+let playerDamage = (env, state, damage) => {
+  if (state.me.health - damage > 0) {
+    {...state, me: {...state.me, health: state.me.Player.health - damage}}
+  } else {
+    {
+      ...state,
+      status: Dead(100),
+      me: {...state.me, health: 0, pos: GravShared.getPhonePos(env)},
+      explosions: [playerExplosion(state.me), ...state.explosions]
+    }
+  }
+};
+
+let smallerShot = (shooting, size, damage) => switch shooting {
+| Enemy.OneShot(b) => Enemy.OneShot({...b, size, damage})
+| TripleShot(b) => Enemy.TripleShot({...b, size, damage})
+};
+
+let damageEnemy = (env, state, enemy, damage) => {
+  open! Enemy;
+  let (health, dead) = countDown(enemy.health);
+  if (dead) {
+    let explosions = [enemyExplosion(enemy), ...state.explosions];
+    switch (enemy.dying) {
+    | Revenge(count, subBullet) => {
+      ...state,
+      bullets: scatterBullets(count, subBullet, enemy.pos) @ state.bullets,
+      explosions
+    }
+    | _ => {...state, explosions}
+    }
+  } else {
+    switch (enemy.dying) {
+    | Asteroid => {
+      let (current, _) = health;
+      let (one, two) = asteroidSplitVel();
+      let size = float_of_int(current) *. 5. +. 10.;
+      let (_, bulletTime) = enemy.missileTimer;
+      let shooting = smallerShot(enemy.shooting, float_of_int(2 + current * 2), 2 + current * 3);
+      let base = {...enemy, health: (current, current), shooting, size};
+      {
+        ...state,
+        enemies: [
+          {
+            ...base,
+            missileTimer: (Random.float(bulletTime /. 4.), bulletTime),
+            movement: EnemyLogic.randomMovement(env, one, enemy.movement)
+          },
+          {
+            ...base,
+            missileTimer: (Random.float(bulletTime /. 2.), bulletTime),
+            movement: EnemyLogic.randomMovement(env, two, enemy.movement)
+          },
+          ...state.enemies
+        ]
+      }
+    }
+    | _ =>
+    {
+      ...state,
+      enemies: [
+        {...enemy, health},
+        ...state.enemies
+      ]
+    }
+    }
+  }
+};
+
+let collideEnemies = (env, state, bullet) => {
+  List.fold_left(
+    ((state, died), enemy) => {
+      if (died) {
+        ({...state, enemies: [enemy, ...state.enemies]}, died)
+      } else {
+        if (collides(enemy.Enemy.pos, bullet.pos, bullet.size +. enemy.Enemy.size))  {
+          (
+            damageEnemy(env, state, enemy, bullet.damage),
+            true
+          )
+        } else {
+          ({...state, enemies: [enemy, ...state.enemies]}, died)
+        }
+      }
+    },
+    ({...state, enemies: []}, false),
+    state.enemies
+  )
+};
+
+let collideBullets = (env, state, bullet) => {
+  let (bullets, explosions, dead) = bulletToBullet(bullet, state.bullets, state.explosions);
+  ({...state, bullets, explosions}, dead)
+};
+
+let handleCollisions = (env, state, bullet) => {
+  let playerDist = MyUtils.dist(MyUtils.posSub(bullet.pos, state.me.pos));
+  if (state.status == Running && playerDist < state.me.size +. bullet.size) {
+    (playerDamage(env, state, bullet.damage), true)
+  } else {
+    let (state, died) = collideEnemies(env, state, bullet);
+    if (died) {
+      (state, died)
+    } else {
+      collideBullets(env, state, bullet)
+    }
+  }
+};
+
 let step = (env, state, bullet) => {
   switch (moveBullet(state.status != Running, state.wallType, state.me, bullet, env)) {
   | None => state
   | Some(bullet) =>
-    switch bullet.stepping {
-    | Nothing => {...state, bullets: [bullet, ...state.bullets]}
-    | Bomb(dead) => dead
-       ? {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
-       : {...state, bullets: [{...bullet, stepping: Bomb(true)}, ...state.bullets]}
-    | TimeBomb(counter) =>
-      let (counter, tipped) = stepTimer(counter, env);
-      {
-        ...state,
-        bullets: [
-          tipped ? bomb(bullet) : {...bullet, stepping: TimeBomb(counter)},
-          ...state.bullets
-        ]
-      }
-    | Scatter(counter, number, subBullet) =>
-      let (counter, tipped) = stepTimer(counter, env);
-      if (tipped) {
-        {...state, bullets: scatterBullets(number, subBullet, bullet.pos) @ state.bullets}
-      } else {
-        {...state, bullets: [{...bullet, stepping: Scatter(counter, number, subBullet)}, ...state.bullets]}
-      }
-    | Shooter(counter, sub) =>
-      let (counter, looped) = loopTimer(counter, env);
-      let bullet = {...bullet, stepping: Shooter(counter, sub)};
-      let childBullet = EnemyLogic.shotBullet(bullet.pos, bullet.size, state.me.Player.pos, sub);
-      if (looped) {
-        {...state, bullets: [bullet, childBullet, ...state.bullets]}
-      } else {
-        {...state, bullets: [bullet, ...state.bullets]}
-      }
-    | ProximityScatter(minDist, number, subBullet) =>
-      let dist = MyUtils.dist(MyUtils.posSub(bullet.pos, state.me.pos));
-      if (dist < minDist) {
-        {...state, bullets: scatterBullets(number, subBullet, bullet.pos) @ state.bullets}
-      } else {
-        {...state, bullets: [bullet, ...state.bullets]}
+    let (state, died) = handleCollisions(env, state, bullet);
+    if (died) {
+      {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
+    } else {
+
+      /* let (state, died) = collideBullet */
+      switch bullet.stepping {
+      | Nothing => {...state, bullets: [bullet, ...state.bullets]}
+      | Bomb(dead) => dead
+        ? {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
+        : {...state, bullets: [{...bullet, stepping: Bomb(true)}, ...state.bullets]}
+      | TimeBomb(counter) =>
+        let (counter, tipped) = stepTimer(counter, env);
+        {
+          ...state,
+          bullets: [
+            tipped ? bomb(bullet) : {...bullet, stepping: TimeBomb(counter)},
+            ...state.bullets
+          ]
+        }
+      | Scatter(counter, number, subBullet) =>
+        let (counter, tipped) = stepTimer(counter, env);
+        if (tipped) {
+          {...state, bullets: scatterBullets(number, subBullet, bullet.pos) @ state.bullets}
+        } else {
+          {...state, bullets: [{...bullet, stepping: Scatter(counter, number, subBullet)}, ...state.bullets]}
+        }
+      | Shooter(counter, sub) =>
+        let (counter, looped) = loopTimer(counter, env);
+        let bullet = {...bullet, stepping: Shooter(counter, sub)};
+        let childBullet = EnemyLogic.shotBullet(bullet.pos, bullet.size, state.me.Player.pos, sub);
+        if (looped) {
+          {...state, bullets: [bullet, childBullet, ...state.bullets]}
+        } else {
+          {...state, bullets: [bullet, ...state.bullets]}
+        }
+      | ProximityScatter(minDist, number, subBullet) =>
+        let dist = MyUtils.dist(MyUtils.posSub(bullet.pos, state.me.pos));
+        if (dist < minDist) {
+          {...state, bullets: scatterBullets(number, subBullet, bullet.pos) @ state.bullets}
+        } else {
+          {...state, bullets: [bullet, ...state.bullets]}
+        }
       }
     }
   }

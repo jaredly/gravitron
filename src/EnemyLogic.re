@@ -35,12 +35,29 @@ let moveEnemy = (env, state, enemy) => {
   }
 };
 
+let randomTarget = env => (
+  Random.float(float_of_int(Env.width(env))),
+  Random.float(float_of_int(Env.height(env)))
+);
+
+let randomMovement = (env, vec, movement) => Enemy.(switch movement {
+| Stationary(_) => Stationary(vec)
+| GoToPosition(_, _) => GoToPosition(randomTarget(env), vec)
+| Wander(_, _) => Wander(randomTarget(env), vec)
+| Avoider(_) => Avoider(vec)
+| Guard(id, _) => Guard(id, vec)
+});
+
 let movementWithVel = (movement, vel) => switch movement {
 | Stationary(_) => Stationary(vel)
 | GoToPosition(target, _) => GoToPosition(target, vel)
 | Wander(target, _) => Wander(target, vel)
 | Avoider(_) => Avoider(vel)
 | Guard(_, _) => assert(false)
+};
+
+let randomizeTimer = ((t, e)) => {
+  (Random.float(e), e)
 };
 
 let behave = (env, state, enemy) => {
@@ -50,15 +67,18 @@ let behave = (env, state, enemy) => {
     let (counter, flipped) = loopTimer(counter, env);
     if (flipped) {
       let (one, two) = asteroidSplitVel();
+      let (_, counterMax) = counter;
       (
         {
           ...enemy,
-          stepping: Rabbit(counter),
-          movement: movementWithVel(enemy.movement, one)
+          stepping: Rabbit((0., max(300., (Random.float(0.5) +. 0.75) *. counterMax))),
+          movement: randomMovement(env, one, enemy.movement)
         },
         [{...enemy,
-            movement: movementWithVel(enemy.movement, two),
-            stepping: Rabbit(counter)
+            movement: randomMovement(env, two, enemy.movement),
+            missileTimer: randomizeTimer(enemy.missileTimer),
+            /* stepping: Rabbit(counter) */
+          stepping: Rabbit((0., max(300., (Random.float(0.5) +. 0.75) *. counterMax)))
           }, ...state.enemies]
       )
     } else {
