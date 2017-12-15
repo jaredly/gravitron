@@ -188,24 +188,30 @@ let collideBullets = (env, state, bullet) => {
 };
 
 let handleCollisions = (env, state, bullet) => {
-  let playerDist = MyUtils.dist(MyUtils.posSub(bullet.pos, state.me.pos));
-  if (state.status == Running && playerDist < state.me.size +. bullet.size) {
-    (playerDamage(env, state, bullet.damage), true)
-  } else {
-    let (state, died) = collideEnemies(env, state, bullet);
-    if (died) {
-      (state, died)
+    let playerDist = MyUtils.dist(MyUtils.posSub(bullet.pos, state.me.pos));
+    if (state.status == Running && playerDist < state.me.size +. bullet.size) {
+      (playerDamage(env, state, bullet.damage), true)
     } else {
-      collideBullets(env, state, bullet)
+      let (state, died) = collideEnemies(env, state, bullet);
+      if (died) {
+        (state, died)
+      } else {
+        collideBullets(env, state, bullet)
+      }
     }
-  }
 };
 
 let step = (env, state, bullet) => {
   switch (moveBullet(state.status != Running, state.wallType, state.me, bullet, env)) {
   | None => state
   | Some(bullet) =>
-    let (state, died) = handleCollisions(env, state, bullet);
+    let (warmup, isFull) = stepTimer(bullet.warmup, env);
+    let bullet = {...bullet, warmup};
+    let (state, died) = if (isFull) {
+      handleCollisions(env, state, bullet);
+    } else {
+      (state, false)
+    };
     if (died) {
       {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
     } else {

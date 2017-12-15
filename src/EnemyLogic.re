@@ -40,13 +40,16 @@ let randomTarget = env => (
   Random.float(float_of_int(Env.height(env)))
 );
 
-let randomMovement = (env, vec, movement) => Enemy.(switch movement {
-| Stationary(_) => Stationary(vec)
-| GoToPosition(_, _) => GoToPosition(randomTarget(env), vec)
-| Wander(_, _) => Wander(randomTarget(env), vec)
-| Avoider(_) => Avoider(vec)
-| Guard(id, _) => Guard(id, vec)
-});
+let randomMovement = (env, vec, movement) => {
+  open! Enemy;
+  switch movement {
+  | Stationary(_) => Stationary(vec)
+  | GoToPosition(_, _) => GoToPosition(randomTarget(env), vec)
+  | Wander(_, _) => Wander(randomTarget(env), vec)
+  | Avoider(_) => Avoider(vec)
+  | Guard(id, _) => Guard(id, vec)
+  }
+};
 
 let movementWithVel = (movement, vel) => switch movement {
 | Stationary(_) => Stationary(vel)
@@ -63,7 +66,7 @@ let randomizeTimer = ((t, e)) => {
 let behave = (env, state, enemy) => {
   switch enemy.stepping {
   | DoNothing => (enemy, state.enemies)
-  | Rabbit(counter) =>
+  | Rabbit(mintime, counter) =>
     let (counter, flipped) = loopTimer(counter, env);
     if (flipped) {
       let (one, two) = asteroidSplitVel();
@@ -71,18 +74,18 @@ let behave = (env, state, enemy) => {
       (
         {
           ...enemy,
-          stepping: Rabbit((0., max(300., (Random.float(0.5) +. 0.75) *. counterMax))),
+          stepping: Rabbit(mintime, (0., max(mintime, (Random.float(0.5) +. 0.75) *. counterMax))),
           movement: randomMovement(env, one, enemy.movement)
         },
         [{...enemy,
             movement: randomMovement(env, two, enemy.movement),
             missileTimer: randomizeTimer(enemy.missileTimer),
             /* stepping: Rabbit(counter) */
-          stepping: Rabbit((0., max(300., (Random.float(0.5) +. 0.75) *. counterMax)))
+          stepping: Rabbit(mintime, (0., max(mintime, (Random.float(0.5) +. 0.75) *. counterMax)))
           }, ...state.enemies]
       )
     } else {
-      ({...enemy, stepping: Rabbit(counter)}, state.enemies)
+      ({...enemy, stepping: Rabbit(mintime, counter)}, state.enemies)
     }
   | Protected(_) => assert(false)
   }

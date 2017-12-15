@@ -150,7 +150,7 @@ module Enemy = {
 
   type stepping =
     | DoNothing
-    | Rabbit(counter) /* timer */
+    | Rabbit(float, counter) /* mintime, timer */
     | Protected(counter) /* spawn protector */
     ;
 

@@ -149,18 +149,35 @@ let levels = [|
     {
     ...red((600., 600.)),
     movement: Wander((600., 600.), MyUtils.v0),
-    stepping: Rabbit((350., 400.))
+    stepping: Rabbit(300., (350., 400.))
   },
     {
     ...red((200., 600.)),
     movement: Wander((200., 600.), MyUtils.v0),
-    stepping: Rabbit((200., 400.))
+    stepping: Rabbit(300., (200., 400.))
   },
     {
     ...red((600., 200.)),
     movement: Wander((600., 200.), MyUtils.v0),
-    stepping: Rabbit((0., 400.))
+    stepping: Rabbit(300., (0., 400.))
   }
+  ],
+  [
+    {
+      ...red((200., 200.)),
+      /* movement: Avoider(MyUtils.v0), */
+      dying: Revenge(20, Bullet.template(~color=color, ~speed=initialSpeed, ~damage=5, ~size=5. *. sizeFactor, ()))
+    },
+    {
+      ...red((600., 600.)),
+      /* movement: Avoider(MyUtils.v0), */
+      dying: Revenge(20, Bullet.template(~color=color, ~speed=initialSpeed, ~damage=5, ~size=5. *. sizeFactor, ()))
+    },
+    {
+      ...red((200., 600.)),
+      /* movement: Avoider(MyUtils.v0), */
+      dying: Revenge(10, Bullet.template(~color=color, ~speed=initialSpeed, ~damage=5, ~size=5. *. sizeFactor, ()))
+    }
   ]
   /* List.mapi(
     (i, f) => f((100. +. float_of_int(i) *. 100., 100.)),
