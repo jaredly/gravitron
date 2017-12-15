@@ -11,6 +11,7 @@ let newGame = (~wallType=FireWalls, env) => {
   {
     status: Running,
     hasMoved: false,
+    startTime: Env.getTimeMs(env),
     level: 0,
     levels,
     me: {
@@ -38,8 +39,9 @@ let drawState = (ctx, state, env) => {
     Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
   }; */
   open GravDraw;
-  if (state.status === Running || state.status === Paused) {
-    drawMe(state.me, env)
+  switch (state.status) {
+  | Running | Paused(_) => drawMe(state.me, env)
+  | _ => ()
   };
   List.iter(drawEnemy(env), state.enemies);
   List.iter(drawBullet(env), state.bullets);
@@ -51,7 +53,11 @@ let drawState = (ctx, state, env) => {
   /* if (true || isPhone) {
     Draw.popMatrix(env)
   }; */
-  drawStatus(ctx, state.wallType, state.level, state.me, env);
+  let timeElapsed = switch (state.status) {
+  | Paused(pauseTime) => pauseTime -. state.startTime
+  | _ => Env.getTimeMs(env) -. state.startTime
+  };
+  drawStatus(ctx, state.wallType, state.level, state.me, timeElapsed, env);
   if (!state.hasMoved) {
     drawHelp(ctx, state.me, env);
   }
@@ -73,7 +79,7 @@ let mainLoop = (ctx, state, env) => {
     } else {
       Transition(ctx, `Finished(false, state.level, Array.length(state.levels)))
     }
-  | Paused =>
+  | Paused(_) =>
     drawState(ctx, state, env);
     PauseOverlay.draw(ctx, env);
 
@@ -91,11 +97,11 @@ let mainLoop = (ctx, state, env) => {
     let state =
       state.status === Running ?
         true
-        ? stepMeMouse(state, env)
-        : stepMeKeys(state, env) : state;
-    let state = stepEnemies(state, env);
+        ? PlayerLogic.stepMeMouse(state, env)
+        : PlayerLogic.stepMeKeys(state, env) : state;
+    let state = EnemyLogic.stepEnemies(state, env);
     let state = {...state, explosions: stepExplosions(state.explosions, env)};
-    let state = stepBullets(state, env);
+    let state = BulletLogic.stepBullets(env, state);
     drawState(ctx, state, env);
     state.enemies !== [] || state.status !== Running ?
       Same(ctx, state) :
@@ -127,8 +133,11 @@ let keyPressed = (ctx, state, env) =>
       | Events.R => newGame(env)
       | Events.Space =>
         switch state.status {
-        | Paused => {...state, status: Running}
-        | Running => {...state, status: Paused}
+        | Paused(pauseTime) => {...state,
+          startTime: state.startTime +. (Reprocessing.Env.getTimeMs(env) -. pauseTime),
+          status: Running
+        }
+        | Running => {...state, status: Paused(Env.getTimeMs(env))}
         | _ => state
         }
       | Events.Num_1 => newAtLevel(~wallType=state.wallType, env, 0)
@@ -148,17 +157,21 @@ let keyPressed = (ctx, state, env) =>
 let mouseDown = (ctx, state, env) => {
   open ScreenManager.Screen;
   switch (state.status) {
-  | Paused => {
+  | Paused(pauseTime) => {
     switch (PauseOverlay.mouseDown(ctx, env)) {
       | None => Same(ctx, state)
-      | Some(`Resume) => Same(ctx, {...state, status: Running})
+      | Some(`Resume) => Same(ctx, {
+        ...state,
+        startTime: state.startTime +. (Reprocessing.Env.getTimeMs(env) -. pauseTime),
+        status: Running
+      })
       | Some(`Quit) => Transition(ctx, `Quit)
     }
     /* Same(ctx, {...state, status: Running}) */
   }
   | Running => {
     if (Utils.rectCollide(Env.mouse(env), ((0, 0), (50, 50)))) {
-      Same(ctx, {...state, status: Paused})
+      Same(ctx, {...state, status: Paused(Env.getTimeMs(env))})
     } else {
       Same(ctx, state)
     };

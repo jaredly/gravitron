@@ -27,51 +27,150 @@ module Player = {
   };
 };
 
-type bulletConfig = (Reprocessing.colorT, float, float, int);
+/* type bulletConfig = (Reprocessing.colorT, float, float, int); */
 
 module Bullet = {
-  type behavior =
-    | Normal
     /** How many to break into, and timer */
-    | Scatter(int, counter, bulletConfig);
-  /* Mine - goes a certain distance & stops (not affected by gravity)  */
-  /* Mortar - explodes with a largish blast radius after a (random?) timer. */
-  /* type size = Small | Medium | Large; */
-  type t = {
+  type moving =
+    | Gravity
+    | HeatSeeking(float)
+    | Mine(counter)
+  and stepping =
+    | TimeBomb(counter)
+    | Bomb(bool)
+    | Nothing
+    | Scatter(counter, int, t)
+    | ProximityScatter(float, int, t)
+    | Shooter(counter, t)
+  and t = {
     color: Reprocessing.colorT,
-    behavior,
-    warmup: counter,
     damage: int,
     size: float,
+    stepping,
+    moving,
+    warmup: counter,
     vel: vec,
     acc: vec,
     pos
   };
+
+  let template = (
+    ~color,
+    ~damage,
+    ~size,
+    ~stepping=Nothing,
+    ~moving=Gravity,
+    ~warmup=(0., 50.),
+    ~speed=0.,
+    ~acc=v0,
+    ~pos=(0., 0.),
+    ()
+  ) => {
+    color, damage, size, stepping, moving, warmup, vel: {theta: 0., mag: speed}, acc, pos
+  }
 };
+
+
+
+/*
+
+Moving
+- gravity
+- heat-seeking
+- mine (goes an amount straight & stops)
+- (??) paired gravity?
+
+
+Stepping
+- time-bomb -> after a timer, transforms into a much bigger immediately self-destructing bullet (bomb)
+- bomb -> self-destructs after 1 step
+- nothing
+- scatter - after a timer, splits into n other bullets shooting out
+- shooter - shoots out bullets at you on a timer
+
+Colliding
+- ???
+
+
+Mine - goes a certain distance & stops (not affected by gravity)
+Mortar - explodes with a largish blast radius after a (random?) timer.
+this could be implemented as just spawning a large bullet that auto-destructs on step 2 (step 1 will collide if anything's there)
+Shooter - shoots out mini bullets at youooo, while also being gravitational
+Paired! they're gravitated to each other too, and can't kill each other
+Missile -> shaped like an arrow, it's self-powered (constant accel) toward you.
+
+Scatter (maybe with levels of scatter? like you could have a 2-level scatter)
+  (orr I guess you just define the child behavior as also scatter)
+
+*/
+
+
+/*
+
+Dodging?
+Anti-missile defense system? (if you're over X% powered, you can shoot a small missile to take down an incoming one)
+
+Moving
+- Stationary
+- GoToPosition
+- Wander
+- Avoider (avoids the player)
+- Guard (circles the guarded thing)
+
+
+Dying
+- Normal
+- Asteroid(size)
+- Revenge(shoot out a cluster of bullets)
+-
+
+
+Stepping
+- Rabbit - subdivide as long as its alive
+- Protected - spawn a protector after a timer (maybe only if there isn't one?)
+
+
+Shooting (all enemies have a shoot timer)
+
+
+ */
 
 module Enemy = {
   /* color, size, speed */
   type movement =
-    | Stationary
+    | Stationary(vec)
     /* target, velocity */
     | GoToPosition(pos, vec)
     | Wander(pos, vec)
+    | Avoider(vec)
+    | Guard(int, vec)
     /* | Avoider(vec) */
     /* | Guard(enemyId) */
     ;
 
+  type stepping =
+    | DoNothing
+    | Rabbit(counter) /* timer */
+    | Protected(counter) /* spawn protector */
+    ;
+
   type dying =
-     /* animation */
-    | Asteroid(float)
+    | Normal
+    | Asteroid
     | Revenge
     ;
 
-  type stepping =
-    | Rabbit(float) /* timer */
-    | Protected(float) /* spawn protector */
+  type shooting =
+    | OneShot(Bullet.t)
+    | TripleShot(Bullet.t)
     ;
 
-  type behavior =
+  type defense =
+    | NoDefense
+    | AAMissiles
+    ;
+
+  /* type behavior =
     | SimpleShooter(counter, bulletConfig)
     | TripleShooter(counter, bulletConfig)
     | ScatterShot(counter, int, bulletConfig, bulletConfig)
@@ -86,17 +185,24 @@ module Enemy = {
     | OneShot(counter, bulletConfig)
     | TripleShot(counter, bulletConfig)
     | ScatterShot(counter, int, bulletConfig, bulletConfig)
-    ;
+    ; */
 
   type t = {
     pos,
     color: Reprocessing.colorT,
     size: float,
-    /* timer: counter, */
     warmup: counter,
     health: counteri,
+    animate: float,
     movement,
-    behavior,
+    dying,
+    stepping,
+    shooting,
+    dodges: float,
+    missileTimer: counter,
+    /* The percent that it has to be full in order to defent itself */
+    selfDefense: option(float),
+    /* behavior, */
     /* shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t */
   };
   /* let step = (state, enemy) => {

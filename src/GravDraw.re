@@ -36,13 +36,11 @@ let drawOnScreen = (~color, ~center as (x, y), ~rad, ~stroke=false, ~strokeWeigh
     let alpha = max(0., min(1., 1. -. dist /. 1000.));
     Draw.fill(withAlpha(color, alpha), env);
     Draw.stroke(withAlpha(color, 0.6), env);
-    triangle(~tip, ~size=(8., 16.), ~angle=MyUtils.thetaToward((x, y), tip), env);
+    triangle(~tip, ~size=(8., 4. +. 12. *. alpha), ~angle=MyUtils.thetaToward((x, y), tip), env);
   };
   if (x +. rad < 0.) {
     if (y +. rad < 0.) {
-      /* let size = (8., 8.); */
       tri((0., 0.))
-      /* triangle(~tip=(0., 0.), ~size, ~angle=Constants.pi /. 2., env); */
     } else if (y -. rad > height) {
       tri((0., height));
     } else {
@@ -88,13 +86,13 @@ let drawWalls = (env, color) => {
   Draw.fill(color, env);
   let w = Env.width(env) |> float_of_int;
   let h = Env.height(env) |> float_of_int;
-  Draw.rectf(~pos=(0., 0.), ~width=w, ~height=GravStep.wallSize, env);
-  Draw.rectf(~pos=(0., 0.), ~width=GravStep.wallSize, ~height=h, env);
-  Draw.rectf(~pos=(0., h -. GravStep.wallSize), ~width=w, ~height=GravStep.wallSize, env);
-  Draw.rectf(~pos=(w -. GravStep.wallSize, 0.), ~width=GravStep.wallSize, ~height=h, env);
+  Draw.rectf(~pos=(0., 0.), ~width=w, ~height=GravShared.wallSize, env);
+  Draw.rectf(~pos=(0., 0.), ~width=GravShared.wallSize, ~height=h, env);
+  Draw.rectf(~pos=(0., h -. GravShared.wallSize), ~width=w, ~height=GravShared.wallSize, env);
+  Draw.rectf(~pos=(w -. GravShared.wallSize, 0.), ~width=GravShared.wallSize, ~height=h, env);
 };
 
-let drawStatus = (ctx, wallType, level, me, env) => {
+let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
   switch (wallType) {
   | FireWalls => drawWalls(env, fireWallColor)
   | BouncyWalls => drawWalls(env, bouncyWallColor)
@@ -106,6 +104,7 @@ let drawStatus = (ctx, wallType, level, me, env) => {
   /* Pause button */
   if (Utils.rectCollide(Env.mouse(env), ((0, 0), (50, 50)))) {
     Draw.stroke(Constants.white, env);
+    Draw.strokeWeight(2, env);
   } else {
     Draw.noStroke(env);
   };
@@ -153,7 +152,19 @@ let drawStatus = (ctx, wallType, level, me, env) => {
     ~body="Level " ++ string_of_int(level + 1),
     ~pos=(Env.width(env) - margin, margin - 5),
     env
-  )
+  );
+
+
+  let seconds = timeElapsed /. 1000. |> int_of_float;
+  let time = seconds < 60
+    ? string_of_int(seconds) ++ "s"
+    : string_of_int(seconds / 60) ++ "m" ++ string_of_int(seconds mod 60) ++ "s";
+  DrawUtils.textRightJustified(
+    ~font=ctx.smallFont,
+    ~body=time,
+    ~pos=(Env.width(env) - margin, Env.height(env) - margin - 16),
+    env
+  );
 };
 
 let drawJoystick = (env) => {
@@ -209,7 +220,7 @@ let drawMinimap = (bullets, me, env) => {
     bullet => {
       open Bullet;
       let (x, y) = toMapCoords(bullet.pos);
-      Draw.fill(bullet.color, env);
+      Draw.fill(withAlpha(bullet.color, 0.5), env);
       Draw.rectf(~pos=(x -. 1., y -. 1.), ~width=2., ~height=2., env);
     },
     bullets
@@ -264,8 +275,9 @@ let drawEnemy = (env, enemy) => {
   if (full > 1) {
     Draw.fill(withAlpha(enemy.color, 0.6), env);
     Draw.noStroke(env);
-    switch (enemy.behavior) {
-    | Asteroid(_, animate, _) => {
+    switch (enemy.dying) {
+    | Asteroid(_) => {
+      let animate = enemy.animate;
       List.iter(
         ((center, rad)) => {
           circle(~center=posAdd(center, enemy.pos), ~rad, env);
@@ -296,11 +308,7 @@ let drawEnemy = (env, enemy) => {
   };
 
   if (warmup === maxval) {
-    switch (enemy.behavior) {
-    | Asteroid(timer, _, _)
-    | TripleShooter(timer, _)
-    | ScatterShot(timer, _, _, _)
-    | SimpleShooter(timer, _) =>
+    let timer = enemy.missileTimer;
     let loaded = fst(timer) /. snd(timer);
     Draw.noFill(env);
     Draw.stroke(withAlpha(Constants.white, 0.4), env);
@@ -316,21 +324,20 @@ let drawEnemy = (env, enemy) => {
       env
     );
     Draw.noStroke(env)
-    }
   }
 };
 
 let drawBullet = (env, bullet) => {
   open Bullet;
-  switch bullet.behavior {
-  | Normal => drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env)
-  | Scatter(_, counter, _) => {
+  switch bullet.stepping {
+  | Scatter(counter, _, _) => {
     let loaded = fst(counter) /. snd(counter);
     drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size *. (1. -. loaded), env);
     Draw.noFill(env);
     Draw.stroke(bullet.color, env);
     circle(~center=bullet.pos, ~rad=bullet.size, env);
   }
+  | _ => drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env)
   }
 };
 

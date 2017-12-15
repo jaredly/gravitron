@@ -3,73 +3,134 @@ open SharedTypes;
 
 open Reprocessing;
 
+open Enemy;
+
 let initialSpeed = isPhone ? 1. : 2.;
 let sizeFactor = isPhone ? 0.8 : 1.0;
 
-let red = (~warmup=200., pos) => {
-  Enemy.pos,
-  color: Constants.red,
+/* Enemy types */
+
+let defaultEnemy = (pos, warmup, maxTime) => {
+  pos,
+  color: Constants.white,
   size: 20. *. sizeFactor,
   warmup: (0., 50.),
   health: (1, 1),
-  movement: Stationary,
-  behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5. *. sizeFactor, initialSpeed, 5))
+  animate: 0.,
+  movement: Stationary(MyUtils.v0),
+  dying: Normal,
+  stepping: DoNothing,
+  shooting: OneShot(Bullet.template(
+    ~color=Constants.white,
+    ~size=5. *. sizeFactor,
+    ~speed=initialSpeed,
+    ~damage=5,
+    ()
+  )),
+  dodges: 0.,
+  missileTimer: (warmup, maxTime),
+  selfDefense: None,
+  /* behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5. *. sizeFactor, initialSpeed, 5)) */
+};
+
+let red = (~warmup=200., pos) => {
+  ...defaultEnemy(pos, warmup, 300.),
+  color: Constants.red,
+  size: 20. *. sizeFactor,
+  shooting: OneShot(Bullet.template(
+    ~color=Constants.white,
+    ~size=5. *. sizeFactor,
+    ~speed=initialSpeed,
+    ~damage=5,
+    ()
+  ))
 };
 
 let blue = (~warmup=100., pos) => {
-  Enemy.pos,
+  ...defaultEnemy(pos, warmup, 300.),
   color: Reprocessing_Constants.blue,
   size: 20. *. sizeFactor,
-  warmup: (0., 50.),
   health: (2, 2),
-  movement: Stationary,
-  behavior: SimpleShooter((warmup, 200.), (Utils.color(~r=150, ~g=150, ~b=255, ~a=255), 4. *. sizeFactor,initialSpeed, 3))
+  shooting: OneShot(Bullet.template(
+    ~color=Utils.color(~r=150, ~g=150, ~b=255, ~a=255),
+    ~size=4. *. sizeFactor,
+    ~speed=initialSpeed,
+    ~damage=3,
+    ()
+  ))
 };
 
 let smallGreen = (~warmup=0., pos) => {
-  Enemy.pos,
+  ...defaultEnemy(pos, warmup, 200.),
   color: Reprocessing_Constants.green,
   size: 15. *. sizeFactor,
-  /* timer: (0., 100.), */
-  warmup: (0., 50.),
   health: (3, 3),
-  movement: Stationary,
-  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.green, 4. *. sizeFactor,initialSpeed, 5))
-  /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
+  shooting: TripleShot(Bullet.template(
+    ~color=Reprocessing.Constants.green,
+    ~size=4. *. sizeFactor,
+    ~speed=initialSpeed,
+    ~damage=5,
+    ()
+  ))
 };
 
 let green = (~warmup=0., pos) => {
-  Enemy.pos,
+  ...defaultEnemy(pos, warmup, 200.),
   color: Reprocessing_Constants.green,
   size: 25. *. sizeFactor,
-  /* timer: (0., 100.), */
-  warmup: (0., 50.),
   health: (5, 5),
-  movement: Stationary,
-  behavior: TripleShooter((warmup, 200.), (Reprocessing.Constants.green, 7. *. sizeFactor, initialSpeed, 10))
-  /* shoot: shoot(~color=Reprocessing.Constants.white, ~size=5., ~vel=2.) */
+  shooting: TripleShot(Bullet.template(
+    ~color=Reprocessing.Constants.green,
+    ~size=7. *. sizeFactor,
+    ~speed=initialSpeed,
+    ~damage=10,
+    ()
+  ))
 };
 
 let colorPink = Reprocessing_Utils.color(~r=255, ~g=100, ~b=200, ~a=255);
 let pink = (~warmup=0., pos) => {
-  Enemy.pos,
+  ...defaultEnemy(pos, warmup, 300.),
   color: colorPink,
   size: 30. *. sizeFactor,
-  warmup: (0., 50.),
   health: (4, 4),
   movement: GoToPosition(pos, MyUtils.v0),
-  behavior: Asteroid((warmup, 200.), 0., (colorPink, 10. *. sizeFactor, initialSpeed, 15))
+  dying: Asteroid,
+  shooting: OneShot(Bullet.template(
+    ~color=colorPink,
+    ~size=10. *. sizeFactor,
+    ~speed=initialSpeed,
+    ~damage=15,
+    ()
+  ))
 };
 
 let color = Reprocessing.Utils.color(~r=100, ~g=150, ~b=255, ~a=255);
 let scatterShooter = (~warmup=200., pos) => {
-  Enemy.pos,
+  ...defaultEnemy(pos, warmup, 300.),
   color,
   size: 35. *. sizeFactor,
-  warmup: (0., 50.),
   health: (10, 10),
   movement: Wander(pos, MyUtils.v0),
-  behavior: ScatterShot((warmup, 300.), 5, (color, 10. *. sizeFactor, initialSpeed *. 1.5, 10), (color, 7. *. sizeFactor, initialSpeed, 10))
+  /* behavior: ScatterShot((warmup, 300.), 5, (color, 10. *. sizeFactor, initialSpeed *. 1.5, 10), (color, 7. *. sizeFactor, initialSpeed, 10)), */
+  shooting: OneShot(Bullet.template(
+    ~color=colorPink,
+    ~size=10. *. sizeFactor,
+    ~speed=initialSpeed,
+    ~stepping=Bullet.Scatter(
+      (0., 60.),
+      5,
+      Bullet.template(
+        ~color,
+        ~size=7. *. sizeFactor,
+        ~speed=initialSpeed,
+        ~damage=10,
+        ()
+      )
+    ),
+    ~damage=15,
+    ()
+  ))
 };
 
 /* TODO these should probably be parameterized */
