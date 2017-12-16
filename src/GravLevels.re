@@ -137,17 +137,24 @@ let scatterShooter = (~warmup=200., pos) => {
 };
 
 /* TODO these should probably be parameterized */
-let levels = [|
+let stages = [|
+  [|
   [red((600., 600.))],
   [red((200., 200.)), red((600., 600.))],
   [red((200., 200.)), blue((600., 600.))],
   [blue(~warmup=150., (600., 600.)), blue((200., 200.))],
   [blue(~warmup=50., (600., 600.)), blue(~warmup=100., (200., 200.)), blue(~warmup=150., (600., 200.)), blue(~warmup=0., (200., 600.))],
+  |],
+
+  [|
   [smallGreen((600., 600.))],
   [red((200., 200.)), smallGreen((600., 600.)), blue((600., 200.))],
   [green((600., 600.))],
   [scatterShooter((600., 600.))],
   [pink((600., 600.))],
+  |],
+
+  [|
   [
     {
     ...red((600., 600.)),
@@ -266,23 +273,28 @@ let levels = [|
       ))
     },
   ]
+  |]
 |];
 
-let makePhoneLevels = (env) => {
+let makePhoneStages = (env) => {
   let w = float_of_int(Env.width(env)) *. phoneScale;
   let h = float_of_int(Env.height(env)) *. phoneScale;
   let v = w /. 4.;
   [|
+    [|
     [red((w /. 2., v))],
     [red(~warmup=50., (w /. 2., v)), red((w /. 2., h -. v))],
     [red((w /. 2., v)), blue((w /. 2., h -. v))],
     [blue(~warmup=150., (w /. 2., v)), blue((w /. 2., h -. v))],
     [blue(~warmup=50., (v, v)), blue((v *. 3., v)), blue((v, h -. v)), blue((v *. 3., h -. v))],
+    |],
+    [|
     [smallGreen((w /. 2., v))],
     [red((v, v)), smallGreen((w -. v, h -. v)), blue((v, h -. v))],
     [green((w /. 2., h -. v))],
     [scatterShooter((w /. 2., v))],
     [pink((w /. 2., h -. v))],
+    |], [|
     [
       {
         ...red(~warmup=250., (v, v)),
@@ -335,6 +347,7 @@ let makePhoneLevels = (env) => {
       },
   ]
   |]
+  |]
 };
 
-let getLevels = (env) => isPhone ? makePhoneLevels(env) : levels;
+let getStages = (env) => isPhone ? makePhoneStages(env) : stages;

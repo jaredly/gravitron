@@ -7,14 +7,14 @@ open SharedTypes;
 open GravShared;
 
 let newGame = (~wallType=FireWalls, env) => {
-  let levels = isPhone ? GravLevels.makePhoneLevels(env) : GravLevels.levels;
+  let stages = GravLevels.getStages(env);
   {
     status: Running,
     hasMoved: false,
     startTime: Env.getTimeMs(env),
     levelTicker: 0.,
-    level: 0,
-    levels,
+    level: (0, 0),
+    stages,
     me: {
       health: fullPlayerHealth,
       lives: 3,
@@ -24,7 +24,7 @@ let newGame = (~wallType=FireWalls, env) => {
       acc: v0,
       size: 15. *. GravLevels.sizeFactor,
     },
-    enemies: levels[0],
+    enemies: stages[0][0],
     bullets: [],
     explosions: [],
     wallType,
@@ -51,7 +51,8 @@ let drawState = (ctx, state, env) => {
   | Paused(pauseTime) => pauseTime -. state.startTime
   | _ => Env.getTimeMs(env) -. state.startTime
   };
-  drawStatus(ctx, state.wallType, state.level, state.me, timeElapsed, env);
+  let (stage, level) = state.level;
+  drawStatus(ctx, state.wallType, level, state.me, timeElapsed, env);
   if (!state.hasMoved) {
     drawHelp(ctx, state.me, env);
   };
@@ -61,7 +62,7 @@ let drawState = (ctx, state, env) => {
     Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
     DrawUtils.centerText(
       ~pos=(Env.width(env) / 2, Env.height(env) / 2),
-      ~body="Level " ++ string_of_int(state.level  + 1),
+      ~body="Level " ++ string_of_int(stage + 1) ++ "." ++ string_of_int(level  + 1),
       ~font=ctx.titleFont,
       env
     );
@@ -74,16 +75,17 @@ let mainLoop = (ctx, state, env) => {
   switch state.status {
   | Dead(0) =>
     if (state.me.Player.lives > 0) {
+      let (stage, level) = state.level;
       Same(ctx, {
         ...state,
         status: Running,
         me: {...state.me, Player.health: fullPlayerHealth, lives: state.me.Player.lives - 1},
-        enemies: state.levels[state.level],
+        enemies: state.stages[stage][level],
         explosions: [],
         bullets: []
       })
     } else {
-      Transition(ctx, `Finished(false, state.level, Array.length(state.levels)))
+      Transition(ctx, `Finished(false, state.level, Array.length(state.stages)))
     }
   | Paused(_) =>
     drawState(ctx, state, env);
@@ -113,24 +115,28 @@ let mainLoop = (ctx, state, env) => {
     state.enemies !== [] || state.status !== Running ?
       Same(ctx, state) :
       {
-        let ctx = SharedTypes.updateHighestBeatenLevel(env, ctx, state.level);
-        state.level >= Array.length(state.levels) - 1 ?
-          Transition(ctx, `Finished(true, state.level, Array.length(state.levels))) :
+        /* let ctx = SharedTypes.updateHighestBeatenLevel(env, ctx, state.level); */
+        let (stage, level) = state.level;
+        let endOfStage = level == Array.length(state.stages[stage]) - 1;
+        let didWin = endOfStage && stage == Array.length(state.stages) - 1;
+        let next = endOfStage ? (stage + 1, 0) : (stage, level + 1);
+        didWin ?
+          Transition(ctx, `Finished(true, state.level, Array.length(state.stages))) :
           Same(ctx, {...state,
-            level: state.level + 1,
-            enemies: state.levels[state.level + 1],
+            level: next,
+            enemies: state.stages[fst(next)][snd(next)],
             levelTicker: 0.
           })
       };
   }
 };
 
-let newAtLevel = (~wallType, env, level) => {
+let newAtStage = (~wallType, env, stage) => {
   let state = newGame(~wallType, env);
-  if (level >= Array.length(state.levels)) {
+  if (stage >= Array.length(state.stages)) {
     state
   } else {
-    {...state, status: Running, level, enemies: state.levels[level]}
+    {...state, status: Running, level: (stage, 0), enemies: state.stages[stage][0]}
   }
 };
 
@@ -151,7 +157,7 @@ let keyPressed = (ctx, state, env) =>
         | Running => {...state, status: Paused(Env.getTimeMs(env))}
         | _ => state
         }
-      | Events.Num_1 => newAtLevel(~wallType=state.wallType, env, 0)
+      /* | Events.Num_1 => newAtLevel(~wallType=state.wallType, env, 0)
       | Events.Num_2 => newAtLevel(~wallType=state.wallType, env, 1)
       | Events.Num_3 => newAtLevel(~wallType=state.wallType, env, 2)
       | Events.Num_4 => newAtLevel(~wallType=state.wallType, env, 3)
@@ -159,7 +165,7 @@ let keyPressed = (ctx, state, env) =>
       | Events.Num_6 => newAtLevel(~wallType=state.wallType, env, 5)
       | Events.Num_7 => newAtLevel(~wallType=state.wallType, env, 6)
       | Events.Num_8 => newAtLevel(~wallType=state.wallType, env, 7)
-      | Events.Num_9 => newAtLevel(~wallType=state.wallType, env, 8)
+      | Events.Num_9 => newAtLevel(~wallType=state.wallType, env, 8) */
       | _ => state
       }
     )

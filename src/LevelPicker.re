@@ -23,33 +23,40 @@ let buttonsInPosition = (ctx, env) => {
   let w = Reprocessing.Env.width(env);
   let left = w / 8;
   let w = w - left - left;
-  let ratio = float_of_int(Reprocessing.Env.width(env)) /. float_of_int(Reprocessing.Env.height(env));
-  let boxHeight = 100;
-  let boxWidth = int_of_float(float_of_int(boxHeight) *. ratio);
   let margin = 10;
+  let ratio = float_of_int(Reprocessing.Env.height(env)) /. float_of_int(Reprocessing.Env.width(env));
+  let boxWidth = Reprocessing.Env.width(env) / 5 - margin;
+  let boxHeight = int_of_float(float_of_int(boxWidth) *. ratio);
   let rowSize = (w - margin) / (boxWidth + margin);
-  let levels = GravLevels.getLevels(env);
-  for (i in 0 to Array.length(levels) - 1) {
-    let col = i mod rowSize;
-    let row = i / rowSize;
-    let x = col * (boxWidth + margin) + left;
-    let y = row * (boxHeight + margin) + top;
-    buttons :=
-      [
-        {
-          text: string_of_int(i + 1),
-          pos: (x, y),
-          width: boxWidth,
-          height: boxHeight,
-          i,
-          enemies: levels[i],
-          status: UserData.highestBeatenLevel(ctx.userData) + 1 > i
-            ? Beaten
-            : (UserData.highestBeatenLevel(ctx.userData) + 1 === i ? Available : Locked)
-        },
-        ...buttons^
-      ]
-  };
+  let stages = GravLevels.getStages(env);
+  Array.iteri(
+    (stageNo, levels) => {
+
+
+    for (i in 0 to Array.length(levels) - 1) {
+      let col = i mod rowSize;
+      let row = i / rowSize;
+      let x = col * (boxWidth + margin) + left;
+      let y = row * (boxHeight + margin) + top;
+      buttons :=
+        [
+          {
+            text: string_of_int(i + 1),
+            pos: (x, y),
+            width: boxWidth,
+            height: boxHeight,
+            i,
+            enemies: levels[i],
+            status: UserData.highestBeatenLevel(ctx.userData) + 1 > i
+              ? Beaten
+              : (UserData.highestBeatenLevel(ctx.userData) + 1 === i ? Available : Locked)
+          },
+          ...buttons^
+        ]
+    };
+    },
+    stages
+  );
   buttons^
 };
 

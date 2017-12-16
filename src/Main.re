@@ -67,7 +67,7 @@ let transitionTo = (ctx, transition, env) =>
   | `Start =>
     print_endline("Start");
     `Game(GravGame.initialState(~wallType=currentWallType(ctx), env))
-  | `StartFromLevel(level) => `Game(GravGame.newAtLevel(~wallType=currentWallType(ctx), env, level))
+  | `StartFromLevel(level) => `Game(GravGame.newAtStage(~wallType=currentWallType(ctx), env, level))
   | `Finished(won, reached, total) => `DoneScreen(DoneScreen.initialState(won, reached, total))
   | `PickLevel => `LevelPicker(LevelPicker.initialState)
   | `PickWalls => `WallScreen(WallScreen.initialState)

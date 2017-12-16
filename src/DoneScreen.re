@@ -12,7 +12,7 @@ let screen = {
       Same(ctx, state)
     }
   },
-  run: (ctx, (won, reached, total, animate), env) => {
+  run: (ctx, (won, (stage, reached), total, animate), env) => {
     open Reprocessing;
 
     Draw.background(Constants.black, env);
@@ -37,9 +37,9 @@ let screen = {
 
     let delta = Env.deltaTime(env) *. 1000. /. 16.;
     if (animate +. delta < max) {
-      Same(ctx, (won, reached, total, animate +. delta))
+      Same(ctx, (won, (stage, reached), total, animate +. delta))
     } else {
-      Same(ctx, (won, reached, total, max))
+      Same(ctx, (won, (stage, reached), total, max))
     }
   }
 };
