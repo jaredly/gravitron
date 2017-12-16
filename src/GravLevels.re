@@ -186,7 +186,7 @@ let levels = [|
         ~color=Utils.color(~r=255, ~g=255, ~b=100, ~a=255),
         ~size=5. *. sizeFactor,
         ~speed=initialSpeed,
-        ~moving=HeatSeeking(0.5, 5.),
+        ~moving=HeatSeeking(0.3, 5.),
         ~damage=5,
         ()
       ))

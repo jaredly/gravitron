@@ -260,6 +260,20 @@ let getCircleParams = (radius, numCircles, spin) => {
   circles^
 };
 
+let timerCircle = (~center, ~rad, ~timer, env) => {
+  let loaded = fst(timer) /. snd(timer);
+  Draw.arcf(
+    ~center,
+    ~radx=rad,
+    ~rady=rad,
+    ~start=0.,
+    ~stop=Constants.two_pi *. loaded,
+    ~isOpen=true,
+    ~isPie=false,
+    env
+  );
+};
+
 let drawEnemy = (env, enemy) => {
   open Enemy;
   let (warmup, maxval) = enemy.warmup;
@@ -307,37 +321,49 @@ let drawEnemy = (env, enemy) => {
     }
   };
 
+  switch (enemy.stepping) {
+  | Rabbit(_, timer) => {
+    Draw.noFill(env);
+    Draw.stroke(withAlpha(enemy.color, 0.4), env);
+    /* Draw.strokeWeight(2, env); */
+    let (warmup, maxval) = timer;
+    let rad = enemy.size *. warmup /. maxval;
+    GravShared.circle(
+      ~center=enemy.pos,
+      ~rad,
+      env
+    );
+    Draw.noStroke(env);
+
+    ()
+  }
+  | _ => ()
+  };
+
   if (warmup === maxval) {
     let timer = enemy.missileTimer;
     let loaded = fst(timer) /. snd(timer);
     Draw.noFill(env);
     Draw.stroke(withAlpha(Constants.white, 0.4), env);
     Draw.strokeWeight(2, env);
-    Draw.arcf(
-      ~center=enemy.pos,
-      ~radx=rad +. 5.,
-      ~rady=rad +. 5.,
-      ~start=0.,
-      ~stop=Constants.two_pi *. loaded,
-      ~isOpen=true,
-      ~isPie=false,
-      env
-    );
+    timerCircle(~center=enemy.pos, ~rad=rad +. 5., ~timer, env);
     Draw.noStroke(env)
   }
 };
 
 let drawBullet = (env, bullet) => {
   open Bullet;
+  let percent = fst(bullet.warmup) /. snd(bullet.warmup);
+  let color = percent < 0.99 ? withAlpha(bullet.color, percent *. 0.8 +. 0.2) : bullet.color;
   switch bullet.stepping {
   | Scatter(counter, _, _) => {
     let loaded = fst(counter) /. snd(counter);
-    drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size *. (1. -. loaded), env);
+    drawOnScreen(~color=color, ~center=bullet.pos, ~rad=bullet.size *. (1. -. loaded), env);
     Draw.noFill(env);
-    Draw.stroke(bullet.color, env);
+    Draw.stroke(color, env);
     circle(~center=bullet.pos, ~rad=bullet.size, env);
   }
-  | _ => drawOnScreen(~color=bullet.color, ~center=bullet.pos, ~rad=bullet.size, env)
+  | _ => drawOnScreen(~color=color, ~center=bullet.pos, ~rad=bullet.size, env)
   }
 };
 

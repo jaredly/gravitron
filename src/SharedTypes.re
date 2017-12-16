@@ -25,6 +25,19 @@ module Player = {
   };
 };
 
+/*
+Gravity - circle
+HeatSeeking - triangle in velocity direction - maybe with exhaust tail?
+Mine - hexagon, with timer circle
+
+TimeBomb - ??
+Bomb - normal circle, it's gone in a second anyway
+Nothing -
+Scatter - show the circles inside of a one
+ProximityScatter - at 2x distance, start to reveal the circles inside
+Shooter - with a shooting pipe
+*/
+
 module Bullet = {
     /** How many to break into, and timer */
   type moving =
@@ -130,6 +143,18 @@ Shooting (all enemies have a shoot timer)
 
 
  */
+
+/*
+Rabbit - a timer for split, somehow -- orr maybe they get distended? or have a circle growing iwthin them. yeah.
+Protected - show timer for spawning another
+
+Asteroid - got the mini spinners inside
+Revenge - maybe spikey? or the little circles on the outside
+
+OneShot - a shooter thing
+TripleShot - 3 shooters, at angles
+
+*/
 
 module Enemy = {
   /* color, size, speed */
