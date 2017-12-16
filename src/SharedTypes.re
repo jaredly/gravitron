@@ -43,7 +43,7 @@ module Bullet = {
   type moving =
     | Gravity
     | HeatSeeking(float, float)
-    | Mine(counter)
+    | Mine(float, float, counter)
   and stepping =
     | TimeBomb(counter)
     | Bomb(bool)
@@ -61,6 +61,14 @@ module Bullet = {
     vel: vec,
     acc: vec,
     pos
+  };
+
+  let init = (bullet) => {
+    let moving = switch bullet.moving {
+    | Mine(min, max, _) => Mine(min, max, (0., Random.float(max -. min) +. min))
+    | x => x
+    };
+    {...bullet, moving}
   };
 
   let template = (

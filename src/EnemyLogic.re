@@ -94,7 +94,7 @@ let behave = (env, state, enemy) => {
 let shotBullet = (~theta=0., startPos, size, playerPos, bullet) => {
   let theta = MyUtils.thetaToward(startPos, playerPos) +. theta;
   let pos = MyUtils.vecToPos({mag: size +. bullet.Bullet.size +. 5., theta});
-  {...bullet, pos: posAdd(startPos, pos), vel: {...bullet.vel, theta}}
+  Bullet.init({...bullet, pos: posAdd(startPos, pos), vel: {...bullet.vel, theta}})
 };
 
 let shoot = (env, state, enemy) => {

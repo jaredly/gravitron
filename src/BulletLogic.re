@@ -22,12 +22,12 @@ let moveBullet = (isDead, wallType, player, bullet, env) => {
     let vel = {theta: vel.theta, mag: min(maxvel, vel.mag)};
     /** TODO this might need to be scaled by deltaTime too */
     (vel, bullet.moving);
-  | Mine(counter) =>
+  | Mine(min, max, counter) =>
     let (counter, stopped) = stepTimer(counter, env);
     if (stopped) {
-      (v0, Mine(counter))
+      (v0, Mine(min, max, counter))
     } else {
-      (bullet.vel, Mine(counter))
+      (bullet.vel, Mine(min, max, counter))
     }
   };
 
@@ -74,6 +74,7 @@ let bomb = bullet => {
   stepping: Bomb(false)
 };
 
+
 let scatterBullets = (number, subBullet, pos) => {
   let by = Constants.two_pi /. float_of_int(number);
   let rec loop = (i) =>
@@ -81,12 +82,12 @@ let scatterBullets = (number, subBullet, pos) => {
       {
         let theta = by *. float_of_int(i);
         [
-          {
+          Bullet.init({
             ...subBullet,
             pos: pos,
             vel: {mag: subBullet.vel.mag, theta},
             acc: v0
-          },
+          }),
           ...loop(i - 1)
         ]
       } :
@@ -259,4 +260,61 @@ let step = (env, state, bullet) => {
   }
 };
 
-let stepBullets = (env, state) => List.fold_left(step(env), {...state, bullets: []}, state.bullets);
+/* Wooo this is a bit of work to make bombs work so they hit multiple things */
+
+let stepCollectingBombs = (env, (state, bombs), bullet) => {
+  switch (bullet.stepping) {
+  | Bomb(_) => (state, [bullet, ...bombs])
+  | _ => (step(env, state, bullet), bombs)
+  }
+};
+
+let bombBullets = ({Bullet.size, pos}, state, bullet) => {
+  if (collides(pos, bullet.pos, bullet.size +. size)) {
+    {
+      ...state,
+      explosions: [bulletExplosion(bullet), ...state.explosions]
+    }
+  } else {
+    {...state, bullets: [bullet, ...state.bullets]}
+  }
+};
+
+let bombEnemies = (env, {Bullet.size, pos, damage}, state, enemy) => {
+  open! Enemy;
+  if (collides(pos, enemy.pos, enemy.size +. size)) {
+    damageEnemy(env, state, enemy, damage)
+  } else {
+    {...state, enemies: [enemy, ...state.enemies]}
+  }
+};
+
+let stepBomb = (env, state, {Bullet.size, pos} as bomb) => {
+  let playerDist = MyUtils.dist(MyUtils.posSub(pos, state.me.pos));
+  let state = if (state.status == Running && playerDist < state.me.size +. size) {
+    playerDamage(env, state, bomb.damage)
+  } else { state };
+
+  let state = List.fold_left(
+    bombBullets(bomb),
+    {...state, bullets: [], explosions: [bulletExplosion(bomb), ...state.explosions]},
+    state.bullets
+  );
+  let state = List.fold_left(
+    bombEnemies(env, bomb),
+    {...state, enemies: []},
+    state.enemies
+  );
+  state
+};
+
+let stepBullets = (env, state) => {
+  let (state, bombs) = List.fold_left(stepCollectingBombs(env), ({...state, bullets: []}, []), state.bullets);
+  List.fold_left(
+    stepBomb(env),
+    state,
+    bombs
+  );
+};
+
+/* let stepBullets = (env, state) => List.fold_left(step(env), {...state, bullets: []}, state.bullets); */
