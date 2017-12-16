@@ -44,7 +44,7 @@ let drawState = (ctx, state, env) => {
   | _ => ()
   };
   List.iter(drawEnemy(env), state.enemies);
-  List.iter(drawBullet(env), state.bullets);
+  List.iter(drawBullet(env, state.me.pos), state.bullets);
   List.iter(drawExplosion(env), state.explosions);
 
   if (state.wallType === Minimapped) {

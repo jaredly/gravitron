@@ -347,24 +347,90 @@ let drawEnemy = (env, enemy) => {
     Draw.stroke(withAlpha(Constants.white, 0.4), env);
     Draw.strokeWeight(2, env);
     timerCircle(~center=enemy.pos, ~rad=rad +. 5., ~timer, env);
-    Draw.noStroke(env)
+    Draw.noStroke(env);
+
+    switch (enemy.dying) {
+    | Revenge(count, {Bullet.color}) => {
+      let fc = float_of_int(count);
+        Draw.fill(withAlpha(Constants.white, 0.3), env);
+      for (i in 0 to count - 1) {
+        let x = i;
+        let fi = float_of_int(i);
+        let size = 3.;
+        let theta = fi /. fc *. Constants.two_pi;
+        let off = MyUtils.vecToPos({theta, mag: enemy.size +. size});
+        circle(
+          ~center=posAdd(enemy.pos, off),
+          ~rad=size,
+          env
+        );
+        /* circle(~center=posAdd(center, enemy.pos), ~rad, env); */
+        ()
+      };
+
+      ()
+    }
+    | _ => ()
+    }
+
   }
 };
 
-let drawBullet = (env, bullet) => {
+let drawScatterBullet = (~loaded, ~num, ~color, ~innerColor, ~bullet, env) => {
+  open Bullet;
+  Draw.fill(Constants.black, env);
+  circle(~center=bullet.pos, ~rad=bullet.size -. 2., env);
+  Draw.noFill(env);
+  Draw.stroke(color, env);
+  circle(~center=bullet.pos, ~rad=bullet.size, env);
+  Draw.noStroke(env);
+  Draw.fill(withAlpha(innerColor, 0.8), env);
+  List.iter(
+    ((center, rad)) => {
+      circle(~center=posAdd(center, bullet.pos), ~rad=rad -. 1., env);
+    },
+    getCircleParams(bullet.size, float_of_int(num), 0.)
+  );
+  Draw.fill(Constants.black, env);
+  Draw.fill(bullet.color, env);
+  circle(~center=bullet.pos, ~rad=bullet.size *. (1. -. loaded), env);
+};
+
+let drawBullet = (env, playerPos, bullet) => {
   open Bullet;
   let percent = fst(bullet.warmup) /. snd(bullet.warmup);
   let color = percent < 0.99 ? withAlpha(bullet.color, percent *. 0.8 +. 0.2) : bullet.color;
+  drawOnScreen(~color=color, ~center=bullet.pos, ~rad=bullet.size, env);
   switch bullet.stepping {
-  | Scatter(counter, _, _) => {
+  | Scatter(counter, num, {color: innerColor}) => {
     let loaded = fst(counter) /. snd(counter);
-    drawOnScreen(~color=color, ~center=bullet.pos, ~rad=bullet.size *. (1. -. loaded), env);
+    drawScatterBullet(~loaded, ~num, ~color, ~innerColor, ~bullet, env);
+  }
+  | ProximityScatter(maxDist, num, {color: innerColor}) => {
+    let dist = MyUtils.dist(MyUtils.posSub(bullet.pos, playerPos));
+    let loaded = dist > maxDist *. 4. ? 0. : 1. -. (dist -. maxDist) /. (maxDist *. 3.);
+    drawScatterBullet(~loaded, ~num, ~color, ~innerColor, ~bullet, env);
+  }
+  | TimeBomb(timer) =>
     Draw.noFill(env);
-    Draw.stroke(color, env);
-    circle(~center=bullet.pos, ~rad=bullet.size, env);
-  }
-  | _ => drawOnScreen(~color=color, ~center=bullet.pos, ~rad=bullet.size, env)
-  }
+    Draw.stroke(withAlpha(Constants.white, 0.7), env);
+    Draw.strokeWeight(3, env);
+    timerCircle(~center=bullet.pos, ~rad=bullet.size +. 2., ~timer, env)
+  | _ => ()
+  };
+
+  switch bullet.moving {
+    | HeatSeeking(_, _) => {
+      /* Draw.fill(color, env); */
+      Draw.noFill(env);
+      Draw.stroke(withAlpha(color, 0.5), env);
+      /* open MyUtils; */
+      let tip = posAdd(bullet.pos, vecToPos({theta: bullet.vel.theta, mag: bullet.size *. 2.}));
+      let tail = posAdd(bullet.pos, vecToPos({theta: bullet.vel.theta, mag: bullet.size *. -2.}));
+      Draw.linef(~p1=tail, ~p2=tip, env);
+    }
+    | _ => ()
+    };
 };
 
 let drawExplosion = (env, explosion) => {

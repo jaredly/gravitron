@@ -69,7 +69,7 @@ module Bullet = {
     ~size,
     ~stepping=Nothing,
     ~moving=Gravity,
-    ~warmup=(0., 50.),
+    ~warmup=(0., 30.),
     ~speed=0.,
     ~acc=v0,
     ~pos=(0., 0.),
