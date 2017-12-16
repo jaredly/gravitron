@@ -35,10 +35,6 @@ let initialState = newGame;
 
 let drawState = (ctx, state, env) => {
   Draw.background(Constants.black, env);
-  /* if (true || isPhone) {
-    Draw.pushMatrix(env);
-    Draw.scale(~x=1. /. phoneScale, ~y=1. /. phoneScale, env)
-  }; */
   open GravDraw;
   switch (state.status) {
   | Running | Paused(_) => drawMe(state.me, env)
@@ -51,9 +47,6 @@ let drawState = (ctx, state, env) => {
   if (state.wallType === Minimapped) {
     drawMinimap(state.bullets, state.me, env);
   };
-  /* if (true || isPhone) {
-    Draw.popMatrix(env)
-  }; */
   let timeElapsed = switch (state.status) {
   | Paused(pauseTime) => pauseTime -. state.startTime
   | _ => Env.getTimeMs(env) -. state.startTime
@@ -63,8 +56,8 @@ let drawState = (ctx, state, env) => {
     drawHelp(ctx, state.me, env);
   };
 
-  if (state.levelTicker < 60.) {
-    let anim = state.levelTicker /. 60.;
+  if (state.levelTicker < 120.) {
+    let anim = state.levelTicker > 60. ? (state.levelTicker -. 60.) /. 60. : 0.;
     Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
     DrawUtils.centerText(
       ~pos=(Env.width(env) / 2, Env.height(env) / 2),
@@ -174,6 +167,7 @@ let keyPressed = (ctx, state, env) =>
 
 let mouseDown = (ctx, state, env) => {
   open ScreenManager.Screen;
+  let state = {...state, hasMoved: true};
   switch (state.status) {
   | Paused(pauseTime) => {
     switch (PauseOverlay.mouseDown(ctx, env)) {

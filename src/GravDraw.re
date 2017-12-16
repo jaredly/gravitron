@@ -92,6 +92,8 @@ let drawWalls = (env, color) => {
   Draw.rectf(~pos=(w -. GravShared.wallSize, 0.), ~width=GravShared.wallSize, ~height=h, env);
 };
 
+let string_seconds = time => time < 10 ? "0" ++ string_of_int(time) : string_of_int(time);
+
 let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
   switch (wallType) {
   | FireWalls => drawWalls(env, fireWallColor)
@@ -154,11 +156,10 @@ let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
     env
   );
 
-
   let seconds = timeElapsed /. 1000. |> int_of_float;
   let time = seconds < 60
-    ? string_of_int(seconds) ++ "s"
-    : string_of_int(seconds / 60) ++ "m" ++ string_of_int(seconds mod 60) ++ "s";
+    ? "0:" ++ string_seconds(seconds)
+    : string_of_int(seconds / 60) ++ ":" ++ string_seconds(seconds mod 60);
   DrawUtils.textRightJustified(
     ~font=ctx.smallFont,
     ~body=time,

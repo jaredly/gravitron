@@ -6,7 +6,7 @@ open MyUtils;
 let maxSpeed = isPhone ? 10. : 7.;
 let stepMeMouse = ({me} as state, env) =>
   Player.(
-    if (Env.mousePressed(env)) {
+    if (Env.mousePressed(env) && state.hasMoved) {
       let delta = deltaTime(env);
       let mousePos = floatPos(Reprocessing_Env.mouse(env));
       let mousePos = isPhone ? scalePos(mousePos, phoneScale) : mousePos;

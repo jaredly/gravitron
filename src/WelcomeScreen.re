@@ -4,7 +4,7 @@ open Reprocessing;
 
 let initialState = env => ();
 
-let buttonWidth = 150;
+let buttonWidth = 170;
 let buttonHeight = 50;
 
 let wallTypeText = t => switch t {
@@ -14,8 +14,8 @@ let wallTypeText = t => switch t {
 };
 
 let buttons: wallType => array((string, transition)) = wallType => [|
-  ("Start", `Start),
-  ("Pick level", `PickLevel),
+  ("Stage 1", `Start),
+  ("Pick stage", `PickLevel),
   /* ("Wall type: " ++ wallTypeText(wallType), `PickWalls), */
 |];
 
@@ -25,10 +25,10 @@ let wallButtons = [|
   ("no walls", Minimapped, Constants.black),
 |];
 
-let buttonsWithPosition = (env, w, h, buttons) => {
+let buttonsWithPosition = (env, w, h, buttons, margin) => {
   let x = w - buttonWidth / 2;
   let y0 = h + 90;
-  let margin = 20;
+  /* let margin = 20; */
 
   Array.mapi((i, button) => {
     let y = y0 + i * (buttonHeight + margin);
@@ -52,7 +52,7 @@ let run = (ctx, env) => {
   DrawUtils.centerText(~font=ctx.titleFont, ~body="Gravitron", ~pos=(w, h), env);
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
 
-  buttonsWithPosition(env, w, h, buttons(currentWallType(ctx))) |> Array.iter((((x, y), (text, _))) => {
+  buttonsWithPosition(env, w, h, buttons(currentWallType(ctx)), 20) |> Array.iter((((x, y), (text, _))) => {
     Draw.fill(MyUtils.withAlpha(Constants.white, 0.2), env);
     Draw.noStroke(env);
     if (MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
@@ -67,7 +67,7 @@ let run = (ctx, env) => {
   DrawUtils.centerText(~font=ctx.smallFont, ~body="Wall type", ~pos=(w, h + 240), env);
 
   let current = currentWallType(ctx);
-  buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons) |> Array.iter((((x, y), (text, wallType, color))) => {
+  buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons, 10) |> Array.iter((((x, y), (text, wallType, color))) => {
     /* let selected = current == wallType; */
     let textWidth = switch ctx.smallTitleFont^ {
     | None => 0
@@ -102,7 +102,7 @@ let screen = ScreenManager.Screen.{
   mouseDown: (ctx, _, env) => {
     let w = Env.width(env) / 2;
     let h = Env.height(env) / 2 + verticalOffset;
-    let dest = buttonsWithPosition(env, w, h, buttons(currentWallType(ctx))) |> Array.fold_left(
+    let dest = buttonsWithPosition(env, w, h, buttons(currentWallType(ctx)), 20) |> Array.fold_left(
       (current, (pos, (_, dest))) => {
         if (current == None) {
           if (MyUtils.rectCollide(Env.mouse(env), (pos, (buttonWidth, buttonHeight)))) {
@@ -114,7 +114,7 @@ let screen = ScreenManager.Screen.{
       },
       None
     );
-    let wallType = buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons) |> Array.fold_left((current, (pos, (text, wallType, color))) => {
+    let wallType = buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons, 10) |> Array.fold_left((current, (pos, (text, wallType, color))) => {
         if (MyUtils.rectCollide(Env.mouse(env), (pos, (buttonWidth, buttonHeight)))) {
           wallType
         } else {
