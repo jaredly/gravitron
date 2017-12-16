@@ -14,7 +14,7 @@ let wallTypeText = t => switch t {
 };
 
 let buttons: int => array((string, transition)) = highestBeatenStage => [|
-  ("Stage " ++ string_of_int(highestBeatenStage + 2), `Start),
+  ("Stage " ++ string_of_int(highestBeatenStage + 2), `StartFromStage(highestBeatenStage + 1)),
   ("Pick stage", `PickLevel),
   /* ("Wall type: " ++ wallTypeText(wallType), `PickWalls), */
 |];

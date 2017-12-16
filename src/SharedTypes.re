@@ -344,7 +344,7 @@ type context = {
 
 type transition = [
   | `Start
-  | `StartFromLevel(int)
+  | `StartFromStage(int)
   | `Quit
   | `Finished(bool, (int, int), int)
   | `PickWalls

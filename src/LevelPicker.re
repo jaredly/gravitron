@@ -149,7 +149,7 @@ let screen =
           );
         switch res {
         | None => Stateless(ctx)
-        | Some(dest) => Transition(ctx, `StartFromLevel(dest))
+        | Some(dest) => Transition(ctx, `StartFromStage(dest))
         }
       },
     ~keyPressed=
