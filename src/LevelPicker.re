@@ -29,10 +29,7 @@ let buttonsInPosition = (ctx, env) => {
   let boxHeight = int_of_float(float_of_int(boxWidth) *. ratio);
   let rowSize = (w - margin) / (boxWidth + margin);
   let stages = GravLevels.getStages(env);
-  Array.iteri(
-    (stageNo, levels) => {
-
-
+  Array.iteri((stageNo, levels) => {
     for (i in 0 to Array.length(levels) - 1) {
       let col = i mod rowSize;
       let row = i / rowSize;
@@ -47,9 +44,9 @@ let buttonsInPosition = (ctx, env) => {
             height: boxHeight,
             i,
             enemies: levels[i],
-            status: UserData.highestBeatenLevel(ctx.userData) + 1 > i
+            status: UserData.highestBeatenStage(ctx.userData) + 1 > i
               ? Beaten
-              : (UserData.highestBeatenLevel(ctx.userData) + 1 === i ? Available : Locked)
+              : (UserData.highestBeatenStage(ctx.userData) + 1 === i ? Available : Locked)
           },
           ...buttons^
         ]

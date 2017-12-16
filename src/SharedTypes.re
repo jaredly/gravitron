@@ -237,31 +237,44 @@ let optOr = (default, v) => switch v { | None => default | Some(v) => v };
 
 module UserData = {
   let key = "gravitron_data";
-  type t = {
+  type t0 = {
     currentWallType: wallType,
     highestBeatenLevels: (int, int, int),
   };
-  type t0 = t;
-  let userDataVersion = 0;
+  type t1 = {
+    currentWallType: wallType,
+    highestBeatenStages: (int, int, int),
+    highScores: (list(float), list(float), list(float))
+  };
+  type t = t1;
+  let userDataVersion = 1;
 
   let default: t = {
     currentWallType: BouncyWalls,
-    highestBeatenLevels: (-1, -1, -1),
+    highestBeatenStages: (-1, -1, -1),
+    highScores: ([], [], [])
   };
 
-  let convertUp = (version, _value) => {
+  let convertUp = (version, value) => {
     switch version {
+    | 0 => {
+      let v: t0 = Obj.magic(value);
+      Some({currentWallType: v.currentWallType, highestBeatenStages: (0, 0, 0), highScores: ([], [], [])})
+    }
     | _ => None
     }
   };
 
-  let rec convertToLatest = ((version, value)): option(t) => {
+  let rec convertToLatest = ((version, value): (int, t)): option(t) => {
     if (version > userDataVersion) {
       None
     } else if (version == userDataVersion) {
-      Some(Obj.magic(value))
+      Some(value)
     } else {
-      convertToLatest((version + 1, convertUp(version, value)))
+      switch (convertUp(version, value)) {
+      | None => None
+      | Some(v) => convertToLatest((version + 1, v))
+      }
     }
   };
 
@@ -285,17 +298,17 @@ module UserData = {
     userData
   };
 
-  let updateHighestLevel = (env, userData, level) => {
-    let (highest, updated) = setHighest(userData.highestBeatenLevels, userData.currentWallType, level);
+  let updateHighestStage = (env, userData, stage) => {
+    let (highest, updated) = setHighest(userData.highestBeatenStages, userData.currentWallType, stage);
     if (updated) {
-      saveUserData(env, {...userData, highestBeatenLevels: highest});
+      saveUserData(env, {...userData, highestBeatenStages: highest});
     } else {
       userData
     }
   };
 
-  let highestBeatenLevel = ({highestBeatenLevels, currentWallType}) => {
-    let (fire, bouncy, mini) = highestBeatenLevels;
+  let highestBeatenStage = ({highestBeatenStages, currentWallType}) => {
+    let (fire, bouncy, mini) = highestBeatenStages;
     switch currentWallType {
     | FireWalls => fire
     | BouncyWalls => bouncy
@@ -333,8 +346,8 @@ type transition = [
   | `EditLevel(int)
 ];
 
-let updateHighestBeatenLevel = (env, ctx, level) => {
-  {...ctx, userData: UserData.updateHighestLevel(env, ctx.userData, level)}
+let updateHighestBeatenStage = (env, ctx, level) => {
+  {...ctx, userData: UserData.updateHighestStage(env, ctx.userData, level)}
 };
 
 let currentWallType = (ctx) => ctx.userData.UserData.currentWallType;

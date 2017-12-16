@@ -13,8 +13,8 @@ let wallTypeText = t => switch t {
 | Minimapped => "none"
 };
 
-let buttons: wallType => array((string, transition)) = wallType => [|
-  ("Stage 1", `Start),
+let buttons: int => array((string, transition)) = highestBeatenStage => [|
+  ("Stage " ++ string_of_int(highestBeatenStage + 2), `Start),
   ("Pick stage", `PickLevel),
   /* ("Wall type: " ++ wallTypeText(wallType), `PickWalls), */
 |];
@@ -53,7 +53,7 @@ let run = (ctx, env) => {
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
 
   let current = currentWallType(ctx);
-  buttonsWithPosition(env, w, h, buttons(currentWallType(ctx)), 20) |> Array.iteri((i, ((x, y), (text, _))) => {
+  buttonsWithPosition(env, w, h, buttons(UserData.highestBeatenStage(ctx.userData)), 20) |> Array.iteri((i, ((x, y), (text, _))) => {
     Draw.fill(MyUtils.withAlpha(Constants.white, 0.2), env);
     Draw.noStroke(env);
     if (MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
@@ -114,7 +114,7 @@ let screen = ScreenManager.Screen.{
   mouseDown: (ctx, _, env) => {
     let w = Env.width(env) / 2;
     let h = Env.height(env) / 2 + verticalOffset;
-    let dest = buttonsWithPosition(env, w, h, buttons(currentWallType(ctx)), 20) |> Array.fold_left(
+    let dest = buttonsWithPosition(env, w, h, buttons(UserData.highestBeatenStage(ctx.userData)), 20) |> Array.fold_left(
       (current, (pos, (_, dest))) => {
         if (current == None) {
           if (MyUtils.rectCollide(Env.mouse(env), (pos, (buttonWidth, buttonHeight)))) {

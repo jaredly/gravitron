@@ -115,9 +115,9 @@ let mainLoop = (ctx, state, env) => {
     state.enemies !== [] || state.status !== Running ?
       Same(ctx, state) :
       {
-        /* let ctx = SharedTypes.updateHighestBeatenLevel(env, ctx, state.level); */
         let (stage, level) = state.level;
         let endOfStage = level == Array.length(state.stages[stage]) - 1;
+        let ctx = endOfStage ? SharedTypes.updateHighestBeatenStage(env, ctx, state.level |> fst) : ctx;
         let didWin = endOfStage && stage == Array.length(state.stages) - 1;
         let next = endOfStage ? (stage + 1, 0) : (stage, level + 1);
         didWin ?
@@ -125,7 +125,8 @@ let mainLoop = (ctx, state, env) => {
           Same(ctx, {...state,
             level: next,
             enemies: state.stages[fst(next)][snd(next)],
-            levelTicker: 0.
+            levelTicker: 0.,
+            startTime: endOfStage ? Env.getTimeMs(env) : state.startTime
           })
       };
   }
