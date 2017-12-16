@@ -23,6 +23,9 @@ module Player = {
     acc: vec,
     size: float
   };
+  let fullHealth = 100;
+  let fullLives = 4;
+  let rejuvinate = me => {...me, health: fullHealth, lives: fullLives};
 };
 
 /*
@@ -259,7 +262,11 @@ module UserData = {
     switch version {
     | 0 => {
       let v: t0 = Obj.magic(value);
-      Some({currentWallType: v.currentWallType, highestBeatenStages: (0, 0, 0), highScores: ([], [], [])})
+      Some({
+        currentWallType: v.currentWallType,
+        highestBeatenStages: (-1, -1, -1),
+        highScores: ([], [], [])
+      })
     }
     | _ => None
     }

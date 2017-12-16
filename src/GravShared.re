@@ -6,7 +6,7 @@ open SharedTypes;
 
 let deltaTime = (env) => Env.deltaTime(env) *. 1000. /. 16.;
 
-let fullPlayerHealth = 100;
+let fullPlayerHealth = SharedTypes.Player.fullHealth;
 
 let fakePhone = try {Sys.getenv("PHONE");true} { | Not_found => false };
 let isPhone = Reprocessing.target == "native-ios" || Reprocessing.target == "native-android" || fakePhone;

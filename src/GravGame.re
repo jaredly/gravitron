@@ -16,8 +16,8 @@ let newGame = (~wallType=FireWalls, env) => {
     level: (0, 0),
     stages,
     me: {
-      health: fullPlayerHealth,
-      lives: 3,
+      health: Player.fullHealth,
+      lives: Player.fullLives,
       pos: getPhonePos(env),
       color: Constants.green,
       vel: v0,
@@ -51,8 +51,7 @@ let drawState = (ctx, state, env) => {
   | Paused(pauseTime) => pauseTime -. state.startTime
   | _ => Env.getTimeMs(env) -. state.startTime
   };
-  let (stage, level) = state.level;
-  drawStatus(ctx, state.wallType, level, state.me, timeElapsed, env);
+  drawStatus(ctx, state.wallType, state.level, state.me, timeElapsed, env);
   if (!state.hasMoved) {
     drawHelp(ctx, state.me, env);
   };
@@ -60,9 +59,10 @@ let drawState = (ctx, state, env) => {
   if (state.levelTicker < 120.) {
     let anim = state.levelTicker > 60. ? (state.levelTicker -. 60.) /. 60. : 0.;
     Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
+    let (stage, level) = state.level;
     DrawUtils.centerText(
       ~pos=(Env.width(env) / 2, Env.height(env) / 2),
-      ~body="Level " ++ string_of_int(stage + 1) ++ "." ++ string_of_int(level  + 1),
+      ~body="Level " ++ string_of_int(stage + 1) ++ "-" ++ string_of_int(level  + 1),
       ~font=ctx.titleFont,
       env
     );
@@ -85,7 +85,7 @@ let mainLoop = (ctx, state, env) => {
         bullets: []
       })
     } else {
-      Transition(ctx, `Finished(false, state.level, Array.length(state.stages)))
+      Transition(ctx, `Finished(false, state.level, Array.length(state.stages[fst(state.level)])))
     }
   | Paused(_) =>
     drawState(ctx, state, env);
@@ -121,11 +121,13 @@ let mainLoop = (ctx, state, env) => {
         let didWin = endOfStage && stage == Array.length(state.stages) - 1;
         let next = endOfStage ? (stage + 1, 0) : (stage, level + 1);
         didWin ?
-          Transition(ctx, `Finished(true, state.level, Array.length(state.stages))) :
+          Transition(ctx, `Finished(true, state.level, Array.length(state.stages[stage]))) :
           Same(ctx, {...state,
             level: next,
             enemies: state.stages[fst(next)][snd(next)],
+            bullets: endOfStage ? [] : state.bullets,
             levelTicker: 0.,
+            me: endOfStage ? Player.rejuvinate(state.me) : state.me,
             startTime: endOfStage ? Env.getTimeMs(env) : state.startTime
           })
       };

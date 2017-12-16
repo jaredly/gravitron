@@ -149,9 +149,10 @@ let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
   };
 
   /* Level */
+  let (stage, level) = level;
   DrawUtils.textRightJustified(
     ~font=ctx.smallFont,
-    ~body="Level " ++ string_of_int(level + 1),
+    ~body="Level " ++ string_of_int(stage + 1) ++ "-" ++ string_of_int(level + 1),
     ~pos=(Env.width(env) - margin, margin - 5),
     env
   );
