@@ -15,11 +15,13 @@ let moveBullet = (isDead, wallType, player, bullet, env) => {
     let speedFactor = isPhone ? 10. : 20.;
     let acc = {theta, mag: speedFactor /. mag};
     (vecAdd(bullet.vel, acc), bullet.moving);
-  | HeatSeeking(speed) =>
+  | HeatSeeking(speed, maxvel) =>
     let theta = thetaToward(bullet.pos, player.Player.pos);
     let acc = {theta, mag: speed};
+    let vel = vecAdd(bullet.vel, acc);
+    let vel = {theta: vel.theta, mag: min(maxvel, vel.mag)};
     /** TODO this might need to be scaled by deltaTime too */
-    (vecAdd(bullet.vel, acc), bullet.moving);
+    (vel, bullet.moving);
   | Mine(counter) =>
     let (counter, stopped) = stepTimer(counter, env);
     if (stopped) {
@@ -68,7 +70,7 @@ let bulletToBullet = (bullet, bullets, explosions) => {
 
 let bomb = bullet => {
   ...bullet,
-  size: bullet.size *. 3.,
+  size: bullet.size *. 20.,
   stepping: Bomb(false)
 };
 
@@ -187,10 +189,12 @@ let collideBullets = (env, state, bullet) => {
   ({...state, bullets, explosions}, dead)
 };
 
-let handleCollisions = (env, state, bullet) => {
+let handleCollisions = (env, state, bullet, isFull) => {
     let playerDist = MyUtils.dist(MyUtils.posSub(bullet.pos, state.me.pos));
     if (state.status == Running && playerDist < state.me.size +. bullet.size) {
       (playerDamage(env, state, bullet.damage), true)
+    } else if (!isFull) {
+      (state, false)
     } else {
       let (state, died) = collideEnemies(env, state, bullet);
       if (died) {
@@ -207,11 +211,7 @@ let step = (env, state, bullet) => {
   | Some(bullet) =>
     let (warmup, isFull) = stepTimer(bullet.warmup, env);
     let bullet = {...bullet, warmup};
-    let (state, died) = if (isFull) {
-      handleCollisions(env, state, bullet);
-    } else {
-      (state, false)
-    };
+    let (state, died) = handleCollisions(env, state, bullet, isFull);
     if (died) {
       {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
     } else {

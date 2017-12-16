@@ -10,12 +10,12 @@ let sizeFactor = isPhone ? 0.8 : 1.0;
 
 /* Enemy types */
 
-let defaultEnemy = (pos, warmup, maxTime) => {
+let defaultEnemy = (~health=1, ~size=20., pos, warmup, maxTime) => {
   pos,
   color: Constants.white,
-  size: 20. *. sizeFactor,
+  size: size *. sizeFactor,
   warmup: (0., 50.),
-  health: (1, 1),
+  health: (health, health),
   animate: 0.,
   movement: Stationary(MyUtils.v0),
   dying: Normal,
@@ -178,6 +178,53 @@ let levels = [|
       /* movement: Avoider(MyUtils.v0), */
       dying: Revenge(10, Bullet.template(~color=color, ~speed=initialSpeed, ~damage=5, ~size=5. *. sizeFactor, ()))
     }
+  ],
+  [
+    {
+      ...defaultEnemy(~size=20., ~health=5, (200., 200.), 0., 200.),
+      shooting: OneShot(Bullet.template(
+        ~color=Utils.color(~r=255, ~g=255, ~b=100, ~a=255),
+        ~size=5. *. sizeFactor,
+        ~speed=initialSpeed,
+        ~moving=HeatSeeking(0.5, 5.),
+        ~damage=5,
+        ()
+      ))
+    },
+    {
+      ...defaultEnemy(~size=20., ~health=5, (600., 200.), 0., 200.),
+      shooting: OneShot(Bullet.template(
+        ~color=Constants.green,
+        ~size=5. *. sizeFactor,
+        ~speed=initialSpeed,
+        ~stepping=TimeBomb((0., 120.)),
+        /* ~moving=HeatSeeking(0.1), */
+        ~damage=5,
+        ()
+      ))
+    },
+    {
+      ...defaultEnemy(~size=20., ~health=5, (600., 600.), 0., 200.),
+      shooting: OneShot(Bullet.template(
+        ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
+        ~size=10. *. sizeFactor,
+        ~speed=initialSpeed,
+        ~stepping=ProximityScatter(
+          100.,
+          5,
+          Bullet.template(
+            ~color=Constants.white,
+            ~size=5. *. sizeFactor,
+            ~speed=initialSpeed,
+            ~damage=3,
+            ()
+          )
+        ),
+        /* ~moving=HeatSeeking(0.1), */
+        ~damage=10,
+        ()
+      ))
+    },
   ]
   /* List.mapi(
     (i, f) => f((100. +. float_of_int(i) *. 100., 100.)),

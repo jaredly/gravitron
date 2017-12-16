@@ -3,12 +3,10 @@ open MyUtils;
 
 /*
 TODO paired bullets
-- triple-shot (replace double prolly)
 - paired-bullet (not 100% sure how to let bullets refer to each other.
     Orr I could have a "doublebullet" that just has different step rules.
     Maybe that makes sense?)
 - triple-paired
-- rabbits (wandering multipliers)
 - protected boss (spawns minions that circle around them. if the boss dies,they become wanderers
     again, not super sure how to have enemies know about each other.
     in this case though, the number of enemies is probably pretty bounded
@@ -27,13 +25,11 @@ module Player = {
   };
 };
 
-/* type bulletConfig = (Reprocessing.colorT, float, float, int); */
-
 module Bullet = {
     /** How many to break into, and timer */
   type moving =
     | Gravity
-    | HeatSeeking(float)
+    | HeatSeeking(float, float)
     | Mine(counter)
   and stepping =
     | TimeBomb(counter)
@@ -144,8 +140,6 @@ module Enemy = {
     | Wander(pos, vec)
     | Avoider(vec)
     | Guard(int, vec)
-    /* | Avoider(vec) */
-    /* | Guard(enemyId) */
     ;
 
   type stepping =
@@ -165,23 +159,6 @@ module Enemy = {
     | TripleShot(Bullet.t)
     ;
 
-  /* type behavior =
-    | SimpleShooter(counter, bulletConfig)
-    | TripleShooter(counter, bulletConfig)
-    | ScatterShot(counter, int, bulletConfig, bulletConfig)
-    /* bullettimer, animate, _ */
-    | Asteroid(counter, float, bulletConfig)
-    /* | Asteroid(counter)
-    | DoubleShooter(int, float)
-    | Splitter */
-    ;
-
-  type shooting =
-    | OneShot(counter, bulletConfig)
-    | TripleShot(counter, bulletConfig)
-    | ScatterShot(counter, int, bulletConfig, bulletConfig)
-    ; */
-
   type t = {
     pos,
     color: Reprocessing.colorT,
@@ -197,14 +174,7 @@ module Enemy = {
     missileTimer: counter,
     /* The percent that it has to be full in order to defent itself */
     selfDefense: option(float),
-    /* behavior, */
-    /* shoot: (Reprocessing.glEnvT, t, Player.t) => Bullet.t */
   };
-  /* let step = (state, enemy) => {
-       switch enemy.typ {
-       | SimpleShooter()
-       }
-     }; */
 };
 
 module Explosion = {
@@ -337,7 +307,7 @@ let updateCurrentWallType = (env, ctx, wallType) => {
   userData: UserData.setCurrentWallType(env, ctx.userData, wallType)
 };
 
-let fireWallColor = Reprocessing.Utils.color(~r=255, ~g=100, ~b=100, ~a=255);
+/* let fireWallColor = Reprocessing.Utils.color(~r=255, ~g=100, ~b=100, ~a=255); */
 let fireWallColor = Reprocessing.Utils.color(~r=100, ~g=100, ~b=100, ~a=255);
 
 let bouncyWallColor = Reprocessing.Utils.color(~r=100, ~g=100, ~b=200, ~a=255);
