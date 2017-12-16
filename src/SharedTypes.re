@@ -167,11 +167,11 @@ TripleShot - 3 shooters, at angles
 module Enemy = {
   /* color, size, speed */
   type movement =
-    | Stationary(vec)
+    | Stationary
     /* target, velocity */
-    | GoToPosition(pos, vec)
-    | Wander(pos, vec)
-    | Avoider(float, vec)
+    | GoToPosition(pos)
+    | Wander(pos)
+    | Avoider(float)
     /* | Guard(int, vec) */
     ;
 
@@ -195,6 +195,7 @@ module Enemy = {
 
   type t = {
     pos,
+    vel: vec,
     color: Reprocessing.colorT,
     size: float,
     warmup: counter,
@@ -244,7 +245,7 @@ module UserData = {
   let userDataVersion = 0;
 
   let default: t = {
-    currentWallType: FireWalls,
+    currentWallType: BouncyWalls,
     highestBeatenLevels: (-1, -1, -1),
   };
 
@@ -318,6 +319,7 @@ type context = {
   smallFont: Reprocessing.fontT,
   textFont: Reprocessing.fontT,
   titleFont: Reprocessing.fontT,
+  smallTitleFont: Reprocessing.fontT,
 };
 
 type transition = [

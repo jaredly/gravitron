@@ -17,7 +17,8 @@ let defaultEnemy = (~health=1, ~size=20., pos, warmup, maxTime) => {
   warmup: (0., 50.),
   health: (health, health),
   animate: 0.,
-  movement: Stationary(MyUtils.v0),
+  movement: Stationary,
+  vel: (MyUtils.v0),
   dying: Normal,
   stepping: DoNothing,
   shooting: OneShot(Bullet.template(
@@ -94,7 +95,8 @@ let pink = (~warmup=0., pos) => {
   color: colorPink,
   size: 30. *. sizeFactor,
   health: (4, 4),
-  movement: GoToPosition(pos, MyUtils.v0),
+  movement: GoToPosition(pos),
+  vel: MyUtils.v0,
   dying: Asteroid,
   shooting: OneShot(Bullet.template(
     ~color=colorPink,
@@ -111,7 +113,8 @@ let scatterShooter = (~warmup=200., pos) => {
   color,
   size: 35. *. sizeFactor,
   health: (10, 10),
-  movement: Wander(pos, MyUtils.v0),
+  movement: Wander(pos),
+  vel: MyUtils.v0,
   /* behavior: ScatterShot((warmup, 300.), 5, (color, 10. *. sizeFactor, initialSpeed *. 1.5, 10), (color, 7. *. sizeFactor, initialSpeed, 10)), */
   shooting: OneShot(Bullet.template(
     ~color=colorPink,
@@ -148,18 +151,18 @@ let levels = [|
   [
     {
     ...red((600., 600.)),
-    movement: Wander((600., 600.), MyUtils.v0),
-    stepping: Rabbit(300., (350., 400.))
+    movement: Wander((600., 600.)),
+    stepping: Rabbit(600., (550., 600.))
   },
     {
     ...red((200., 600.)),
-    movement: Wander((200., 600.), MyUtils.v0),
-    stepping: Rabbit(300., (200., 400.))
+    movement: Wander((200., 600.)),
+    stepping: Rabbit(600., (200., 600.))
   },
     {
     ...red((600., 200.)),
-    movement: Wander((600., 200.), MyUtils.v0),
-    stepping: Rabbit(300., (0., 400.))
+    movement: Wander((600., 200.)),
+    stepping: Rabbit(600., (0., 600.))
   }
   ],
   [
@@ -245,7 +248,7 @@ let levels = [|
   ], [
     {
       ...defaultEnemy(~size=20., ~health=5, (200., 600.), 0., 70.),
-      movement: Avoider(300., MyUtils.v0),
+      movement: Avoider(300.),
       shooting: OneShot(Bullet.template(
         ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
         ~size=10. *. sizeFactor,
@@ -283,7 +286,7 @@ let makePhoneLevels = (env) => {
     [
       {
         ...red(~warmup=250., (v, v)),
-        movement: Wander((v, v), MyUtils.v0),
+        movement: Wander((v, v)),
         stepping: Rabbit(300., (450., 400.))
       },
     ],
@@ -301,13 +304,13 @@ let makePhoneLevels = (env) => {
     },
       {
         ...red(~warmup=250., (v, v)),
-        movement: Wander((v, v), MyUtils.v0)
+        movement: Wander((v, v))
       },
   ],
   [
       {
         ...red(~warmup=250., (v, v)),
-        movement: Wander((v, v), MyUtils.v0)
+        movement: Wander((v, v))
       },
 
     {
@@ -328,7 +331,7 @@ let makePhoneLevels = (env) => {
         ...red(~warmup=250., (v, v)),
         selfDefense: Some(0.1),
         dodges: (0.5, 3.0),
-        movement: Wander((v, v), MyUtils.v0)
+        movement: Wander((v, v))
       },
   ]
   |]

@@ -142,12 +142,14 @@ let damageEnemy = (env, state, enemy, damage) => {
           {
             ...base,
             missileTimer: (Random.float(bulletTime /. 4.), bulletTime),
-            movement: EnemyLogic.randomMovement(env, one, enemy.movement)
+            vel: one,
+            movement: EnemyLogic.randomMovement(env, enemy.movement, enemy.size)
           },
           {
             ...base,
             missileTimer: (Random.float(bulletTime /. 2.), bulletTime),
-            movement: EnemyLogic.randomMovement(env, two, enemy.movement)
+            vel: two,
+            movement: EnemyLogic.randomMovement(env, enemy.movement, enemy.size)
           },
           ...state.enemies
         ]
@@ -209,7 +211,7 @@ let handleCollisions = (env, state, bullet, isFull) => {
 
 let step = (env, state, bullet) => {
   switch (moveBullet(state.status != Running, state.wallType, state.me, bullet, env)) {
-  | None => state
+  | None => {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
   | Some(bullet) =>
     let (warmup, isFull) = stepTimer(bullet.warmup, env);
     let bullet = {...bullet, warmup};

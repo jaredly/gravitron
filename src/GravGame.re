@@ -12,6 +12,7 @@ let newGame = (~wallType=FireWalls, env) => {
     status: Running,
     hasMoved: false,
     startTime: Env.getTimeMs(env),
+    levelTicker: 0.,
     level: 0,
     levels,
     me: {
@@ -60,7 +61,19 @@ let drawState = (ctx, state, env) => {
   drawStatus(ctx, state.wallType, state.level, state.me, timeElapsed, env);
   if (!state.hasMoved) {
     drawHelp(ctx, state.me, env);
-  }
+  };
+
+  if (state.levelTicker < 60.) {
+    let anim = state.levelTicker /. 60.;
+    Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
+    DrawUtils.centerText(
+      ~pos=(Env.width(env) / 2, Env.height(env) / 2),
+      ~body="Level " ++ string_of_int(state.level  + 1),
+      ~font=ctx.titleFont,
+      env
+    );
+    Draw.noTint(env);
+  };
 };
 
 let mainLoop = (ctx, state, env) => {
@@ -87,6 +100,7 @@ let mainLoop = (ctx, state, env) => {
   | _ =>
     let state = {
       ...state,
+      levelTicker: state.levelTicker +. GravShared.deltaTime(env),
       status:
         switch state.status {
         | Dead(n) => Dead(n - 1)
@@ -109,7 +123,11 @@ let mainLoop = (ctx, state, env) => {
         let ctx = SharedTypes.updateHighestBeatenLevel(env, ctx, state.level);
         state.level >= Array.length(state.levels) - 1 ?
           Transition(ctx, `Finished(true, state.level, Array.length(state.levels))) :
-          Same(ctx, {...state, level: state.level + 1, enemies: state.levels[state.level + 1]})
+          Same(ctx, {...state,
+            level: state.level + 1,
+            enemies: state.levels[state.level + 1],
+            levelTicker: 0.
+          })
       };
   }
 };

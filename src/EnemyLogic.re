@@ -13,28 +13,31 @@ let offscreenTheta = offscreen => switch offscreen {
   | OnScreen => assert(false)
 };
 
+/* let evade = */
+
 let moveEnemy = (env, state, enemy) => {
+  let vel = enemy.vel;
   switch enemy.movement {
-  | Stationary(vel) =>
+  | Stationary =>
     let vel = {theta: vel.theta, mag: vel.mag < 0.01 ? 0.0 : vel.mag *. 0.95};
     let pos = posAdd(enemy.pos, vecToPos(vel));
-    {...enemy, pos, movement: Stationary(vel)}
-  | GoToPosition(target, vel) => {
+    {...enemy, pos, vel, movement: Stationary}
+  | GoToPosition(target) => {
     let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
     let vel = {theta: vel.theta, mag: min(vel.mag, 2.) *. 0.98};
     let pos = posAdd(enemy.pos, vecToPos(vel));
-    {...enemy, pos, movement: GoToPosition(target, vel)}
+    {...enemy, pos, vel, movement: GoToPosition(target)}
   }
-  | Wander(target, vel) =>
+  | Wander(target) =>
     let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
     let vel = {theta: vel.theta, mag: min(vel.mag, 4.) *. 0.98};
     let pos = posAdd(enemy.pos, vecToPos(vel));
     let target =
       collides(enemy.pos, target, enemy.size *. 2.)
-      ? randomTarget(Env.width(env) |> float_of_int, Env.height(env) |> float_of_int)
+      ? randomTarget(Env.width(env) |> float_of_int, Env.height(env) |> float_of_int, enemy.size)
       : target;
-    {...enemy, pos, movement: Wander(target, vel)}
-  | Avoider(minDist, vel) =>
+    {...enemy, pos, vel, movement: Wander(target)}
+  | Avoider(minDist) =>
     let vel = if (dist(MyUtils.posSub(state.me.pos, enemy.pos)) < minDist) {
       vecAdd(vel, {theta: thetaToward(state.me.Player.pos, enemy.pos), mag: 0.1});
     } else {
@@ -50,31 +53,24 @@ let moveEnemy = (env, state, enemy) => {
     };
     let vel = {theta: vel.theta, mag: vel.mag *. 0.98};
     let pos = posAdd(enemy.pos, vecToPos(vel));
-    {...enemy, pos, movement: Avoider(minDist, vel)}
+    {...enemy, pos, vel, movement: Avoider(minDist)}
   }
-
 };
 
-let randomTarget = env => (
+let randomTarget = (env, size) => randomTarget(
   Random.float(float_of_int(Env.width(env))),
-  Random.float(float_of_int(Env.height(env)))
+  Random.float(float_of_int(Env.height(env))),
+  size
 );
 
-let randomMovement = (env, vec, movement) => {
+let randomMovement = (env, movement, size) => {
   open! Enemy;
   switch movement {
-  | Stationary(_) => Stationary(vec)
-  | GoToPosition(_, _) => GoToPosition(randomTarget(env), vec)
-  | Wander(_, _) => Wander(randomTarget(env), vec)
-  | Avoider(minDist, _) => Avoider(minDist, vec)
+  | Stationary => Stationary
+  | GoToPosition(_) => GoToPosition(randomTarget(env, size))
+  | Wander(_) => Wander(randomTarget(env, size))
+  | Avoider(minDist) => Avoider(minDist)
   }
-};
-
-let movementWithVel = (movement, vel) => switch movement {
-| Stationary(_) => Stationary(vel)
-| GoToPosition(target, _) => GoToPosition(target, vel)
-| Wander(target, _) => Wander(target, vel)
-| Avoider(minDist, _) => Avoider(minDist, vel)
 };
 
 let randomizeTimer = ((t, e)) => {
@@ -93,10 +89,12 @@ let behave = (env, state, enemy) => {
         {
           ...enemy,
           stepping: Rabbit(mintime, (0., max(mintime, (Random.float(0.5) +. 0.75) *. counterMax))),
-          movement: randomMovement(env, one, enemy.movement)
+          vel: one,
+          movement: randomMovement(env, enemy.movement, enemy.size)
         },
         [{...enemy,
-            movement: randomMovement(env, two, enemy.movement),
+            movement: randomMovement(env, enemy.movement, enemy.size),
+            vel: two,
             missileTimer: randomizeTimer(enemy.missileTimer),
             /* stepping: Rabbit(counter) */
           stepping: Rabbit(mintime, (0., max(mintime, (Random.float(0.5) +. 0.75) *. counterMax)))

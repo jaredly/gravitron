@@ -20,8 +20,8 @@ let buttons: wallType => array((string, transition)) = wallType => [|
 |];
 
 let wallButtons = [|
-  ("solid", FireWalls, fireWallColor),
   ("bouncy", BouncyWalls, bouncyWallColor),
+  ("solid", FireWalls, fireWallColor),
   ("no walls", Minimapped, Constants.black),
 |];
 
@@ -61,7 +61,7 @@ let run = (ctx, env) => {
     };
     /* Draw.noFill(env); */
     Draw.rect(~pos=(x, y), ~width=buttonWidth, ~height=buttonHeight, env);
-    DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 10), env);
+    DrawUtils.centerText(~font=ctx.smallTitleFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 15), env);
   });
 
   DrawUtils.centerText(~font=ctx.smallFont, ~body="Wall type", ~pos=(w, h + 240), env);
@@ -69,7 +69,7 @@ let run = (ctx, env) => {
   let current = currentWallType(ctx);
   buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons) |> Array.iter((((x, y), (text, wallType, color))) => {
     /* let selected = current == wallType; */
-    let textWidth = switch ctx.textFont^ {
+    let textWidth = switch ctx.smallTitleFont^ {
     | None => 0
     | Some(font) => Reprocessing_Font.Font.calcStringWidth(env, font, text)
     };
@@ -84,7 +84,7 @@ let run = (ctx, env) => {
     Draw.strokeWeight(2, env);
     Draw.stroke(color, env);
     Draw.rect(~pos=(x, y), ~width=buttonWidth, ~height=buttonHeight, env);
-    DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 10), env);
+    DrawUtils.centerText(~font=ctx.smallTitleFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 15), env);
   });
 
   /* Draw.fill(Constants.red, env); */

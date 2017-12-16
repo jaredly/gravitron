@@ -27,22 +27,35 @@ let setup = (assetDir, initialScreen, env) => {
       highScores: [||],
       titleFont:
         Reprocessing.Draw.loadFont(
-          ~filename=assetDir /+ "SFCompactRounded-Black-48.fnt",
+          ~filename=assetDir /+ "Orbitron-Black-48.fnt",
           ~isPixel=false,
           env
         ),
+      smallTitleFont:
+        Reprocessing.Draw.loadFont(
+          ~filename=assetDir /+ "Orbitron-Regular-24.fnt",
+          ~isPixel=false,
+          env
+        ),
+      /* titleFont:
+        Reprocessing.Draw.loadFont(
+          ~filename=assetDir /+ "SFCompactRounded-Black-48.fnt",
+          ~isPixel=false,
+          env
+        ), */
       textFont:
         Reprocessing.Draw.loadFont(
-          ~filename=assetDir /+ "SFCompactDisplay-Regular-24.fnt",
+          /* ~filename=assetDir /+ "SFCompactDisplay-Regular-24.fnt", */
+          ~filename=assetDir /+ "Orbitron-Regular-24.fnt",
           ~isPixel=false,
           env
         ),
       smallFont:
         Reprocessing.Draw.loadFont(
-          ~filename=assetDir /+ "SFCompactDisplay-Regular-16.fnt",
+          ~filename=assetDir /+ "Orbitron-Regular-16.fnt",
           ~isPixel=false,
           env
-        )
+        ),
     },
     initialScreen
   )

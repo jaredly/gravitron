@@ -71,6 +71,7 @@ type gameState = {
   startTime: float,
   level: int,
   levels: array(list(Enemy.t)),
+  levelTicker: float,
   me: SharedTypes.Player.t,
   enemies: list(Enemy.t),
   bullets: list(Bullet.t),
@@ -80,14 +81,6 @@ type gameState = {
   wallType: wallType
 };
 type state = gameState;
-
-type screen =
-  | Welcome /* need state for buttons? maybe an animation tho */
-  | Playing(gameState)
-  | Done(bool, int, int, float) /* succeeded, level reached, total levels, animation! */
-  | LevelEditor(option(int)) /* the index of the level being edited */
-  ;
-
 
 let asteroidSplitVel = () => {
   let theta = Random.float(Constants.two_pi);
@@ -150,8 +143,8 @@ let springToward = (p1, p2, scale) => {
   {...vec, mag: vec.mag *. scale}
 };
 
-let randomTarget = (w, h) => {
-  let margin = 30.;
+let randomTarget = (w, h, size) => {
+  let margin = size *. 2.;
   (Random.float(w -. margin *. 2.) +. margin, Random.float(h -. margin *. 2.) +. margin)
 };
 

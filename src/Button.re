@@ -53,7 +53,7 @@ let drawInner = ((x, y), width, (size, buttons), ~ctx, ~env) => {
     };
 
     Draw.rect(~pos=(x, y), ~width, ~height=buttonHeight, env);
-    DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x + width / 2, y + 10), env);
+    DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x + width / 2, y + 15), env);
   }, buttons);
 };
 
