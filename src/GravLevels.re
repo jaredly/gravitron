@@ -257,7 +257,6 @@ let levels = [|
           ~speed=initialSpeed,
           ~damage=3,
           ()
-
         )),
         ~damage=10,
         ()
@@ -281,6 +280,50 @@ let makePhoneLevels = (env) => {
     [green((w /. 2., h -. v))],
     [scatterShooter((w /. 2., v))],
     [pink((w /. 2., h -. v))],
+    [
+      {
+        ...red(~warmup=250., (v, v)),
+        movement: Wander((v, v), MyUtils.v0),
+        stepping: Rabbit(300., (450., 400.))
+      },
+    ],
+  [
+    {
+      ...defaultEnemy(~size=20., ~health=5, (v, h -. v), 0., 200.),
+      shooting: OneShot(Bullet.template(
+        ~color=Utils.color(~r=255, ~g=255, ~b=100, ~a=255),
+        ~size=5. *. sizeFactor,
+        ~speed=initialSpeed,
+        ~moving=HeatSeeking(0.3, 5.),
+        ~damage=5,
+        ()
+      ))
+    },
+      {
+        ...red(~warmup=250., (v, v)),
+        movement: Wander((v, v), MyUtils.v0)
+      },
+  ],
+  [
+      {
+        ...red(~warmup=250., (v, v)),
+        movement: Wander((v, v), MyUtils.v0)
+      },
+
+    {
+      ...defaultEnemy(~size=20., ~health=5, (w -. v, v), 100., 200.),
+      shooting: OneShot(Bullet.template(
+        ~color=Constants.green,
+        ~size=5. *. sizeFactor,
+        ~speed=initialSpeed,
+        ~stepping=TimeBomb((0., 120.)),
+        /* ~moving=HeatSeeking(0.1), */
+        ~damage=5,
+        ()
+      ))
+    },
+
+  ]
   |]
 };
 
