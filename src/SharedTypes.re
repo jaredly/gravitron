@@ -204,7 +204,8 @@ module Enemy = {
     dying,
     stepping,
     shooting,
-    dodges: float,
+    /* Accel, maxvel */
+    dodges: (float, float),
     missileTimer: counter,
     /* The percent that it has to be full in order to defent itself */
     selfDefense: option(float),
