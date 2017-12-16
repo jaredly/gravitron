@@ -52,7 +52,8 @@ let run = (ctx, env) => {
   DrawUtils.centerText(~font=ctx.titleFont, ~body="Gravitron", ~pos=(w, h), env);
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
 
-  buttonsWithPosition(env, w, h, buttons(currentWallType(ctx)), 20) |> Array.iter((((x, y), (text, _))) => {
+  let current = currentWallType(ctx);
+  buttonsWithPosition(env, w, h, buttons(currentWallType(ctx)), 20) |> Array.iteri((i, ((x, y), (text, _))) => {
     Draw.fill(MyUtils.withAlpha(Constants.white, 0.2), env);
     Draw.noStroke(env);
     if (MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
@@ -62,11 +63,22 @@ let run = (ctx, env) => {
     /* Draw.noFill(env); */
     Draw.rect(~pos=(x, y), ~width=buttonWidth, ~height=buttonHeight, env);
     DrawUtils.centerText(~font=ctx.smallTitleFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 15), env);
+    if (i === 0) {
+      let color = switch (current) {
+      | FireWalls => fireWallColor
+      | BouncyWalls => bouncyWallColor
+      | Minimapped => Constants.black
+      };
+      Draw.stroke(color, env);
+      Draw.strokeWeight(3, env);
+      Draw.noFill(env);
+      let margin = 6;
+      Draw.rect(~pos=(x + margin, y + margin), ~width=buttonWidth - margin * 2, ~height=buttonHeight - margin * 2, env);
+    };
   });
 
   DrawUtils.centerText(~font=ctx.smallFont, ~body="Wall type", ~pos=(w, h + 240), env);
 
-  let current = currentWallType(ctx);
   buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons, 10) |> Array.iter((((x, y), (text, wallType, color))) => {
     /* let selected = current == wallType; */
     let textWidth = switch ctx.smallTitleFont^ {
