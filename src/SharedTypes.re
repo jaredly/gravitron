@@ -171,14 +171,14 @@ module Enemy = {
     /* target, velocity */
     | GoToPosition(pos, vec)
     | Wander(pos, vec)
-    | Avoider(vec)
-    | Guard(int, vec)
+    | Avoider(float, vec)
+    /* | Guard(int, vec) */
     ;
 
   type stepping =
     | DoNothing
     | Rabbit(float, counter) /* mintime, timer */
-    | Protected(counter) /* spawn protector */
+    /* | Protected(counter) spawn protector */
     ;
 
   type dying =

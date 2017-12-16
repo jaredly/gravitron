@@ -197,7 +197,7 @@ let levels = [|
         ~color=Constants.green,
         ~size=5. *. sizeFactor,
         ~speed=initialSpeed,
-        ~stepping=TimeBomb((0., 120.)),
+        ~stepping=TimeBomb((0., 60.)),
         /* ~moving=HeatSeeking(0.1), */
         ~damage=5,
         ()
@@ -206,7 +206,7 @@ let levels = [|
     {
       ...defaultEnemy(~size=20., ~health=5, (600., 600.), 0., 200.),
       shooting: OneShot(Bullet.template(
-        ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
+        ~color=Utils.color(~r=100, ~g=200, ~b=200, ~a=255),
         ~size=10. *. sizeFactor,
         ~speed=initialSpeed,
         ~stepping=ProximityScatter(
@@ -245,6 +245,7 @@ let levels = [|
   ], [
     {
       ...defaultEnemy(~size=20., ~health=5, (200., 600.), 0., 70.),
+      movement: Avoider(300., MyUtils.v0),
       shooting: OneShot(Bullet.template(
         ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
         ~size=10. *. sizeFactor,
@@ -256,6 +257,7 @@ let levels = [|
           ~speed=initialSpeed,
           ~damage=3,
           ()
+
         )),
         ~damage=10,
         ()

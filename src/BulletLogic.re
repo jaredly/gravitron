@@ -111,6 +111,7 @@ let playerDamage = (env, state, damage) => {
 let smallerShot = (shooting, size, damage) => switch shooting {
 | Enemy.OneShot(b) => Enemy.OneShot({...b, size, damage})
 | TripleShot(b) => Enemy.TripleShot({...b, size, damage})
+| Alternate(b1, b2, first) => Enemy.Alternate({...b1, size, damage}, {...b2, size, damage}, first)
 };
 
 let damageEnemy = (env, state, enemy, damage) => {
