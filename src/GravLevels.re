@@ -226,8 +226,8 @@ let levels = [|
       ))
     },
     {
-      ...defaultEnemy(~size=20., ~health=5, (200., 600.), 0., 200.),
-      shooting: OneShot(Bullet.template(
+      ...defaultEnemy(~size=20., ~health=5, (200., 600.), 0., 40.),
+      shooting: Alternate(Bullet.template(
         ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
         ~size=10. *. sizeFactor,
         ~speed=initialSpeed,
@@ -235,13 +235,17 @@ let levels = [|
         /* ~moving=HeatSeeking(0.1), */
         ~damage=10,
         ()
-      ))
+      ), Bullet.template(
+        ~color=Constants.white,
+        ~size=4. *. sizeFactor,
+        ~speed=initialSpeed,
+        /* ~moving=Mine(30., 100., (0., 100.)), */
+        /* ~moving=HeatSeeking(0.1), */
+        ~damage=3,
+        ()
+      ), false)
     },
   ]
-  /* List.mapi(
-    (i, f) => f((100. +. float_of_int(i) *. 100., 100.)),
-    [red, blue, green, pink, scatterShooter]
-  ), */
 |];
 
 let makePhoneLevels = (env) => {

@@ -100,19 +100,23 @@ let shotBullet = (~theta=0., startPos, size, playerPos, bullet) => {
 let shoot = (env, state, enemy) => {
   let (missileTimer, flipped) = loopTimer(enemy.missileTimer, env);
   let enemy = {...enemy, missileTimer};
-  (enemy, if (flipped) {
+  let (bullets, shooting) = if (flipped) {
     switch enemy.shooting {
-    | OneShot(bullet) => [shotBullet(enemy.pos, enemy.size, state.me.pos, bullet), ...state.bullets]
-    | TripleShot(bullet) => [
+    | OneShot(bullet) => ([shotBullet(enemy.pos, enemy.size, state.me.pos, bullet), ...state.bullets], enemy.shooting)
+    | Alternate(bullet1, bullet2, first) => ([shotBullet(enemy.pos, enemy.size, state.me.pos, first ? bullet1 : bullet2), ...state.bullets],
+      Alternate(bullet1, bullet2, !first)
+    )
+    | TripleShot(bullet) => ([
         shotBullet(~theta=0., enemy.pos, enemy.size, state.me.pos, bullet),
         shotBullet(~theta=(-0.3), enemy.pos, enemy.size, state.me.pos, bullet),
         shotBullet(~theta=0.3, enemy.pos, enemy.size, state.me.pos, bullet),
         ...state.bullets
-      ]
+      ], enemy.shooting)
     }
   } else {
-    state.bullets
-  })
+    (state.bullets, enemy.shooting)
+  };
+  ({...enemy, shooting}, bullets)
 };
 
 let step = (env, state, enemy) => {

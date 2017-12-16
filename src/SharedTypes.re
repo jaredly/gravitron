@@ -189,6 +189,7 @@ module Enemy = {
 
   type shooting =
     | OneShot(Bullet.t)
+    | Alternate(Bullet.t, Bullet.t, bool)
     | TripleShot(Bullet.t)
     ;
 
