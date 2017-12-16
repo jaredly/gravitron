@@ -220,7 +220,6 @@ let levels = [|
             ()
           )
         ),
-        /* ~moving=HeatSeeking(0.1), */
         ~damage=10,
         ()
       ))
@@ -239,11 +238,28 @@ let levels = [|
         ~color=Constants.white,
         ~size=4. *. sizeFactor,
         ~speed=initialSpeed,
-        /* ~moving=Mine(30., 100., (0., 100.)), */
-        /* ~moving=HeatSeeking(0.1), */
         ~damage=3,
         ()
       ), false)
+    },
+  ], [
+    {
+      ...defaultEnemy(~size=20., ~health=5, (200., 600.), 0., 70.),
+      shooting: OneShot(Bullet.template(
+        ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
+        ~size=10. *. sizeFactor,
+        ~speed=initialSpeed,
+        ~moving=Mine(30., 100., (0., 100.)),
+        ~stepping=Shooter((0., 300.), Bullet.template(
+          ~color=Constants.white,
+          ~size=4. *. sizeFactor,
+          ~speed=initialSpeed,
+          ~damage=3,
+          ()
+        )),
+        ~damage=10,
+        ()
+      ))
     },
   ]
 |];

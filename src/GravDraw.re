@@ -416,6 +416,11 @@ let drawBullet = (env, playerPos, bullet) => {
     Draw.stroke(withAlpha(Constants.white, 0.7), env);
     Draw.strokeWeight(3, env);
     timerCircle(~center=bullet.pos, ~rad=bullet.size +. 2., ~timer, env)
+  | Shooter(timer, _) =>
+    Draw.noFill(env);
+    Draw.stroke(withAlpha(Constants.red, 0.7), env);
+    Draw.strokeWeight(3, env);
+    timerCircle(~center=bullet.pos, ~rad=bullet.size +. 2., ~timer, env)
   | _ => ()
   };
 
