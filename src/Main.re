@@ -37,6 +37,12 @@ let setup = (assetDir, initialScreen, env) => {
           ~isPixel=false,
           env
         ),
+      boldTextFont:
+        Reprocessing.Draw.loadFont(
+          ~filename=assetDir /+ "Orbitron-Black-24.fnt",
+          ~isPixel=false,
+          env
+        ),
       /* titleFont:
         Reprocessing.Draw.loadFont(
           ~filename=assetDir /+ "SFCompactRounded-Black-48.fnt",

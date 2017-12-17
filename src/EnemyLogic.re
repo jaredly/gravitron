@@ -58,8 +58,8 @@ let moveEnemy = (env, state, enemy) => {
 };
 
 let randomTarget = (env, size) => randomTarget(
-  Random.float(float_of_int(Env.width(env))),
-  Random.float(float_of_int(Env.height(env))),
+  float_of_int(Env.width(env)),
+  float_of_int(Env.height(env)),
   size
 );
 

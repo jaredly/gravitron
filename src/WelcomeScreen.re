@@ -87,7 +87,8 @@ let run = (ctx, env) => {
     | Some(font) => Reprocessing_Font.Font.calcStringWidth(env, font, text)
     };
 
-    if (current == wallType || MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
+    let enabled = SharedTypes.isWallTypeEnabled(ctx, wallType);
+    if (enabled && (current == wallType || MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight))))) {
       Draw.noStroke(env);
       Draw.fill(current === wallType ? Constants.white : MyUtils.withAlpha(Constants.white, 0.5), env);
       Draw.rect(~pos=(x + buttonWidth / 2 - textWidth / 2, y + 10 + 24 + 2), ~width=textWidth, ~height=4, env);
@@ -97,7 +98,16 @@ let run = (ctx, env) => {
     Draw.strokeWeight(2, env);
     Draw.stroke(color, env);
     Draw.rect(~pos=(x, y), ~width=buttonWidth, ~height=buttonHeight, env);
-    DrawUtils.centerText(~font=ctx.smallTitleFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 15), env);
+
+    if (!enabled) {
+      Draw.fill(Utils.color(~r=20, ~g=20, ~b=20, ~a=200), env);
+      Draw.tint(Utils.color(~r=100, ~g=100, ~b=100, ~a=255), env);
+      Draw.rect(~pos=(x, y), ~width=buttonWidth, ~height=buttonHeight, env);
+      DrawUtils.centerText(~font=ctx.boldTextFont, ~body="LOCKED", ~pos=(x + buttonWidth / 2, y + 15), env);
+      Draw.noTint(env);
+    } else {
+      DrawUtils.centerText(~font=ctx.smallTitleFont, ~body=text, ~pos=(x + buttonWidth / 2, y + 15), env);
+    };
   });
 
   /* Draw.fill(Constants.red, env); */
@@ -130,7 +140,7 @@ let screen = ScreenManager.Screen.{
       None
     );
     let wallType = buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons, 10) |> Array.fold_left((current, (pos, (text, wallType, color))) => {
-        if (MyUtils.rectCollide(Env.mouse(env), (pos, (buttonWidth, buttonHeight)))) {
+        if (SharedTypes.isWallTypeEnabled(ctx, wallType) && MyUtils.rectCollide(Env.mouse(env), (pos, (buttonWidth, buttonHeight)))) {
           wallType
         } else {
           current

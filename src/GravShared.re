@@ -144,7 +144,7 @@ let springToward = (p1, p2, scale) => {
 };
 
 let randomTarget = (w, h, size) => {
-  let margin = size *. 2.;
+  let margin = size;
   (Random.float(w -. margin *. 2.) +. margin, Random.float(h -. margin *. 2.) +. margin)
 };
 

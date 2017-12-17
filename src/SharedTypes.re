@@ -339,6 +339,7 @@ type context = {
   smallFont: Reprocessing.fontT,
   textFont: Reprocessing.fontT,
   titleFont: Reprocessing.fontT,
+  boldTextFont: Reprocessing.fontT,
   smallTitleFont: Reprocessing.fontT,
 };
 
@@ -358,6 +359,16 @@ let updateHighestBeatenStage = (env, ctx, level) => {
 };
 
 let currentWallType = (ctx) => ctx.userData.UserData.currentWallType;
+
+let isWallTypeEnabled = (ctx, typ) => {
+  let (f, b, m) = ctx.userData.highestBeatenStages;
+  let maxStage = Array.length(ctx.stages) - 1;
+  switch (typ) {
+  | BouncyWalls => true
+  | FireWalls => b == maxStage
+  | Minimapped => b == maxStage && f == maxStage
+  }
+};
 
 let updateCurrentWallType = (env, ctx, wallType) => {
   ...ctx,
