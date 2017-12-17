@@ -101,6 +101,7 @@ let backButton = (ctx, env) => {
 
 let drawButton = (ctx, env, (pos, textPos, width, height, text)) => {
   open Reprocessing;
+  Draw.noStroke(env);
   Draw.fill(Button.color, env);
   Draw.rect(~pos, ~width, ~height, env);
   Draw.text(~pos=textPos, ~body=text, ~font=ctx.textFont, env);
