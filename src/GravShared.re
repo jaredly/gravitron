@@ -70,7 +70,7 @@ type gameState = {
   hasMoved: bool,
   startTime: float,
   level: (int, int),
-  stages: array(array(list(Enemy.t))),
+  /* stages: array(array(list(Enemy.t))), */
   levelTicker: float,
   me: SharedTypes.Player.t,
   enemies: list(Enemy.t),

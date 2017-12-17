@@ -6,15 +6,15 @@ open SharedTypes;
 
 open GravShared;
 
-let newGame = (~wallType=FireWalls, env) => {
-  let stages = GravLevels.getStages(env);
+let newGame = (~wallType=FireWalls, env, ctx) => {
+  /* let stages = GravLevels.getStages(env); */
   {
     status: Running,
     hasMoved: false,
     startTime: Env.getTimeMs(env),
     levelTicker: 0.,
     level: (0, 0),
-    stages,
+    /* stages, */
     me: {
       health: Player.fullHealth,
       lives: Player.fullLives,
@@ -24,7 +24,7 @@ let newGame = (~wallType=FireWalls, env) => {
       acc: v0,
       size: 15. *. GravLevels.sizeFactor,
     },
-    enemies: stages[0][0],
+    enemies: ctx.stages[0][0],
     bullets: [],
     explosions: [],
     wallType,
@@ -80,12 +80,12 @@ let mainLoop = (ctx, state, env) => {
         ...state,
         status: Running,
         me: {...state.me, Player.health: fullPlayerHealth, lives: state.me.Player.lives - 1},
-        enemies: state.stages[stage][level],
+        enemies: ctx.stages[stage][level],
         explosions: [],
         bullets: []
       })
     } else {
-      Transition(ctx, `Finished(false, state.level, Array.length(state.stages[fst(state.level)])))
+      Transition(ctx, `Finished(false, state.level, Array.length(ctx.stages[fst(state.level)])))
     }
   | Paused(_) =>
     drawState(ctx, state, env);
@@ -116,15 +116,15 @@ let mainLoop = (ctx, state, env) => {
       Same(ctx, state) :
       {
         let (stage, level) = state.level;
-        let endOfStage = level == Array.length(state.stages[stage]) - 1;
+        let endOfStage = level == Array.length(ctx.stages[stage]) - 1;
         let ctx = endOfStage ? SharedTypes.updateHighestBeatenStage(env, ctx, state.level |> fst) : ctx;
-        let didWin = endOfStage && stage == Array.length(state.stages) - 1;
+        let didWin = endOfStage && stage == Array.length(ctx.stages) - 1;
         let next = endOfStage ? (stage + 1, 0) : (stage, level + 1);
         didWin ?
-          Transition(ctx, `Finished(true, state.level, Array.length(state.stages[stage]))) :
+          Transition(ctx, `Finished(true, state.level, Array.length(ctx.stages[stage]))) :
           Same(ctx, {...state,
             level: next,
-            enemies: state.stages[fst(next)][snd(next)],
+            enemies: ctx.stages[fst(next)][snd(next)],
             bullets: endOfStage ? [] : state.bullets,
             levelTicker: 0.,
             me: endOfStage ? Player.rejuvinate(state.me) : state.me,
@@ -134,12 +134,12 @@ let mainLoop = (ctx, state, env) => {
   }
 };
 
-let newAtStage = (~wallType, env, stage) => {
-  let state = newGame(~wallType, env);
-  if (stage >= Array.length(state.stages)) {
+let newAtStage = (~wallType, env, ctx, stage) => {
+  let state = newGame(~wallType, env, ctx);
+  if (stage >= Array.length(ctx.stages)) {
     state
   } else {
-    {...state, status: Running, level: (stage, 0), enemies: state.stages[stage][0]}
+    {...state, status: Running, level: (stage, 0), enemies: ctx.stages[stage][0]}
   }
 };
 
@@ -150,7 +150,7 @@ let keyPressed = (ctx, state, env) =>
     Same(
       ctx,
       switch k {
-      | Events.R => newGame(env)
+      | Events.R => newGame(env, ctx)
       | Events.Space =>
         switch state.status {
         | Paused(pauseTime) => {...state,

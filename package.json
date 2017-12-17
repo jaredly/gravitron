@@ -11,7 +11,7 @@
     "clean": "bsb -clean-world",
 
     "build:ios": "bsb -make-world -backend native && ./lib/bs/native/buildios.native",
-    "build:android": "bsb -make-world -backend native && ./lib/bs/native/buildandroid.native",
+    "build:android": "bsb -make-world -backend native && ./lib/bs/native/buildandroid.native && cp assets/* android/app/src/main/assets/",
     "run:android": "npm run build:android && cd android && ./gradlew installDebug",
 
     "setup:android": "./reasongl-android/setup_opam.sh",

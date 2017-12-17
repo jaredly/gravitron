@@ -334,7 +334,7 @@ module UserData = {
 
 type context = {
   userData: UserData.t,
-  userLevels: array(array(Enemy.t)),
+  stages: array(array(list(Enemy.t))),
   highScores: array(highScore),
   smallFont: Reprocessing.fontT,
   textFont: Reprocessing.fontT,

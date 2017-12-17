@@ -23,7 +23,7 @@ let setup = (assetDir, initialScreen, env) => {
   (
     {
       userData,
-      userLevels: [||],
+      stages: GravLevels.getStages(env),
       highScores: [||],
       titleFont:
         Reprocessing.Draw.loadFont(
@@ -66,8 +66,8 @@ let transitionTo = (ctx, transition, env) =>
   | `Quit => `WelcomeScreen(WelcomeScreen.initialState(env))
   | `Start =>
     print_endline("Start");
-    `Game(GravGame.initialState(~wallType=currentWallType(ctx), env))
-  | `StartFromStage(stage) => `Game(GravGame.newAtStage(~wallType=currentWallType(ctx), env, stage))
+    `Game(GravGame.initialState(~wallType=currentWallType(ctx), env, ctx))
+  | `StartFromStage(stage) => `Game(GravGame.newAtStage(~wallType=currentWallType(ctx), env, ctx, stage))
   | `Finished(won, reached, total) => `DoneScreen(DoneScreen.initialState(won, reached, total))
   | `PickLevel => `LevelPicker(LevelPicker.initialState)
   | `PickWalls => `WallScreen(WallScreen.initialState)
