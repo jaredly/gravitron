@@ -83,6 +83,38 @@ let drawEnemySquare = (env, enemies, (x, y), w, h) => {
   Draw.popMatrix(env);
 };
 
+let backButton = (ctx, env) => {
+  let (x, y) = (Reprocessing.Env.width(env) / 2, Reprocessing.Env.height(env) - 10);
+  let font = ctx.textFont;
+  let text = "Back";
+  /* let width = Font. */
+  let width = switch font^ {
+  | Some(font) => Reprocessing_Font.Font.calcStringWidth(env, font, text)
+  | None => 0
+  };
+  let height = 40;
+  let margin = 10;
+  let textPos = (x - width / 2, y - height + 10);
+  let pos = (x - width / 2 - margin, y - height);
+  (pos, textPos, width + margin * 2, height, text)
+};
+
+let drawButton = (ctx, env, (pos, textPos, width, height, text)) => {
+  open Reprocessing;
+  Draw.fill(Button.color, env);
+  Draw.rect(~pos, ~width, ~height, env);
+  Draw.text(~pos=textPos, ~body=text, ~font=ctx.textFont, env);
+};
+
+let hitButton = (ctx, env, ((x, y), _, width, height, _)) => {
+  let (a, b) = Reprocessing.Env.mouse(env);
+  if (a >= x && a <= x + width && b >= y && b <= y + height) {
+    true
+  } else {
+    false
+  }
+};
+
 let screen =
   ScreenManager.stateless(
     ~run=
@@ -92,63 +124,36 @@ let screen =
         DrawUtils.centerText(
           ~font=ctx.titleFont,
           ~pos=(Env.width(env) / 2, 20),
-          ~body="Pick a level",
+          ~body="Pick a stage",
           env
         );
-        List.iter(
-          ({text, pos, width, height, enemies, status}) => {
-            if (status === Beaten || true) {
-              drawEnemySquare(env, enemies, pos, width, height);
-            } else {
-              Draw.fill(status === Locked
-                ? Utils.color(~r=50, ~g=50, ~b=50, ~a=255)
-                : Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
-                , env);
-              Draw.noStroke(env);
-              Draw.rect(~pos, ~width, ~height, env);
-            };
-            Draw.noFill(env);
-            let hovered = MyUtils.rectCollide(Reprocessing.Env.mouse(env), (pos, (width, height)));
-            Draw.stroke(if (hovered) {
-              switch status {
-              | Locked => Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
-              | _ => Constants.green
-              }
-            } else switch status {
-            | Locked | Beaten => Utils.color(~r=100, ~g=100, ~b=100, ~a=255)
-            | Available => Constants.white
-            }, env);
-            Draw.strokeWeight(hovered && status !== Locked ? 3 : 1, env);
-            Draw.rect(~pos, ~width, ~height, env);
-            if (status !== Beaten) {
-              let (x, y) = center(pos, width, height);
-              DrawUtils.centerText(~font=ctx.textFont, ~body=text, ~pos=(x, y - 16), env)
-            }
-          },
-          buttonsInPosition(ctx, env)
+        let buttons = Array.mapi((i, _) => {
+          ("Stage " ++ string_of_int(i + 1), `StartFromStage(i))
+        }, ctx.stages) |> Array.to_list;
+        Button.draw(
+          ~enabled=((i, _) => i <= 1+ UserData.highestBeatenStage(ctx.userData)),
+          (Env.width(env) / 2, 100),
+          (Normal, buttons),
+          ~ctx,
+          ~env
         );
+        drawButton(ctx, env, backButton(ctx, env));
+
         Stateless(ctx)
       },
     ~mouseDown=
       (ctx, env) => {
-        let res =
-          List.fold_left(
-            (current, {pos, width, height, i, status}) =>
-              switch current {
-              | Some(_) => current
-              | None =>
-                if ((status !== Locked || true)
-                    && MyUtils.rectCollide(Reprocessing.Env.mouse(env), (pos, (width, height)))) {
-                  Some(i)
-                } else {
-                  None
-                }
-              },
-            None,
-            buttonsInPosition(ctx, env)
-          );
+        let buttons = Array.mapi((i, _) => {
+          ("Stage " ++ string_of_int(i + 1), i)
+        }, ctx.stages) |> Array.to_list;
+        open Reprocessing;
+        let res = Button.hit(
+          ~enabled=((i, _) => i <= 1+ UserData.highestBeatenStage(ctx.userData)),
+          (Env.width(env) / 2, 100), (Normal, buttons), ~ctx, ~env, Env.mouse(env));
         switch res {
-        | None => Stateless(ctx)
+        | None => if (hitButton(ctx, env, backButton(ctx, env))) {
+            Transition(ctx, `Quit)
+          } else { Stateless(ctx) }
         | Some(dest) => Transition(ctx, `StartFromStage(dest))
         }
       },

@@ -13,8 +13,8 @@ let wallTypeText = t => switch t {
 | Minimapped => "none"
 };
 
-let buttons: int => array((string, transition)) = highestBeatenStage => [|
-  ("Stage " ++ string_of_int(highestBeatenStage + 2), `StartFromStage(highestBeatenStage + 1)),
+let buttons = (highestBeatenStage, hasWon): array((string, transition))  => [|
+  (hasWon ? "Beaten" : "Stage " ++ string_of_int(highestBeatenStage + 2), hasWon ? `Start : `StartFromStage(highestBeatenStage + 1)),
   ("Pick stage", `PickLevel),
   /* ("Wall type: " ++ wallTypeText(wallType), `PickWalls), */
 |];
@@ -53,7 +53,8 @@ let run = (ctx, env) => {
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
 
   let current = currentWallType(ctx);
-  buttonsWithPosition(env, w, h, buttons(UserData.highestBeatenStage(ctx.userData)), 20) |> Array.iteri((i, ((x, y), (text, _))) => {
+  let highest = UserData.highestBeatenStage(ctx.userData);
+  buttonsWithPosition(env, w, h, buttons(highest, highest == Array.length(ctx.stages) - 1), 20) |> Array.iteri((i, ((x, y), (text, _))) => {
     Draw.fill(MyUtils.withAlpha(Constants.white, 0.2), env);
     Draw.noStroke(env);
     if (MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
@@ -114,7 +115,9 @@ let screen = ScreenManager.Screen.{
   mouseDown: (ctx, _, env) => {
     let w = Env.width(env) / 2;
     let h = Env.height(env) / 2 + verticalOffset;
-    let dest = buttonsWithPosition(env, w, h, buttons(UserData.highestBeatenStage(ctx.userData)), 20) |> Array.fold_left(
+    let highest = UserData.highestBeatenStage(ctx.userData);
+    let hasWon = highest == Array.length(ctx.stages) - 1;
+    let dest = buttonsWithPosition(env, w, h, buttons(UserData.highestBeatenStage(ctx.userData), hasWon), 20) |> Array.fold_left(
       (current, (pos, (_, dest))) => {
         if (current == None) {
           if (MyUtils.rectCollide(Env.mouse(env), (pos, (buttonWidth, buttonHeight)))) {

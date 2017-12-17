@@ -299,7 +299,7 @@ let makePhoneStages = (env) => {
       {
         ...red(~warmup=250., (v, v)),
         movement: Wander((v, v)),
-        stepping: Rabbit(300., (450., 400.))
+        stepping: Rabbit(600., (550., 600.))
       },
     ],
   [
@@ -338,13 +338,13 @@ let makePhoneStages = (env) => {
       ))
     },
 
-  ], [
+  /* ], [
       {
         ...red(~warmup=250., (v, v)),
         selfDefense: Some(0.1),
         dodges: (0.5, 3.0),
         movement: Wander((v, v))
-      },
+      }, */
   ]
   |]
   |]

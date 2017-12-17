@@ -32,7 +32,10 @@ let getWidth = (env, font, text) => switch (font^) {
 
 let maxWidth = (env, font, buttons) => List.fold_left((a, (text, _)) => max(a, getWidth(env, font, text)), 0, buttons);
 
-let drawInner = ((x, y), width, (size, buttons), ~ctx, ~env) => {
+let color = Reprocessing.Utils.color(~r=50, ~g=50 ,~b=50, ~a=255);
+let disabledColor = Reprocessing.Utils.color(~r=20, ~g=20 ,~b=20, ~a=255);
+
+let drawInner = (~enabled, (x, y), width, (size, buttons), ~ctx, ~env) => {
   let margin = margin(size);
   let buttonHeight = height(size);
 
@@ -41,13 +44,16 @@ let drawInner = ((x, y), width, (size, buttons), ~ctx, ~env) => {
   Draw.fill(Utils.color(~r=50, ~g=50 ,~b=80, ~a=150), env);
   Draw.rect(~pos=(0, 0), ~width=Env.width(env), ~height=Env.height(env), env);
 
-  List.iteri((i, (text, _)) => {
+  List.iteri((i, (text, action)) => {
+    let enabled = enabled(i, action);
     let y = y + i * (buttonHeight + margin);
 
-    Draw.fill(Utils.color(~r=50, ~g=50 ,~b=50, ~a=255), env);
+    Draw.fill(
+      enabled ? color : disabledColor
+    , env);
     Draw.noStroke(env);
 
-    if (MyUtils.rectCollide(Env.mouse(env), ((x,y), (width, buttonHeight)))) {
+    if (enabled && MyUtils.rectCollide(Env.mouse(env), ((x,y), (width, buttonHeight)))) {
       Draw.strokeWeight(2, env);
       Draw.stroke(Utils.color(~r=100, ~g=100, ~b=100, ~a=255), env);
     };
@@ -57,7 +63,7 @@ let drawInner = ((x, y), width, (size, buttons), ~ctx, ~env) => {
   }, buttons);
 };
 
-let hitInner = (pos, (x, y), width, (size, buttons)) => {
+let hitInner = (~enabled, pos, (x, y), width, (size, buttons)) => {
   let buttonHeight = height(size);
   let margin = margin(size);
 
@@ -66,7 +72,8 @@ let hitInner = (pos, (x, y), width, (size, buttons)) => {
     switch res {
     | Some(x) => (i + 1, res)
     | None =>
-      if (MyUtils.rectCollide(pos, ((x,y), (width, buttonHeight)))) {
+      let enabled = enabled(i, action);
+      if (enabled && MyUtils.rectCollide(pos, ((x,y), (width, buttonHeight)))) {
         (i + 1, Some(action))
       } else {
         (i + 1, None);
@@ -75,16 +82,18 @@ let hitInner = (pos, (x, y), width, (size, buttons)) => {
   }, (0, None), buttons) |> snd;
 };
 
-let draw = ((cx, y), (size, buttons), ~ctx, ~env) => {
+let allEnabled = (_, _) => true;
+
+let draw = (~enabled=allEnabled, (cx, y), (size, buttons), ~ctx, ~env) => {
   let margin = margin(size);
   let buttonHeight = height(size);
   let width = maxWidth(env, whichFont(ctx, size), buttons) + margin * 4;
 
   let x = cx - width / 2;
-  drawInner((x, y), width, (size, buttons), ~ctx, ~env);
+  drawInner(~enabled, (x, y), width, (size, buttons), ~ctx, ~env);
 };
 
-let drawCentered = ((cx, cy), (size, buttons), ~ctx, ~env) => {
+let drawCentered = (~enabled=allEnabled, (cx, cy), (size, buttons), ~ctx, ~env) => {
   let margin = margin(size);
   let buttonHeight = height(size);
   let width = maxWidth(env, whichFont(ctx, size), buttons) + margin * 4;
@@ -92,19 +101,19 @@ let drawCentered = ((cx, cy), (size, buttons), ~ctx, ~env) => {
 
   let x = cx - width / 2;
   let y = cy - height / 2;
-  drawInner((x, y), width, (size, buttons), ~ctx, ~env);
+  drawInner(~enabled, (x, y), width, (size, buttons), ~ctx, ~env);
 };
 
-let hit = ((cx, y), (size, buttons), ~ctx, ~env, pos) => {
+let hit = (~enabled=allEnabled, (cx, y), (size, buttons), ~ctx, ~env, pos) => {
   let margin = margin(size);
   let buttonHeight = height(size);
   let width = maxWidth(env, whichFont(ctx, size), buttons) + margin * 4;
 
   let x = cx - width / 2;
-  hitInner(pos, (x, y), width, (size, buttons));
+  hitInner(~enabled, pos, (x, y), width, (size, buttons));
 };
 
-let hitCentered = ((cx, cy), (size, buttons), ~ctx, ~env, pos) => {
+let hitCentered = (~enabled=allEnabled, (cx, cy), (size, buttons), ~ctx, ~env, pos) => {
   let margin = margin(size);
   let buttonHeight = height(size);
   let width = maxWidth(env, whichFont(ctx, size), buttons) + margin * 4;
@@ -112,5 +121,5 @@ let hitCentered = ((cx, cy), (size, buttons), ~ctx, ~env, pos) => {
 
   let x = cx - width / 2;
   let y = cy - height / 2;
-  hitInner(pos, (x, y), width, (size, buttons));
+  hitInner(~enabled, pos, (x, y), width, (size, buttons));
 };

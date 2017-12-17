@@ -24,7 +24,7 @@ module Player = {
     size: float
   };
   let fullHealth = 100;
-  let fullLives = 4;
+  let fullLives = 2;
   let rejuvinate = me => {...me, health: fullHealth, lives: fullLives};
 };
 

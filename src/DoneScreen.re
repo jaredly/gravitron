@@ -28,7 +28,7 @@ let screen = {
     DrawUtils.centerText(~font=ctx.titleFont, ~body=(won ? "You won!" : "Game over"), ~pos=(w, y), env);
     if (animate === max) {
       if (!won) {
-        DrawUtils.centerText(~font=ctx.smallFont, ~body=Printf.sprintf("Reached level %d/%d of stage %d", reached + 1, total, stage), ~pos=(w, y + 60), env);
+        DrawUtils.centerText(~font=ctx.smallFont, ~body=Printf.sprintf("Reached level %d/%d of stage %d", reached + 1, total, stage + 1), ~pos=(w, y + 60), env);
       };
       DrawUtils.centerText(~font=ctx.textFont, ~body=(GravShared.isPhone ? "Tap to continue" : "Click to continue"), ~pos=(w, y + 80), env);
     };
