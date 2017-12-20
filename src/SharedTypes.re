@@ -300,6 +300,27 @@ module UserData = {
     }
   };
 
+  let rec setScore = (scores, stage, score) => {
+    switch (scores, stage) {
+    | ([], 0) => ([score], true)
+    | ([], _) => ([], false)
+    | ([head, ...tail], 0) => head > score ? ([score, ...tail], true) : (scores, false)
+    | ([head, ...tail], n) => {
+      let (ntail, updated) = setScore(tail, stage - 1, score);
+      ([head, ...ntail], updated)
+    }
+    }
+  };
+
+  let setHighScore = (scores, wall, stage, score) => {
+    let (fire, bouncy, mini) = scores;
+    switch wall {
+    | FireWalls => let (scores, updated) = setScore(fire, stage, score); ((scores, bouncy, mini), updated)
+    | BouncyWalls => let (scores, updated) = setScore(bouncy, stage, score); ((fire, scores, mini), updated)
+    | Minimapped => let (scores, updated) = setScore(mini, stage, score); ((fire, bouncy, scores), updated)
+    }
+  };
+
   let saveUserData = (env, userData) => {
     let _saved = Reprocessing.Env.saveUserData(~key, ~value=(userDataVersion, userData), env);
     userData
@@ -311,6 +332,15 @@ module UserData = {
       saveUserData(env, {...userData, highestBeatenStages: highest});
     } else {
       userData
+    }
+  };
+
+  let updateHighScore = (env, userData, stage, score) => {
+    let (scores, updated) = setHighScore(userData.highScores, userData.currentWallType, stage, score);
+    if (updated) {
+      (true, saveUserData(env, {...userData, highScores: scores}));
+    } else {
+      (false, userData)
     }
   };
 
@@ -357,6 +387,11 @@ type transition = [
 
 let updateHighestBeatenStage = (env, ctx, level) => {
   {...ctx, userData: UserData.updateHighestStage(env, ctx.userData, level)}
+};
+
+let updateHighScore = (env, ctx, level, score) => {
+  let (updated, userData) = UserData.updateHighScore(env, ctx.userData, level, score);
+  (updated, {...ctx, userData})
 };
 
 let currentWallType = (ctx) => ctx.userData.UserData.currentWallType;

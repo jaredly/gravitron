@@ -14,6 +14,7 @@ let newGame = (~wallType=FireWalls, env, ctx) => {
     startTime: Env.getTimeMs(env),
     levelTicker: 0.,
     level: (0, 0),
+    gotHighScore: None,
     /* stages, */
     me: {
       health: Player.fullHealth,
@@ -33,11 +34,11 @@ let newGame = (~wallType=FireWalls, env, ctx) => {
 
 let initialState = newGame;
 
-let drawState = (ctx, state, env) => {
+let drawState = (~noLevelText=false, ctx, state, env) => {
   Draw.background(Constants.black, env);
   open GravDraw;
   switch (state.status) {
-  | Running | Paused(_) => drawMe(state.me, env)
+  | Running | Paused(_) | StageCleared(_, _, _) => drawMe(state.me, env)
   | _ => ()
   };
   List.iter(drawEnemy(env), state.enemies);
@@ -49,6 +50,7 @@ let drawState = (ctx, state, env) => {
   };
   let timeElapsed = switch (state.status) {
   | Paused(pauseTime) => pauseTime -. state.startTime
+  | StageCleared(_, time, _) => time
   | _ => Env.getTimeMs(env) -. state.startTime
   };
   drawStatus(ctx, state.wallType, state.level, state.me, timeElapsed, env);
@@ -56,7 +58,7 @@ let drawState = (ctx, state, env) => {
     drawHelp(ctx, state.me, env);
   };
 
-  if (state.levelTicker < 120.) {
+  if (!noLevelText && state.levelTicker < 120.) {
     let anim = state.levelTicker > 60. ? (state.levelTicker -. 60.) /. 60. : 0.;
     Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
     let (stage, level) = state.level;
@@ -92,6 +94,32 @@ let mainLoop = (ctx, state, env) => {
     PauseOverlay.draw(ctx, env);
 
     Same(ctx, state)
+  | StageCleared(gotHighScore, timeElapsed, timer) =>
+    drawState(~noLevelText=true, ctx, state, env);
+
+    let anim = timer < 50. ? (50. -. timer) /. 50. : 0.;
+    Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
+
+    DrawUtils.centerText(
+      ~pos=(Env.width(env) / 2, Env.height(env) / 2),
+      ~body="Stage cleared",
+      ~font=ctx.boldTextFont,
+      env
+    );
+    if (gotHighScore) {
+      DrawUtils.centerText(
+        ~pos=(Env.width(env) / 2, Env.height(env) / 2 + 30),
+        ~body="New high score!",
+        ~font=ctx.textFont,
+        env
+      );
+    };
+
+    Draw.noTint(env);
+
+    let status = timer > 0. ? StageCleared(gotHighScore, timeElapsed, timer -. deltaTime(env)) : Running;
+    Same(ctx, {...state, status})
+
   | _ =>
     let state = {
       ...state,
@@ -119,10 +147,13 @@ let mainLoop = (ctx, state, env) => {
         let endOfStage = level == Array.length(ctx.stages[stage]) - 1;
         let ctx = endOfStage ? SharedTypes.updateHighestBeatenStage(env, ctx, state.level |> fst) : ctx;
         let didWin = endOfStage && stage == Array.length(ctx.stages) - 1;
+        let timeElapsed = Env.getTimeMs(env) -. state.startTime;
+        let (gotHighScore, ctx) = endOfStage ? SharedTypes.updateHighScore(env, ctx, state.level |> fst, timeElapsed) : (false, ctx);
         let next = endOfStage ? (stage + 1, 0) : (stage, level + 1);
         didWin ?
           Transition(ctx, `Finished(true, state.level, Array.length(ctx.stages[stage]))) :
           Same(ctx, {...state,
+            status: endOfStage ? StageCleared(gotHighScore, timeElapsed, 100.) : Running,
             level: next,
             enemies: ctx.stages[fst(next)][snd(next)],
             bullets: endOfStage ? [] : state.bullets,
