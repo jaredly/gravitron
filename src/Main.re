@@ -76,6 +76,7 @@ let transitionTo = (ctx, transition, env) =>
   | `StartFromStage(stage) => `Game(GravGame.newAtStage(~wallType=currentWallType(ctx), env, ctx, stage))
   | `Finished(won, reached, total) => `DoneScreen(DoneScreen.initialState(won, reached, total))
   | `PickLevel => `LevelPicker(LevelPicker.initialState)
+  | `HighScores => `HighScores(HighScores.initialState)
   | `PickWalls => `WallScreen(WallScreen.initialState)
   | `UserLevels => `LevelEditor(LevelEditor.blankState)
   | `EditLevel(level) => `LevelEditor(LevelEditor.editState(level))
@@ -87,6 +88,7 @@ let getScreen = (state) =>
     | `WelcomeScreen(state) =>
       Screen(state, WelcomeScreen.screen, ((state) => `WelcomeScreen(state)))
     | `LevelPicker(state) => Screen(state, LevelPicker.screen, ((state) => `LevelPicker(state)))
+    | `HighScores(state) => Screen(state, HighScores.screen, ((state) => `HighScores(state)))
     | `Game(state) => Screen(state, GravGame.screen, ((state) => `Game(state)))
     | `DoneScreen(state) => Screen(state, DoneScreen.screen, ((state) => `DoneScreen(state)))
     | `LevelEditor(state) => Screen(state, LevelEditor.screen, ((state) => `LevelEditor(state)))

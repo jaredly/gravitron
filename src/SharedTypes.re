@@ -348,6 +348,7 @@ type transition = [
   | `StartFromStage(int)
   | `Quit
   | `Finished(bool, (int, int), int)
+  | `HighScores
   | `PickWalls
   | `PickLevel
   | `UserLevels

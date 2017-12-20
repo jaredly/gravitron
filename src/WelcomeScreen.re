@@ -14,20 +14,21 @@ let wallTypeText = t => switch t {
 };
 
 let buttons = (highestBeatenStage, hasWon): array((string, transition))  => [|
-  (hasWon ? "Beaten" : "Stage " ++ string_of_int(highestBeatenStage + 2), hasWon ? `Start : `StartFromStage(highestBeatenStage + 1)),
+  (hasWon ? "Complete" : "Stage " ++ string_of_int(highestBeatenStage + 2), hasWon ? `Start : `StartFromStage(highestBeatenStage + 1)),
   ("Pick stage", `PickLevel),
-  /* ("Wall type: " ++ wallTypeText(wallType), `PickWalls), */
+  /* TODO free play */
+  /* ("Free play", `PickLevel), */
 |];
 
 let wallButtons = [|
   ("bouncy", BouncyWalls, bouncyWallColor),
   ("solid", FireWalls, fireWallColor),
-  ("no walls", Minimapped, Constants.black),
+  ("no walls", Minimapped, Utils.color(~r=50, ~g=50, ~b=50, ~a=255)),
 |];
 
 let buttonsWithPosition = (env, w, h, buttons, margin) => {
   let x = w - buttonWidth / 2;
-  let y0 = h + 90;
+  let y0 = h;
   /* let margin = 20; */
 
   Array.mapi((i, button) => {
@@ -36,9 +37,15 @@ let buttonsWithPosition = (env, w, h, buttons, margin) => {
   }, buttons)
 };
 
-let wallButtonOffset = 180;
+let highScoreButton = (ctx, env) => {
+  Button.singleBottom(env, "High scores", ctx.textFont, (Env.width(env) / 2, Env.height(env) - 10))
+};
 
-let verticalOffset = -200;
+let wallButtonOffset = 220;
+
+let verticalOffset = -250;
+
+let buttonOffset = 70;
 
 /** TODO I want to make an animation or something on the welcome screen
  * that shows a bit of what it will be like
@@ -51,12 +58,15 @@ let run = (ctx, env) => {
   let h = Env.height(env) / 2 + verticalOffset;
   DrawUtils.centerText(~font=ctx.titleFont, ~body="Gravitron", ~pos=(w, h), env);
   /* DrawUtils.centerText(~font=ctx.textFont, ~body="Tap to start the game", ~pos=(w, h + 50), env); */
+  let h = h + buttonOffset;
 
   let current = currentWallType(ctx);
   let highest = UserData.highestBeatenStage(ctx.userData);
-  buttonsWithPosition(env, w, h, buttons(highest, highest == Array.length(ctx.stages) - 1), 20) |> Array.iteri((i, ((x, y), (text, _))) => {
+  buttonsWithPosition(env, w, h, buttons(highest, highest == Array.length(ctx.stages) - 1), 10) |> Array.iteri((i, ((x, y), (text, _))) => {
     Draw.fill(MyUtils.withAlpha(Constants.white, 0.2), env);
     Draw.noStroke(env);
+    /* let buttonWidth = i == 0 ? buttonWidth + 50 : buttonWidth;
+    let x = i == 0 ? x - 25 : x; */
     if (MyUtils.rectCollide(Env.mouse(env), ((x,y), (buttonWidth, buttonHeight)))) {
       Draw.strokeWeight(2, env);
       Draw.stroke(Utils.color(~r=100, ~g=100, ~b=100, ~a=255), env);
@@ -78,7 +88,7 @@ let run = (ctx, env) => {
     };
   });
 
-  DrawUtils.centerText(~font=ctx.smallFont, ~body="Wall type", ~pos=(w, h + 240), env);
+  DrawUtils.centerText(~font=ctx.smallFont, ~body="Wall type", ~pos=(w, h + wallButtonOffset - 20), env);
 
   buttonsWithPosition(env, w, h + wallButtonOffset, wallButtons, 10) |> Array.iter((((x, y), (text, wallType, color))) => {
     /* let selected = current == wallType; */
@@ -110,6 +120,8 @@ let run = (ctx, env) => {
     };
   });
 
+  Button.drawSingle(env, highScoreButton(ctx, env));
+
   /* Draw.fill(Constants.red, env); */
   /* Draw.rect(~pos=Env.mouse(env), ~width=5, ~height=5, env); */
 
@@ -124,10 +136,10 @@ let screen = ScreenManager.Screen.{
   run: (ctx, _, env) => Same(ctx, run(ctx, env)),
   mouseDown: (ctx, _, env) => {
     let w = Env.width(env) / 2;
-    let h = Env.height(env) / 2 + verticalOffset;
+    let h = Env.height(env) / 2 + verticalOffset + buttonOffset;
     let highest = UserData.highestBeatenStage(ctx.userData);
     let hasWon = highest == Array.length(ctx.stages) - 1;
-    let dest = buttonsWithPosition(env, w, h, buttons(UserData.highestBeatenStage(ctx.userData), hasWon), 20) |> Array.fold_left(
+    let dest = buttonsWithPosition(env, w, h, buttons(UserData.highestBeatenStage(ctx.userData), hasWon), 10) |> Array.fold_left(
       (current, (pos, (_, dest))) => {
         if (current == None) {
           if (MyUtils.rectCollide(Env.mouse(env), (pos, (buttonWidth, buttonHeight)))) {
@@ -150,7 +162,13 @@ let screen = ScreenManager.Screen.{
     );
     let ctx = updateCurrentWallType(env, ctx, wallType);
     switch dest {
-    | None => Same(ctx, ())
+    | None => {
+      if (Button.hitSingle(env, highScoreButton(ctx, env))) {
+        Transition(ctx, `HighScores)
+      } else {
+        Same(ctx, ())
+      }
+    }
     | Some(dest) => Transition(ctx, dest)
     }
   },

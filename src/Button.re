@@ -123,3 +123,54 @@ let hitCentered = (~enabled=allEnabled, (cx, cy), (size, buttons), ~ctx, ~env, p
   let y = cy - height / 2;
   hitInner(~enabled, pos, (x, y), width, (size, buttons));
 };
+
+
+
+let singleBottom = (env, text, font, (x, y)) => {
+  /* let (x, y) = (Reprocessing.Env.width(env) / 2, Reprocessing.Env.height(env) - 10); */
+  /* let width = Font. */
+  let width = switch font^ {
+  | Some(font) => Reprocessing_Font.Font.calcStringWidth(env, font, text)
+  | None => 0
+  };
+  let height = 40;
+  let margin = 10;
+  let textPos = (x - width / 2, y - height + 10);
+  let pos = (x - width / 2 - margin, y - height);
+  (pos, textPos, width + margin * 2, height, text, font)
+};
+
+let singleTop = (env, text, font, (x, y)) => {
+  let width = switch font^ {
+  | Some(font) => Reprocessing_Font.Font.calcStringWidth(env, font, text)
+  | None => 0
+  };
+  let height = 40;
+  let margin = 10;
+  let textPos = (x - width / 2, y + 10);
+  let pos = (x - width / 2 - margin, y);
+  (pos, textPos, width + margin * 2, height, text, font)
+};
+
+let drawSingle = (env, (pos, textPos, width, height, text, font)) => {
+  open Reprocessing;
+  Draw.noStroke(env);
+  Draw.fill(color, env);
+  if (MyUtils.rectCollide(Env.mouse(env), (pos, (width, height)))) {
+    /* Draw.noFill(env); */
+    Draw.strokeWeight(2, env);
+    Draw.stroke(Utils.color(~r=100, ~g=100, ~b=100, ~a=255), env);
+  };
+  Draw.rect(~pos, ~width, ~height, env);
+  Draw.text(~pos=textPos, ~body=text, ~font, env);
+};
+
+let hitSingle = (env, ((x, y), _, width, height, _, _)) => {
+  let (a, b) = Reprocessing.Env.mouse(env);
+  if (a >= x && a <= x + width && b >= y && b <= y + height) {
+    true
+  } else {
+    false
+  }
+};
+

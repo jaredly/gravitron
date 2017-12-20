@@ -94,6 +94,13 @@ let drawWalls = (env, color) => {
 
 let string_seconds = time => time < 10 ? "0" ++ string_of_int(time) : string_of_int(time);
 
+let timeText = time => {
+  let seconds = time /. 1000. |> int_of_float;
+  seconds < 60
+    ? "0 : " ++ string_seconds(seconds)
+    : string_of_int(seconds / 60) ++ " : " ++ string_seconds(seconds mod 60);
+};
+
 let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
   switch (wallType) {
   | FireWalls => drawWalls(env, fireWallColor)
@@ -157,13 +164,9 @@ let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
     env
   );
 
-  let seconds = timeElapsed /. 1000. |> int_of_float;
-  let time = seconds < 60
-    ? "0:" ++ string_seconds(seconds)
-    : string_of_int(seconds / 60) ++ ":" ++ string_seconds(seconds mod 60);
   DrawUtils.textRightJustified(
     ~font=ctx.smallFont,
-    ~body=time,
+    ~body=timeText(timeElapsed),
     ~pos=(Env.width(env) - margin, Env.height(env) - margin - 16),
     env
   );
