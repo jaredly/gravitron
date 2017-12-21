@@ -17,7 +17,7 @@ let buttons = (highestBeatenStage, hasWon): array((string, transition))  => [|
   (hasWon ? "Complete" : "Stage " ++ string_of_int(highestBeatenStage + 2), hasWon ? `Start : `StartFromStage(highestBeatenStage + 1)),
   ("Pick stage", `PickLevel),
   /* TODO free play */
-  /* ("Free play", `PickLevel), */
+  ("Free play", `PickFreePlay),
 |];
 
 let wallButtons = [|

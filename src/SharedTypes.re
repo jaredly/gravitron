@@ -373,14 +373,18 @@ type context = {
   smallTitleFont: Reprocessing.fontT,
 };
 
+type difficulty = Easy | Medium | Hard;
+
 type transition = [
   | `Start
   | `StartFromStage(int)
+  | `FreeStyle(difficulty)
   | `Quit
   | `Finished(bool, (int, int), int)
   | `HighScores
   | `PickWalls
   | `PickLevel
+  | `PickFreePlay
   | `UserLevels
   | `EditLevel(int)
 ];

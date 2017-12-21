@@ -17,46 +17,6 @@ type button = {
   enemies: list(Enemy.t),
 };
 
-let buttonsInPosition = (ctx, env) => {
-  let buttons = ref([]);
-  let top = 100;
-  let w = Reprocessing.Env.width(env);
-  let left = w / 8;
-  let w = w - left - left;
-  let margin = 10;
-  let ratio = float_of_int(Reprocessing.Env.height(env)) /. float_of_int(Reprocessing.Env.width(env));
-  let boxWidth = Reprocessing.Env.width(env) / 5 - margin;
-  let boxHeight = int_of_float(float_of_int(boxWidth) *. ratio);
-  let rowSize = (w - margin) / (boxWidth + margin);
-  let stages = GravLevels.getStages(env);
-  Array.iteri((stageNo, levels) => {
-    for (i in 0 to Array.length(levels) - 1) {
-      let col = i mod rowSize;
-      let row = i / rowSize;
-      let x = col * (boxWidth + margin) + left;
-      let y = row * (boxHeight + margin) + top;
-      buttons :=
-        [
-          {
-            text: string_of_int(i + 1),
-            pos: (x, y),
-            width: boxWidth,
-            height: boxHeight,
-            i,
-            enemies: levels[i],
-            status: UserData.highestBeatenStage(ctx.userData) + 1 > i
-              ? Beaten
-              : (UserData.highestBeatenStage(ctx.userData) + 1 === i ? Available : Locked)
-          },
-          ...buttons^
-        ]
-    };
-    },
-    stages
-  );
-  buttons^
-};
-
 let center = ((x, y), w, h) => (x + w/2, y + h/2);
 
 let drawEnemySquare = (env, enemies, (x, y), w, h) => {

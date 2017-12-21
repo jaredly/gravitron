@@ -137,61 +137,69 @@ let scatterShooter = (~warmup=200., pos) => {
 };
 
 /* TODO these should probably be parameterized */
-let stages = [|
+let stages = (env) => {
+  let w = Env.width(env) |> float_of_int;
+  let h = Env.height(env) |> float_of_int;
+  let q = min(w, h) /. 4.;
+  let tl = (q, q);
+  let tr = (w -. q, q);
+  let bl = (q, h -. q);
+  let br = (w -. q, h -. q);
   [|
-  [red((600., 600.))],
-  [red((200., 200.)), red((600., 600.))],
-  [red((200., 200.)), blue((600., 600.))],
-  [blue(~warmup=150., (600., 600.)), blue((200., 200.))],
-  [blue(~warmup=50., (600., 600.)), blue(~warmup=100., (200., 200.)), blue(~warmup=150., (600., 200.)), blue(~warmup=0., (200., 600.))],
+  [|
+  [red(br)],
+  [red(tl), red(br)],
+  [red(tl), blue(br)],
+  [blue(~warmup=150., br), blue(tl)],
+  [blue(~warmup=50., br), blue(~warmup=100., tl), blue(~warmup=150., tr), blue(~warmup=0., bl)],
   |],
 
   [|
-  [smallGreen((600., 600.))],
-  [red((200., 200.)), smallGreen((600., 600.)), blue((600., 200.))],
-  [green((600., 600.))],
-  [scatterShooter((600., 600.))],
-  [pink((600., 600.))],
+  [smallGreen(br)],
+  [red(tl), smallGreen(br), blue(tr)],
+  [green(br)],
+  [scatterShooter(br)],
+  [pink(br)],
   |],
 
   [|
   [
     {
-    ...red((600., 600.)),
-    movement: Wander((600., 600.)),
+    ...red(br),
+    movement: Wander(br),
     stepping: Rabbit(600., (550., 600.))
   },
     {
-    ...red((200., 600.)),
-    movement: Wander((200., 600.)),
+    ...red(bl),
+    movement: Wander(bl),
     stepping: Rabbit(600., (200., 600.))
   },
     {
-    ...red((600., 200.)),
-    movement: Wander((600., 200.)),
+    ...red(tr),
+    movement: Wander(tr),
     stepping: Rabbit(600., (0., 600.))
   }
   ],
   [
     {
-      ...red((200., 200.)),
+      ...red(tl),
       /* movement: Avoider(MyUtils.v0), */
       dying: Revenge(20, Bullet.template(~color=color, ~speed=initialSpeed, ~damage=5, ~size=5. *. sizeFactor, ()))
     },
     {
-      ...red((600., 600.)),
+      ...red(br),
       /* movement: Avoider(MyUtils.v0), */
       dying: Revenge(20, Bullet.template(~color=color, ~speed=initialSpeed, ~damage=5, ~size=5. *. sizeFactor, ()))
     },
     {
-      ...red((200., 600.)),
+      ...red(bl),
       /* movement: Avoider(MyUtils.v0), */
       dying: Revenge(10, Bullet.template(~color=color, ~speed=initialSpeed, ~damage=5, ~size=5. *. sizeFactor, ()))
     }
   ],
   [
     {
-      ...defaultEnemy(~size=20., ~health=5, (200., 200.), 0., 200.),
+      ...defaultEnemy(~size=20., ~health=5, tl, 0., 200.),
       shooting: OneShot(Bullet.template(
         ~color=Utils.color(~r=255, ~g=255, ~b=100, ~a=255),
         ~size=5. *. sizeFactor,
@@ -202,7 +210,7 @@ let stages = [|
       ))
     },
     {
-      ...defaultEnemy(~size=20., ~health=5, (600., 200.), 0., 200.),
+      ...defaultEnemy(~size=20., ~health=5, tr, 0., 200.),
       shooting: OneShot(Bullet.template(
         ~color=Constants.green,
         ~size=5. *. sizeFactor,
@@ -214,7 +222,7 @@ let stages = [|
       ))
     },
     {
-      ...defaultEnemy(~size=20., ~health=5, (600., 600.), 0., 200.),
+      ...defaultEnemy(~size=20., ~health=5, br, 0., 200.),
       shooting: OneShot(Bullet.template(
         ~color=Utils.color(~r=100, ~g=200, ~b=200, ~a=255),
         ~size=10. *. sizeFactor,
@@ -235,7 +243,7 @@ let stages = [|
       ))
     },
     {
-      ...defaultEnemy(~size=20., ~health=5, (200., 600.), 0., 40.),
+      ...defaultEnemy(~size=20., ~health=5, bl, 0., 40.),
       shooting: Alternate(Bullet.template(
         ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
         ~size=10. *. sizeFactor,
@@ -254,7 +262,7 @@ let stages = [|
     },
   ], [
     {
-      ...defaultEnemy(~size=20., ~health=5, (200., 600.), 0., 70.),
+      ...defaultEnemy(~size=20., ~health=5, bl, 0., 70.),
       movement: Avoider(300.),
       shooting: OneShot(Bullet.template(
         ~color=Utils.color(~r=255, ~g=100, ~b=255, ~a=255),
@@ -274,7 +282,8 @@ let stages = [|
     },
   ]
   |]
-|];
+|]
+};
 
 let makePhoneStages = (env) => {
   let w = float_of_int(Env.width(env)) *. phoneScale;
@@ -350,4 +359,12 @@ let makePhoneStages = (env) => {
   |]
 };
 
-let getStages = (env) => isPhone ? makePhoneStages(env) : stages;
+let getStages = (env) => isPhone ? makePhoneStages(env) : stages(env);
+
+/* let getStages = (env) => {
+  let stages = [|
+    FreePlay.makeStage(env, true),
+    FreePlay.makeStage(env, false)
+  |];
+  stages
+}; */

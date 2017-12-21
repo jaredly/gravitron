@@ -6,9 +6,16 @@ open SharedTypes;
 
 open GravShared;
 
-let newGame = (~wallType=FireWalls, env, ctx) => {
+let newGame = (~mode=Campaign, ~wallType=FireWalls, env, ctx) => {
   /* let stages = GravLevels.getStages(env); */
+  let mode = switch mode {
+    | Campaign => Campaign
+    | FreePlay(Easy, _) => FreePlay(Easy, FreePlay.makeLevel(env, true))
+    | FreePlay(difficulty, _) => FreePlay(difficulty, FreePlay.makeLevel(env, false))
+  };
+
   {
+    mode,
     status: Running,
     hasMoved: false,
     startTime: Env.getTimeMs(env),
@@ -25,7 +32,10 @@ let newGame = (~wallType=FireWalls, env, ctx) => {
       acc: v0,
       size: 15. *. GravLevels.sizeFactor,
     },
-    enemies: ctx.stages[0][0],
+    enemies: switch mode {
+    | Campaign => ctx.stages[0][0]
+    | FreePlay(_, enemies) => enemies
+    },
     bullets: [],
     explosions: [],
     wallType,
@@ -38,7 +48,7 @@ let drawState = (~noLevelText=false, ctx, state, env) => {
   Draw.background(Constants.black, env);
   open GravDraw;
   switch (state.status) {
-  | Running | Paused(_) | StageCleared(_, _, _) => drawMe(state.me, env)
+  | Running | Paused(_) => drawMe(state.me, env)
   | _ => ()
   };
   List.iter(drawEnemy(env), state.enemies);
@@ -50,7 +60,6 @@ let drawState = (~noLevelText=false, ctx, state, env) => {
   };
   let timeElapsed = switch (state.status) {
   | Paused(pauseTime) => pauseTime -. state.startTime
-  | StageCleared(_, time, _) => time
   | _ => Env.getTimeMs(env) -. state.startTime
   };
   drawStatus(ctx, state.wallType, state.level, state.me, timeElapsed, env);
@@ -62,12 +71,28 @@ let drawState = (~noLevelText=false, ctx, state, env) => {
     let anim = state.levelTicker > 60. ? (state.levelTicker -. 60.) /. 60. : 0.;
     Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
     let (stage, level) = state.level;
+
+    let text = level > 0
+      ? "Level " ++ string_of_int(stage + 1) ++ "-" ++ string_of_int(level  + 1)
+      : "Stage " ++ string_of_int(stage + 1);
     DrawUtils.centerText(
-      ~pos=(Env.width(env) / 2, Env.height(env) / 2),
-      ~body="Level " ++ string_of_int(stage + 1) ++ "-" ++ string_of_int(level  + 1),
+      ~pos=(Env.width(env) / 2, Env.height(env) / 2 - 50),
+      ~body=text,
       ~font=ctx.titleFont,
       env
     );
+
+    switch state.gotHighScore {
+    | None => ()
+    | Some(score) =>
+      DrawUtils.centerText(
+        ~pos=(Env.width(env) / 2, Env.height(env) / 2),
+        ~body="New high score! " ++ GravDraw.timeText(score),
+        ~font=ctx.textFont,
+        env
+      );
+    };
+
     Draw.noTint(env);
   };
 };
@@ -82,7 +107,10 @@ let mainLoop = (ctx, state, env) => {
         ...state,
         status: Running,
         me: {...state.me, Player.health: fullPlayerHealth, lives: state.me.Player.lives - 1},
-        enemies: ctx.stages[stage][level],
+        enemies: switch state.mode {
+        | Campaign => ctx.stages[stage][level]
+        | FreePlay(_, enemies) => enemies
+        },
         explosions: [],
         bullets: []
       })
@@ -94,31 +122,6 @@ let mainLoop = (ctx, state, env) => {
     PauseOverlay.draw(ctx, env);
 
     Same(ctx, state)
-  | StageCleared(gotHighScore, timeElapsed, timer) =>
-    drawState(~noLevelText=true, ctx, state, env);
-
-    let anim = timer < 50. ? (50. -. timer) /. 50. : 0.;
-    Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
-
-    DrawUtils.centerText(
-      ~pos=(Env.width(env) / 2, Env.height(env) / 2),
-      ~body="Stage cleared",
-      ~font=ctx.boldTextFont,
-      env
-    );
-    if (gotHighScore) {
-      DrawUtils.centerText(
-        ~pos=(Env.width(env) / 2, Env.height(env) / 2 + 30),
-        ~body="New high score!",
-        ~font=ctx.textFont,
-        env
-      );
-    };
-
-    Draw.noTint(env);
-
-    let status = timer > 0. ? StageCleared(gotHighScore, timeElapsed, timer -. deltaTime(env)) : Running;
-    Same(ctx, {...state, status})
 
   | _ =>
     let state = {
@@ -143,6 +146,23 @@ let mainLoop = (ctx, state, env) => {
     state.enemies !== [] || state.status !== Running ?
       Same(ctx, state) :
       {
+        switch state.mode {
+        | FreePlay(difficulty, _) => {
+          let enemies = switch difficulty {
+          | Easy => FreePlay.makeLevel(env, true)
+          | _ => FreePlay.makeLevel(env, false)
+          };
+
+          let (_, level) = state.level;
+          Same(ctx, {
+            ...state,
+            level: (0, level + 1),
+            mode: FreePlay(difficulty, enemies),
+            enemies,
+            levelTicker: 0.
+          })
+        }
+        | Campaign =>
         let (stage, level) = state.level;
         let endOfStage = level == Array.length(ctx.stages[stage]) - 1;
         let ctx = endOfStage ? SharedTypes.updateHighestBeatenStage(env, ctx, state.level |> fst) : ctx;
@@ -153,14 +173,15 @@ let mainLoop = (ctx, state, env) => {
         didWin ?
           Transition(ctx, `Finished(true, state.level, Array.length(ctx.stages[stage]))) :
           Same(ctx, {...state,
-            status: endOfStage ? StageCleared(gotHighScore, timeElapsed, 100.) : Running,
             level: next,
+            gotHighScore: endOfStage && gotHighScore ? Some(timeElapsed) : None,
             enemies: ctx.stages[fst(next)][snd(next)],
             bullets: endOfStage ? [] : state.bullets,
             levelTicker: 0.,
             me: endOfStage ? Player.rejuvinate(state.me) : state.me,
             startTime: endOfStage ? Env.getTimeMs(env) : state.startTime
           })
+        }
       };
   }
 };
@@ -176,7 +197,17 @@ let newAtStage = (~wallType, env, ctx, stage) => {
 
 let keyPressed = (ctx, state, env) =>
   switch (Env.keyCode(env)) {
-  | Events.Escape => ScreenManager.Screen.Transition(ctx, `Quit)
+  | Events.Escape => {
+    switch (state.status) {
+    | Paused(pauseTime) => {
+      ScreenManager.Screen.Transition(ctx, `Quit)
+    }
+    | Running => {
+      Same(ctx, {...state, status: Paused(Env.getTimeMs(env))})
+    }
+    | _ => Same(ctx, state)
+    }
+  }
   | k =>
     Same(
       ctx,
@@ -191,15 +222,6 @@ let keyPressed = (ctx, state, env) =>
         | Running => {...state, status: Paused(Env.getTimeMs(env))}
         | _ => state
         }
-      /* | Events.Num_1 => newAtLevel(~wallType=state.wallType, env, 0)
-      | Events.Num_2 => newAtLevel(~wallType=state.wallType, env, 1)
-      | Events.Num_3 => newAtLevel(~wallType=state.wallType, env, 2)
-      | Events.Num_4 => newAtLevel(~wallType=state.wallType, env, 3)
-      | Events.Num_5 => newAtLevel(~wallType=state.wallType, env, 4)
-      | Events.Num_6 => newAtLevel(~wallType=state.wallType, env, 5)
-      | Events.Num_7 => newAtLevel(~wallType=state.wallType, env, 6)
-      | Events.Num_8 => newAtLevel(~wallType=state.wallType, env, 7)
-      | Events.Num_9 => newAtLevel(~wallType=state.wallType, env, 8) */
       | _ => state
       }
     )
@@ -237,8 +259,15 @@ let screen = ScreenManager.Screen.{
   run: (ctx, state, env) => mainLoop(ctx, state, env),
   mouseDown,
   keyPressed: (ctx, state, env) => keyPressed(ctx, state, env),
-  backPressed: (ctx, _, _) => {
-    /* Capi.logAndroid("Grav game plz quit"); */
-    Some(Transition(ctx, `Quit))
+  backPressed: (ctx, state, env) => {
+    switch (state.status) {
+    | Paused(pauseTime) => {
+      Some(Transition(ctx, `Quit))
+    }
+    | Running => {
+      Some(Same(ctx, {...state, status: Paused(Env.getTimeMs(env))}))
+    }
+    | _ => Some(Same(ctx, state))
+    }
   }
 };

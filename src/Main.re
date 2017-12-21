@@ -15,7 +15,14 @@ let setup = (assetDir, initialScreen, env) => {
   let userData = SharedTypes.UserData.load(env);
 
   if (!GravShared.isPhone) {
-    Reprocessing.Env.size(~width=800, ~height=800, env);
+    let size = min(
+      min(
+        Reprocessing.Env.maxWidth(env),
+        Reprocessing.Env.maxHeight(env)
+      ),
+      800
+    );
+    Reprocessing.Env.size(~width=size, ~height=size, env);
   } else if (GravShared.fakePhone) {
     Reprocessing.Env.size(~width=340, ~height=640, env);
   };
@@ -75,6 +82,8 @@ let transitionTo = (ctx, transition, env) =>
     `Game(GravGame.initialState(~wallType=currentWallType(ctx), env, ctx))
   | `StartFromStage(stage) => `Game(GravGame.newAtStage(~wallType=currentWallType(ctx), env, ctx, stage))
   | `Finished(won, reached, total) => `DoneScreen(DoneScreen.initialState(won, reached, total))
+  | `FreeStyle(difficulty) => `Game(GravGame.initialState(~mode=GravShared.FreePlay(difficulty, []), ~wallType=currentWallType(ctx), env, ctx))
+  | `PickFreePlay => `PickFreePlay(FreePlayPicker.initialState)
   | `PickLevel => `LevelPicker(LevelPicker.initialState)
   | `HighScores => `HighScores(HighScores.initialState)
   | `PickWalls => `WallScreen(WallScreen.initialState)
@@ -90,6 +99,7 @@ let getScreen = (state) =>
     | `LevelPicker(state) => Screen(state, LevelPicker.screen, ((state) => `LevelPicker(state)))
     | `HighScores(state) => Screen(state, HighScores.screen, ((state) => `HighScores(state)))
     | `Game(state) => Screen(state, GravGame.screen, ((state) => `Game(state)))
+    | `PickFreePlay(state) => Screen(state, FreePlayPicker.screen, state => `PickFreePlay(state))
     | `DoneScreen(state) => Screen(state, DoneScreen.screen, ((state) => `DoneScreen(state)))
     | `LevelEditor(state) => Screen(state, LevelEditor.screen, ((state) => `LevelEditor(state)))
     | `WallScreen(state) => Screen(state, WallScreen.screen, (state) => `WallScreen(state))

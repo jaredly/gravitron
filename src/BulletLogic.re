@@ -173,7 +173,7 @@ let collideEnemies = (env, state, bullet) => {
       if (died) {
         ({...state, enemies: [enemy, ...state.enemies]}, died)
       } else {
-        if (collides(enemy.Enemy.pos, bullet.pos, bullet.size +. enemy.Enemy.size))  {
+        if (isFullTimer(enemy.Enemy.warmup) && collides(enemy.Enemy.pos, bullet.pos, bullet.size +. enemy.Enemy.size))  {
           (
             damageEnemy(env, state, enemy, bullet.damage),
             true

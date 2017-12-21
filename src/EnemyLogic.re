@@ -123,8 +123,8 @@ let shoot = (env, state, enemy) => {
     )
     | TripleShot(bullet) => ([
         shotBullet(~theta=0., enemy.pos, enemy.size, state.me.pos, bullet),
-        shotBullet(~theta=(-0.3), enemy.pos, enemy.size, state.me.pos, bullet),
-        shotBullet(~theta=0.3, enemy.pos, enemy.size, state.me.pos, bullet),
+        shotBullet(~theta=(-0.5), enemy.pos, enemy.size, state.me.pos, bullet),
+        shotBullet(~theta=0.5, enemy.pos, enemy.size, state.me.pos, bullet),
         ...state.bullets
       ], enemy.shooting)
     }

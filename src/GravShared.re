@@ -8,7 +8,7 @@ let deltaTime = (env) => Env.deltaTime(env) *. 1000. /. 16.;
 
 let fullPlayerHealth = SharedTypes.Player.fullHealth;
 
-let fakePhone = try {Sys.getenv("PHONE");true} { | Not_found => false };
+let fakePhone = try {Sys.getenv("PHONE") |> ignore; true} { | Not_found => false };
 let isPhone = Reprocessing.target == "native-ios" || Reprocessing.target == "native-android" || fakePhone;
 
 let phoneScale = isPhone ? 1. : 1.;
@@ -63,14 +63,20 @@ let circle = (~center, ~rad) => Reprocessing.Draw.ellipsef(~center, ~radx=rad, ~
 type status =
   | Running
   | Paused(float)
-  | StageCleared(bool, float, float)
+  /* | StageCleared(bool, float, float) */
   | Dead(int);
+
+type mode =
+  | Campaign
+  | FreePlay(difficulty, list(Enemy.t));
 
 type gameState = {
   status,
+  mode,
   hasMoved: bool,
   startTime: float,
   level: (int, int),
+  gotHighScore: option(float),
   /* stages: array(array(list(Enemy.t))), */
   levelTicker: float,
   me: SharedTypes.Player.t,

@@ -3,7 +3,7 @@ open Reprocessing;
 
 let initialState = ();
 
-let width = 200;
+let width = 140;
 let textHeight = 24;
 
 let drawScores = (ctx, env, name, scores, y) => {
@@ -41,8 +41,8 @@ let run = (ctx, env) => {
   DrawUtils.centerText(~font=ctx.boldTextFont, ~body="High scores", ~pos=(w, h), env);
   let y = h + 50;
   let (f, b, m) = ctx.userData.UserData.highScores;
-  let y = drawScores(ctx, env, "Bouncy", b, y);
-  let y = drawScores(ctx, env, "Solid", f, y);
+  let y = drawScores(ctx, env, "Bouncy walls", b, y);
+  let y = drawScores(ctx, env, "Solid walls", f, y);
   let y = drawScores(ctx, env, "No walls", m, y);
 
   Button.drawSingle(env, backButton(ctx, env));
