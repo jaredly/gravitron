@@ -62,21 +62,21 @@ let complexBullet = () => {
 let basicEnemy = (pos, color, health, missileTimer) => {
   open Enemy;
   {
-  pos,
-  vel: MyUtils.v0,
-  color,
-  size: 20.,
-  warmup: (0., 40.),
-  health: (health, health),
-  animate: 0.,
-  movement: choose([|Stationary, Wander(pos), Avoider(Random.float(1.) +. 1.)|]),
-  dying: Normal,
-  stepping: DoNothing,
-  shooting: OneShot(basicBullet(1)),
-  dodges: (0., 0.),
-  missileTimer: (0., missileTimer),
-  selfDefense: None,
-};
+    pos,
+    vel: MyUtils.v0,
+    color,
+    size: 20.,
+    warmup: (0., 40.),
+    health: (health, health),
+    animate: 0.,
+    movement: choose([|Stationary, Wander(pos), Avoider(Random.float(1.) +. 1.)|]),
+    dying: Normal,
+    stepping: DoNothing,
+    shooting: OneShot(basicBullet(1)),
+    dodges: (0., 0.),
+    missileTimer: (0., missileTimer),
+    selfDefense: None,
+  };
 };
 
 let easyEnemy = (~pos) => {

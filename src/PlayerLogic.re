@@ -3,14 +3,14 @@ open GravShared;
 open Reprocessing;
 open MyUtils;
 
-let maxSpeed = isPhone ? 10. : 7.;
+let maxSpeed = 10.;
 let stepMeMouse = ({me} as state, env) =>
   Player.(
     if (Env.mousePressed(env) && state.hasMoved) {
       let delta = deltaTime(env);
       let mousePos = floatPos(Reprocessing_Env.mouse(env));
       let mousePos = isPhone ? scalePos(mousePos, phoneScale) : mousePos;
-      let vel = springToward(me.pos, mousePos, isPhone ? 0.5 : 0.1);
+      let vel = springToward(me.pos, mousePos, 0.5);
       let vel = clampVec(vel, 0.01, maxSpeed, 0.98);
       let (vel, pos) = bouncePos(state.wallType, vel, me.pos, Env.width(env), Env.height(env), delta, me.size);
       {...state, me: {...me, pos, vel}, hasMoved: true}

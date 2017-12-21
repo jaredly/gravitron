@@ -77,10 +77,11 @@ let bomb = bullet => {
 
 let scatterBullets = (number, subBullet, pos) => {
   let by = Constants.two_pi /. float_of_int(number);
+  let off = Random.float(by);
   let rec loop = (i) =>
     i > 0 ?
       {
-        let theta = by *. float_of_int(i);
+        let theta = by *. float_of_int(i) +. off;
         [
           Bullet.init({
             ...subBullet,

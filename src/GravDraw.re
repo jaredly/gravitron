@@ -101,7 +101,7 @@ let timeText = time => {
     : string_of_int(seconds / 60) ++ " : " ++ string_seconds(seconds mod 60);
 };
 
-let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
+let drawStatus = (ctx, {wallType, level, me, mode}, timeElapsed, env) => {
   switch (wallType) {
   | FireWalls => drawWalls(env, fireWallColor)
   | BouncyWalls => drawWalls(env, bouncyWallColor)
@@ -157,9 +157,15 @@ let drawStatus = (ctx, wallType, level, me, timeElapsed, env) => {
 
   /* Level */
   let (stage, level) = level;
+  let levelText = switch mode {
+  | Campaign => "Level " ++ string_of_int(stage + 1) ++ "-" ++ string_of_int(level + 1)
+  | FreePlay(Easy, _) => "Easy - " ++ string_of_int(level + 1)
+  | FreePlay(Medium, _) => "Medium - " ++ string_of_int(level + 1)
+  | FreePlay(Hard, _) => "Hard - " ++ string_of_int(level + 1)
+  };
   DrawUtils.textRightJustified(
     ~font=ctx.smallFont,
-    ~body="Level " ++ string_of_int(stage + 1) ++ "-" ++ string_of_int(level + 1),
+    ~body=levelText,
     ~pos=(Env.width(env) - margin, margin - 5),
     env
   );
@@ -329,7 +335,8 @@ let drawEnemy = (env, enemy) => {
   switch (enemy.stepping) {
   | Rabbit(_, timer) => {
     Draw.noFill(env);
-    Draw.stroke(withAlpha(enemy.color, 0.4), env);
+    Draw.stroke(enemy.color, env);
+    Draw.strokeWeight(3, env);
     /* Draw.strokeWeight(2, env); */
     let (warmup, maxval) = timer;
     let rad = enemy.size *. warmup /. maxval;

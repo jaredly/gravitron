@@ -81,7 +81,7 @@ let transitionTo = (ctx, transition, env) =>
     print_endline("Start");
     `Game(GravGame.initialState(~wallType=currentWallType(ctx), env, ctx))
   | `StartFromStage(stage) => `Game(GravGame.newAtStage(~wallType=currentWallType(ctx), env, ctx, stage))
-  | `Finished(won, reached, total) => `DoneScreen(DoneScreen.initialState(won, reached, total))
+  | `Finished(won, reached, total, difficulty) => `DoneScreen(DoneScreen.initialState(won, reached, total, difficulty))
   | `FreeStyle(difficulty) => `Game(GravGame.initialState(~mode=GravShared.FreePlay(difficulty, []), ~wallType=currentWallType(ctx), env, ctx))
   | `PickFreePlay => `PickFreePlay(FreePlayPicker.initialState)
   | `PickLevel => `LevelPicker(LevelPicker.initialState)

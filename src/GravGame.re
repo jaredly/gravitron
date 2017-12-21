@@ -62,7 +62,7 @@ let drawState = (~noLevelText=false, ctx, state, env) => {
   | Paused(pauseTime) => pauseTime -. state.startTime
   | _ => Env.getTimeMs(env) -. state.startTime
   };
-  drawStatus(ctx, state.wallType, state.level, state.me, timeElapsed, env);
+  drawStatus(ctx, state, timeElapsed, env);
   if (!state.hasMoved) {
     drawHelp(ctx, state.me, env);
   };
@@ -72,9 +72,15 @@ let drawState = (~noLevelText=false, ctx, state, env) => {
     Draw.tint(withAlpha(Constants.white, 0.5 -. anim /. 2.), env);
     let (stage, level) = state.level;
 
-    let text = level > 0
+    let text = switch state.mode {
+    | Campaign =>
+    level > 0
       ? "Level " ++ string_of_int(stage + 1) ++ "-" ++ string_of_int(level  + 1)
       : "Stage " ++ string_of_int(stage + 1);
+    | FreePlay(Easy, _) => "Easy - " ++ string_of_int(level + 1)
+    | FreePlay(Medium, _) => "Medium - " ++ string_of_int(level + 1)
+    | FreePlay(Hard, _) => "Hard - " ++ string_of_int(level + 1)
+    };
     DrawUtils.centerText(
       ~pos=(Env.width(env) / 2, Env.height(env) / 2 - 50),
       ~body=text,
@@ -115,7 +121,7 @@ let mainLoop = (ctx, state, env) => {
         bullets: []
       })
     } else {
-      Transition(ctx, `Finished(false, state.level, Array.length(ctx.stages[fst(state.level)])))
+      Transition(ctx, `Finished(false, state.level, Array.length(ctx.stages[fst(state.level)]), switch state.mode { | FreePlay(d, _) => Some(d) | _ => None }))
     }
   | Paused(_) =>
     drawState(ctx, state, env);
@@ -171,7 +177,7 @@ let mainLoop = (ctx, state, env) => {
         let (gotHighScore, ctx) = endOfStage ? SharedTypes.updateHighScore(env, ctx, state.level |> fst, timeElapsed) : (false, ctx);
         let next = endOfStage ? (stage + 1, 0) : (stage, level + 1);
         didWin ?
-          Transition(ctx, `Finished(true, state.level, Array.length(ctx.stages[stage]))) :
+          Transition(ctx, `Finished(true, state.level, Array.length(ctx.stages[stage]), switch state.mode { | FreePlay(d, _) => Some(d) | _ => None })) :
           Same(ctx, {...state,
             level: next,
             gotHighScore: endOfStage && gotHighScore ? Some(timeElapsed) : None,

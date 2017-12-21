@@ -380,7 +380,7 @@ type transition = [
   | `StartFromStage(int)
   | `FreeStyle(difficulty)
   | `Quit
-  | `Finished(bool, (int, int), int)
+  | `Finished(bool, (int, int), int, option(difficulty))
   | `HighScores
   | `PickWalls
   | `PickLevel
