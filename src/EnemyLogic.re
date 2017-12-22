@@ -13,6 +13,11 @@ let offscreenTheta = offscreen => switch offscreen {
   | OnScreen => assert(false)
 };
 
+let resetEnemyStepping = stepping => switch stepping {
+| DoNothing => DoNothing
+| Rabbit(mintime, (at, max)) => Rabbit(mintime, (0., max))
+};
+
 /* let evade = */
 
 let moveEnemy = (env, state, enemy) => {
@@ -24,13 +29,13 @@ let moveEnemy = (env, state, enemy) => {
     {...enemy, pos, vel, movement: Stationary}
   | GoToPosition(target) => {
     let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
-    let vel = {theta: vel.theta, mag: min(vel.mag, 2.) *. 0.98};
+    let vel = {theta: vel.theta, mag: min(max(vel.mag, 0.), 2.) *. 0.98};
     let pos = posAdd(enemy.pos, vecToPos(vel));
     {...enemy, pos, vel, movement: GoToPosition(target)}
   }
   | Wander(target) =>
     let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
-    let vel = {theta: vel.theta, mag: min(vel.mag, 4.) *. 0.98};
+    let vel = {theta: vel.theta, mag: min(max(vel.mag, 0.), 4.) *. 0.98};
     let pos = posAdd(enemy.pos, vecToPos(vel));
     let target =
       collides(enemy.pos, target, enemy.size *. 2.)
@@ -43,7 +48,7 @@ let moveEnemy = (env, state, enemy) => {
     } else {
       vel
     };
-    let vel = switch (offscreen(enemy.pos, Env.width(env), Env.height(env), int_of_float(enemy.size *. 3.))) {
+    let vel = switch (offscreen(enemy.pos, Env.width(env), Env.height(env), int_of_float(enemy.size))) {
       | OnScreen => vel
       | x => {
         let theta = offscreenTheta(x);

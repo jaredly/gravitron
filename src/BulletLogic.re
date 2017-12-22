@@ -136,7 +136,9 @@ let damageEnemy = (env, state, enemy, damage) => {
       let size = float_of_int(current) *. 5. +. 10.;
       let (_, bulletTime) = enemy.missileTimer;
       let shooting = smallerShot(enemy.shooting, float_of_int(2 + current * 2), 2 + current * 3);
-      let base = {...enemy, health: (current, current), shooting, size};
+      let base = {...enemy,
+        stepping: EnemyLogic.resetEnemyStepping(enemy.stepping),
+        health: (current, current), shooting, size};
       {
         ...state,
         enemies: [

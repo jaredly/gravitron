@@ -69,7 +69,18 @@ let basicEnemy = (pos, color, health, missileTimer) => {
     warmup: (0., 40.),
     health: (health, health),
     animate: 0.,
-    movement: choose([|Stationary, Wander(pos), Avoider(Random.float(1.) +. 1.)|]),
+    movement: {
+      let m = choose([|Stationary, Wander(pos), Avoider(Random.float(100.) +. 50.)|]);
+      let {Reprocessing_Common.r, g, b} = color;
+      Printf.printf("color %f %f %f", r, g, b);
+      print_endline(switch m {
+      | Stationary => "stationary enemy"
+      | Wander(x) => "wander"
+      | Avoider(_) => "avoider"
+      | GoToPosition(_) => "Go to position"
+      });
+      m
+    },
     dying: Normal,
     stepping: DoNothing,
     shooting: OneShot(basicBullet(1)),
@@ -109,7 +120,7 @@ let hardEnemy = (~pos) => {
     },
     dying: health <= 3 ? choose([|Normal, Normal, Normal, Asteroid, Revenge(Random.int(20) + 4, simpleBullet())|])
       : choose([|Normal, Normal, Normal, Revenge(Random.int(20) + 4, simpleBullet())|]),
-    stepping: choose([|DoNothing, DoNothing, Rabbit(600., (0., 600.))|])
+    stepping: choose([|DoNothing, DoNothing, DoNothing, DoNothing, Rabbit(600., (0., 600.))|])
   };
 };
 
