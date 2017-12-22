@@ -19,7 +19,7 @@ let moveBullet = (isDead, wallType, player, bullet, env) => {
     let theta = thetaToward(bullet.pos, player.Player.pos);
     let acc = {theta, mag: speed};
     let vel = vecAdd(bullet.vel, acc);
-    let vel = {theta: vel.theta, mag: min(maxvel, vel.mag)};
+    let vel = {theta: vel.theta, mag: vel.mag *. 0.98};
     /** TODO this might need to be scaled by deltaTime too */
     (vel, bullet.moving);
   | Mine(min, max, counter) =>
