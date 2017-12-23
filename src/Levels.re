@@ -150,8 +150,8 @@ let orange = {
 let wanderYellow = {...yellow, movement: Wander((0., 0.))};
 
 let stage3 = env => [|
-  place2(env, orange, wanderYellow),
   place1(env, orange),
+  place2(env, orange, wanderYellow),
 |];
 
 let stages = env => [|
