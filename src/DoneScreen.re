@@ -30,9 +30,7 @@ let screen = {
       if (!won) {
         let text = switch difficulty {
         | None => Printf.sprintf("Reached level %d/%d of stage %d", reached + 1, total, stage + 1)
-        | Some(Easy) => "Reached level " ++ string_of_int(reached + 1)
-        | Some(Medium) => "Reached level " ++ string_of_int(reached + 1)
-        | Some(Hard) => "Reached level " ++ string_of_int(reached + 1)
+        | Some(_) => "Reached level " ++ string_of_int(reached + 1)
         };
         DrawUtils.centerText(~font=ctx.smallFont, ~body=text, ~pos=(w, y + 60), env);
       };

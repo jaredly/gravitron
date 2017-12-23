@@ -3,7 +3,8 @@ open SharedTypes;
 let buttons = (Button.Normal, [
   ("Easy", Easy),
   ("Medium", Medium),
-  ("Hard", Hard)
+  ("Hard", Hard),
+  ("Ludicrous", Ludicrous)
 ]);
 
 let backButton = (ctx, env) =>

@@ -10,8 +10,10 @@ let newGame = (~mode=Campaign, ~wallType=FireWalls, env, ctx) => {
   /* let stages = GravLevels.getStages(env); */
   let mode = switch mode {
     | Campaign => Campaign
-    | FreePlay(Easy, _) => FreePlay(Easy, FreePlay.makeLevel(env, true))
-    | FreePlay(difficulty, _) => FreePlay(difficulty, FreePlay.makeLevel(env, false))
+    | FreePlay(Easy, _) => FreePlay(Easy, FreePlay.makeLevel(env, FreeBetter.easyEnemy))
+    | FreePlay(Medium, _) => FreePlay(Medium, FreePlay.makeLevel(env, FreeBetter.mediumEnemy))
+    | FreePlay(Hard, _) => FreePlay(Hard, FreePlay.makeLevel(env, FreeBetter.hardEnemy))
+    | FreePlay(Ludicrous, _) => FreePlay(Ludicrous, FreePlay.makeLevel(env, FreeBetter.ludicrousEnemy))
   };
 
   {
@@ -80,6 +82,7 @@ let drawState = (~noLevelText=false, ctx, state, env) => {
     | FreePlay(Easy, _) => "Easy - " ++ string_of_int(level + 1)
     | FreePlay(Medium, _) => "Medium - " ++ string_of_int(level + 1)
     | FreePlay(Hard, _) => "Hard - " ++ string_of_int(level + 1)
+    | FreePlay(Ludicrous, _) => "Ludicrous - " ++ string_of_int(level + 1)
     };
     DrawUtils.centerText(
       ~pos=(Env.width(env) / 2, Env.height(env) / 2 - 50),
@@ -155,8 +158,10 @@ let mainLoop = (ctx, state, env) => {
         switch state.mode {
         | FreePlay(difficulty, _) => {
           let enemies = switch difficulty {
-          | Easy => FreePlay.makeLevel(env, true)
-          | _ => FreePlay.makeLevel(env, false)
+          | Easy => FreePlay.makeLevel(env, FreeBetter.easyEnemy)
+          | Medium => FreePlay.makeLevel(env, FreeBetter.mediumEnemy)
+          | Hard => FreePlay.makeLevel(env, FreeBetter.hardEnemy)
+          | Ludicrous => FreePlay.makeLevel(env, FreeBetter.ludicrousEnemy)
           };
 
           let (_, level) = state.level;

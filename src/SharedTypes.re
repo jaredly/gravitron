@@ -66,6 +66,30 @@ module Bullet = {
     pos
   };
 
+  let rec showMoving = moving => switch moving {
+  | Gravity => ""
+  | HeatSeeking(_, _) => ", heatseek"
+  | Mine(_, _, _) => ", mine"
+  }
+
+  and showStepping = s => switch s {
+  | Nothing => ""
+  | TimeBomb(_) => ", step: timebomb"
+  | Scatter(_, n, b) => Printf.sprintf(", step: Scatter(%d, %s)", n, show(b))
+  | ProximityScatter(_, n, b) => Printf.sprintf(", step: PScatter(%d, %s)", n, show(b))
+  | Shooter(_, b) => Printf.sprintf(", step: Shooter(%s)", show(b))
+  | Bomb(_) => ", step: bomb"
+  }
+
+  and show = bullet => {
+    Printf.sprintf(
+      "Bullet(%d%s%s)",
+      bullet.damage,
+      showStepping(bullet.stepping),
+      showMoving(bullet.moving)
+    )
+  };
+
   let init = (bullet) => {
     let moving = switch bullet.moving {
     | Mine(min, max, _) => Mine(min, max, (0., Random.float(max -. min) +. min))
@@ -214,6 +238,41 @@ module Enemy = {
     /* The percent that it has to be full in order to defent itself */
     selfDefense: option(float),
   };
+
+  let showMovement = m => switch m {
+  | Stationary => ""
+  | GoToPosition(_) => ", move: go"
+  | Wander(_) => ", move: wander"
+  | Avoider(_) => ", move: avoid"
+  };
+
+  let showStepping = s => switch s {
+  | DoNothing => ""
+  | Rabbit(m, _) => Printf.sprintf(", step: rabbit(%f)", m)
+  };
+
+  let showDying = d => switch d {
+    | Normal => ""
+    | Asteroid => ", die: Asteroid"
+    | Revenge(n, b) => Printf.sprintf(", die: Revenge(%d, %s)", n, Bullet.show(b))
+  };
+
+  let showShooting = s => switch s {
+  | OneShot(b) => ", shoot: " ++ Bullet.show(b)
+  | TripleShot(b) => ", tripleshot: " ++ Bullet.show(b)
+  | Alternate(a, b, _) => ", altershoot: " ++ Bullet.show(a) ++ " + " ++ Bullet.show(b)
+  };
+
+  let show = (enemy) => {
+    Printf.sprintf(
+      "Enemy(health:%d%s%s%s%s)",
+      fst(enemy.health),
+      showMovement(enemy.movement),
+      showDying(enemy.dying),
+      showStepping(enemy.stepping),
+      showShooting(enemy.shooting)
+    )
+  }
 };
 
 module Explosion = {
@@ -373,7 +432,7 @@ type context = {
   smallTitleFont: Reprocessing.fontT,
 };
 
-type difficulty = Easy | Medium | Hard;
+type difficulty = Easy | Medium | Hard | Ludicrous;
 
 type transition = [
   | `Start

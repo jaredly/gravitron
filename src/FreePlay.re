@@ -106,7 +106,7 @@ let randomEnemy = (~pos, ~color, depth) => {
 }; */
 
 
-let makeLevel = (env, easy) => {
+let makeLevel = (env, maker) => {
   let w = Reprocessing.Env.width(env) |> float_of_int;
   let h = Reprocessing.Env.height(env) |> float_of_int;
   let q = min(w, h) /. 4.;
@@ -117,19 +117,15 @@ let makeLevel = (env, easy) => {
   let positions = [|tl, tr, bl, br|];
   let level = ref([]);
   for (i in 0 to Random.int(2) + 1) {
-    level := [
-      easy
-      ? FreeBetter.easyEnemy(~pos=positions[i])
-      : FreeBetter.hardEnemy(~pos=positions[i])
-      , ...level^]
+    level := [maker(~pos=positions[i]), ...level^]
   };
   level^
 };
 
-let makeStage = (env, easy) => {
+let makeStage = (env, maker) => {
   let levels = Array.make(5, []);
   for (i in 0 to 4) {
-    levels[i] = makeLevel(env, easy)
+    levels[i] = makeLevel(env, maker)
   };
   levels
 };
