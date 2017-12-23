@@ -25,6 +25,7 @@ module Player = {
   };
   let fullHealth = 100;
   let fullLives = 2;
+  let freePlayLives = 3;
   let rejuvinate = me => {...me, health: fullHealth, lives: fullLives};
 };
 
@@ -68,10 +69,10 @@ module Bullet = {
 
   let colorForStepping = stepping => switch stepping {
   | Nothing => Reprocessing.Constants.white
-  | TimeBomb(_) | Bomb(_) => HslToRgb.hsla(~h=60, ~s=1., ~l=0.7, ~a=255)
+  | TimeBomb(_) | Bomb(_) => HslToRgb.hsla(~h=120, ~s=1., ~l=0.7, ~a=255)
   | Scatter(_) => HslToRgb.hsla(~h=0, ~s=1., ~l=0.7, ~a=255)
-  | ProximityScatter(_) => HslToRgb.hsla(~h=240, ~s=1., ~l=0.7, ~a=255)
-  | Shooter(_) => HslToRgb.hsla(~h=200, ~s=1., ~l=0.7, ~a=255)
+  | ProximityScatter(_) => HslToRgb.hsla(~h=320, ~s=1., ~l=0.7, ~a=255)
+  | Shooter(_) => HslToRgb.hsla(~h=240, ~s=1., ~l=0.7, ~a=255)
   };
 
   let fixColor = bullet => {...bullet, color: colorForStepping(bullet.stepping)};

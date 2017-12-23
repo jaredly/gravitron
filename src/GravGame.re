@@ -15,6 +15,10 @@ let newGame = (~mode=Campaign, ~wallType=FireWalls, env, ctx) => {
     | FreePlay(Hard, _) => FreePlay(Hard, FreePlay.makeLevel(env, FreeBetter.hardEnemy))
     | FreePlay(Ludicrous, _) => FreePlay(Ludicrous, FreePlay.makeLevel(env, FreeBetter.ludicrousEnemy))
   };
+  let lives = switch mode {
+  | Campaign => Player.fullLives
+  | _ => Player.freePlayLives
+  };
 
   {
     mode,
@@ -27,7 +31,7 @@ let newGame = (~mode=Campaign, ~wallType=FireWalls, env, ctx) => {
     /* stages, */
     me: {
       health: Player.fullHealth,
-      lives: Player.fullLives,
+      lives,
       pos: getPhonePos(env),
       color: Constants.green,
       vel: v0,
@@ -87,7 +91,7 @@ let drawState = (~noLevelText=false, ctx, state, env) => {
     DrawUtils.centerText(
       ~pos=(Env.width(env) / 2, Env.height(env) / 2 - 50),
       ~body=text,
-      ~font=ctx.titleFont,
+      ~font=ctx.boldTextFont,
       env
     );
 
