@@ -40,11 +40,11 @@ let randomSort = arr => {
 
 /* Bullet generation */
 
-let sizeForDamage = damage => sqrt(float_of_int(damage)) +. 5.;
+let sizeForDamage = damage => sqrt(float_of_int(damage)) +. 3.;
 
 open Bullet;
 let basicBullet = (damage) => {
-  Bullet.color: randomColor(),
+  Bullet.color: Reprocessing.Constants.white,
   damage,
   size: sizeForDamage(damage),
   warmup: (0., 40.),
@@ -74,7 +74,7 @@ let rec pStepping = (available, bullet) => {
       (1, (5 + bn, Shooter((0., Random.float(200.) +. 100.), b)))
     }
   |]);
-  (points, {...bullet, stepping})
+  (points, Bullet.fixColor({...bullet, stepping}))
 }
 
 and pDamage = (available, bullet) => {

@@ -66,6 +66,16 @@ module Bullet = {
     pos
   };
 
+  let colorForStepping = stepping => switch stepping {
+  | Nothing => Reprocessing.Constants.white
+  | TimeBomb(_) | Bomb(_) => HslToRgb.hsla(~h=60, ~s=1., ~l=0.7, ~a=255)
+  | Scatter(_) => HslToRgb.hsla(~h=0, ~s=1., ~l=0.7, ~a=255)
+  | ProximityScatter(_) => HslToRgb.hsla(~h=240, ~s=1., ~l=0.7, ~a=255)
+  | Shooter(_) => HslToRgb.hsla(~h=200, ~s=1., ~l=0.7, ~a=255)
+  };
+
+  let fixColor = bullet => {...bullet, color: colorForStepping(bullet.stepping)};
+
   let rec showMoving = moving => switch moving {
   | Gravity => ""
   | HeatSeeking(_, _) => ", heatseek"
@@ -110,7 +120,8 @@ module Bullet = {
     ~pos=(0., 0.),
     ()
   ) => {
-    color, damage, size, stepping, moving, warmup, vel: {theta: 0., mag: speed}, acc, pos
+    color: colorForStepping(stepping),
+    damage, size, stepping, moving, warmup, vel: {theta: 0., mag: speed}, acc, pos
   }
 };
 
