@@ -45,7 +45,8 @@ let moveBullet = (isDead, wallType, player, bullet, env) => {
   | BouncyWalls => {
     let off = offscreen(pos, Env.width(env), Env.height(env), int_of_float(bullet.size));
     let vel = bounceVel(bullet.vel, off);
-    let pos = posAdd(bullet.pos, vecToPos(vel));
+    let pos = keepOnScreen(bullet.pos, float_of_int(Env.width(env)), float_of_int(Env.height(env)), bullet.size);
+    let pos = posAdd(pos, vecToPos(vel));
     Some({...bullet, vel, pos})
   }
   }

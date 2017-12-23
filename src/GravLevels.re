@@ -31,7 +31,6 @@ let defaultEnemy = (~health=1, ~size=20., pos, warmup, maxTime) => {
   dodges: (0., 0.),
   missileTimer: (warmup, maxTime),
   selfDefense: None,
-  /* behavior: SimpleShooter((warmup, 300.), (Reprocessing.Constants.white, 5. *. sizeFactor, initialSpeed, 5)) */
 };
 
 let red = (~warmup=200., pos) => {
@@ -347,13 +346,6 @@ let makePhoneStages = (env) => {
       ))
     },
 
-  /* ], [
-      {
-        ...red(~warmup=250., (v, v)),
-        selfDefense: Some(0.1),
-        dodges: (0.5, 3.0),
-        movement: Wander((v, v))
-      }, */
   ]
   |]
   |]
