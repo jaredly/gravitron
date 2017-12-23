@@ -52,6 +52,12 @@ let moveBullet = (isDead, wallType, player, bullet, env) => {
   }
 };
 
+let bomb = bullet => {
+  ...bullet,
+  size: bullet.size *. 20.,
+  stepping: Bomb(false)
+};
+
 let bulletToBullet = (bullet, bullets, explosions) => {
   let (removed, bullets, explosions) =
     List.fold_left(
@@ -59,20 +65,20 @@ let bulletToBullet = (bullet, bullets, explosions) => {
         (
           removed ?
             (true, [other, ...bullets], explosions) :
-            collides(bullet.pos, other.pos, bullet.size +. other.size) ?
-              (true, bullets, [bulletExplosion(bullet), bulletExplosion(other), ...explosions]) :
-              (false, [other, ...bullets], explosions)
+            collides(bullet.pos, other.pos, bullet.size +. other.size) ? {
+              let (bullets, explosions) = switch (other.stepping) {
+              | TimeBomb(_) => ([bomb(other), ...bullets], explosions)
+              | _ => (bullets, [bulletExplosion(other), ...explosions])
+              };
+              (true, bullets, explosions)
+            }
+              /* (true, bullets, [bulletExplosion(bullet), bulletExplosion(other), ...explosions]) */
+              : (false, [other, ...bullets], explosions)
         ),
       (false, [], explosions),
       bullets
     );
   (bullets, explosions, removed)
-};
-
-let bomb = bullet => {
-  ...bullet,
-  size: bullet.size *. 20.,
-  stepping: Bomb(false)
 };
 
 
@@ -178,10 +184,13 @@ let collideEnemies = (env, state, bullet) => {
         ({...state, enemies: [enemy, ...state.enemies]}, died)
       } else {
         if (isFullTimer(enemy.Enemy.warmup) && collides(enemy.Enemy.pos, bullet.pos, bullet.size +. enemy.Enemy.size))  {
-          (
+          switch (bullet.stepping) {
+          | TimeBomb(_) => ({...state, enemies: [enemy, ...state.enemies]}, true)
+          | _ => (
             damageEnemy(env, state, enemy, bullet.damage),
             true
           )
+          };
         } else {
           ({...state, enemies: [enemy, ...state.enemies]}, died)
         }
@@ -200,7 +209,10 @@ let collideBullets = (env, state, bullet) => {
 let handleCollisions = (env, state, bullet, isFull) => {
     let playerDist = MyUtils.dist(MyUtils.posSub(bullet.pos, state.me.pos));
     if (state.status == Running && playerDist < state.me.size +. bullet.size) {
-      (playerDamage(env, state, bullet.damage), true)
+      switch (bullet.stepping) {
+      | TimeBomb(_) => (state, true)
+      | _ => (playerDamage(env, state, bullet.damage), true)
+      };
     } else if (!isFull) {
       (state, false)
     } else {
@@ -221,7 +233,11 @@ let step = (env, state, bullet) => {
     let bullet = {...bullet, warmup};
     let (state, died) = handleCollisions(env, state, bullet, isFull);
     if (died) {
-      {...state, explosions: [bulletExplosion(bullet), ...state.explosions]}
+        let (bullets, explosions) = switch (bullet.stepping) {
+        | TimeBomb(_) => ([bomb(bullet), ...state.bullets], state.explosions)
+        | _ => (state.bullets, [bulletExplosion(bullet), ...state.explosions])
+        };
+      {...state, bullets, explosions}
     } else {
 
       /* let (state, died) = collideBullet */

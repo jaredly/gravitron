@@ -30,7 +30,7 @@ let setup = (assetDir, initialScreen, env) => {
   (
     {
       userData,
-      stages: GravLevels.getStages(env),
+      stages: Levels.stages(env),
       highScores: [||],
       titleFont:
         Reprocessing.Draw.loadFont(
@@ -74,7 +74,13 @@ let setup = (assetDir, initialScreen, env) => {
   )
 };
 
-let transitionTo = (ctx, transition, env) =>
+let reloadCtx = (env, ctx) => {
+  {...ctx, stages: Levels.stages(env)}
+};
+
+let transitionTo = (ctx, transition, env) => {
+  /** TODO remove in prod */
+  let ctx = reloadCtx(env, ctx);
   switch transition {
   | `Quit => `WelcomeScreen(WelcomeScreen.initialState(env))
   | `Start =>
@@ -90,6 +96,7 @@ let transitionTo = (ctx, transition, env) =>
   | `UserLevels => `LevelEditor(LevelEditor.blankState)
   | `EditLevel(level) => `LevelEditor(LevelEditor.editState(level))
   };
+};
 
 let getScreen = (state) =>
   ScreenManager.Screen.(

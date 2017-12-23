@@ -40,21 +40,7 @@ let randomSort = arr => {
 
 /* Bullet generation */
 
-let sizeForDamage = damage => sqrt(float_of_int(damage)) +. 3.;
-
 open Bullet;
-let basicBullet = (damage) => {
-  Bullet.color: Reprocessing.Constants.white,
-  damage,
-  size: sizeForDamage(damage),
-  warmup: (0., 40.),
-  acc: MyUtils.v0,
-  pos: (0., 0.),
-  vel: {theta: 0., mag: Random.float(2.) +. 1.},
-  stepping: Nothing,
-  moving: Gravity,
-};
-
 let rec pStepping = (available, bullet) => {
   let (points, stepping) = chooseWeightedValid(available, [|
     (10, (0, Nothing)),
@@ -87,7 +73,7 @@ and pDamage = (available, bullet) => {
 }
 
 and randomBullet = (available) => {
-  let bullet = basicBullet(3);
+  let bullet = Bullet.basic(~speed=Random.float(2.) +. 1., 3);
   let changes = randomSort([|pDamage, pStepping|]);
   let (_, points, bullet) = Array.fold_left(
     ((stop, l, b), p) => {
@@ -110,8 +96,7 @@ and randomBullet = (available) => {
 /* Enemy generation */
 
 
-
-open Enemy;
+open! Enemy;
 let pHealth = (available, enemy) => {
   switch (enemy.dying) {
   | Asteroid => (0, enemy)
@@ -187,25 +172,6 @@ let pTimer = (available, enemy) => {
 
 
 
-let basicEnemy = (color) => {
-  {
-    pos: (0., 0.),
-    vel: MyUtils.v0,
-    color,
-    size: 20.,
-    warmup: (0., 40.),
-    health: (1, 1),
-    animate: 0.,
-    movement: Stationary,
-    dying: Normal,
-    stepping: DoNothing,
-    shooting: OneShot(basicBullet(5)),
-    dodges: (0., 0.),
-    missileTimer: (Random.float(400.), 400.),
-    selfDefense: None,
-  };
-};
-
 /* let permutations = [| pHealth, pMovement, pDying, pStepping, pShooting, pTimer |]; */
 let permutations = [| pTimer, pShooting, pHealth, pMovement, pDying, pStepping |];
 
@@ -218,14 +184,13 @@ let permutations = [| pTimer, pShooting, pHealth, pMovement, pDying, pStepping |
  * And so I can keep going through the loop until they get difficult enough.
  *
  * Also
- * - keep missiles on the board
- *
- * GoToPosition is broken, always goes to top right -- need to randomize that
- *
- * I want more interesting bullets as a priority
+ * - bombs should explode even when they're not triggered by the timer
+ * - mines should be marked as such (hexagon)
+ * - need to be able to scroll the high scores page
+ * - also keep track of free play high score (how far you got)
  */
 let makeEnemyInRange = (lower, upper) => {
-  let enemy = basicEnemy(randomColor());
+  let enemy = Enemy.basic(randomColor());
   /* let permutations = randomSort(permutations); */
   Array.fold_left(
     ((l, e), p) => {

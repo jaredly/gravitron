@@ -123,7 +123,27 @@ module Bullet = {
   ) => {
     color: colorForStepping(stepping),
     damage, size, stepping, moving, warmup, vel: {theta: 0., mag: speed}, acc, pos
-  }
+  };
+
+  let sizeForDamage = damage => sqrt(float_of_int(damage)) +. 3.;
+
+  let basic = (
+    ~speed=2.,
+    ~stepping=Nothing,
+    ~moving=Gravity,
+    damage
+  ) => {
+    color: colorForStepping(stepping),
+    damage,
+    size: sizeForDamage(damage),
+    warmup: (0., 40.),
+    acc: MyUtils.v0,
+    pos: (0., 0.),
+    vel: {theta: 0., mag: speed},
+    stepping,
+    moving,
+  };
+
 };
 
 
@@ -284,7 +304,42 @@ module Enemy = {
       showStepping(enemy.stepping),
       showShooting(enemy.shooting)
     )
-  }
+  };
+
+  let fixMoving = enemy => {
+    ...enemy,
+    movement: switch enemy.movement {
+    | GoToPosition(_) => GoToPosition(enemy.pos)
+    | Wander(_) => Wander(enemy.pos)
+    | _ => enemy.movement
+    }
+  };
+
+  let sizeForHealth = health => sqrt(float_of_int(health)) *. 5. +. 15.;
+
+  let basic = (~start=Random.float(400.),
+    ~full=400.,
+    ~speed=2.,
+    ~health=1, ~damage=5, color) => {
+    {
+      pos: (0., 0.),
+      vel: MyUtils.v0,
+      color,
+      size: sizeForHealth(health),
+      warmup: (0., 40.),
+      health: (health, health),
+      animate: 0.,
+      movement: Stationary,
+      dying: Normal,
+      stepping: DoNothing,
+      shooting: OneShot(Bullet.basic(~speed, damage)),
+      dodges: (0., 0.),
+      missileTimer: (start, full),
+      selfDefense: None,
+    };
+  };
+
+  let startTimer = (at, enemy) => {...enemy, missileTimer: (at, snd(enemy.missileTimer))};
 };
 
 module Explosion = {
