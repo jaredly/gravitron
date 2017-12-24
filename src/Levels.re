@@ -201,8 +201,59 @@ let purple = {
   dying: Asteroid
 };
 
+let lightPurple = {
+  ...Enemy.basic(~start=100., ~full=150., ~health=3, hexColor("B66BFF")),
+  shooting: OneShot(Bullet.basic(~stepping=TimeBomb((0., 150.)), 5)),
+  dying: Asteroid
+};
+
+let oliveGreen = {
+  ...Enemy.basic(~start=100., ~full=150., ~health=5, hexColor("5BA802")),
+  shooting: OneShot(Bullet.basic(
+    ~moving=Mine(40., 70., (0., 0.)),
+    ~stepping=Shooter((0., 200.), Bullet.basic(3)),
+    15
+  ))
+};
+
 let stage5 = env => [|
-  place1(env, purple)
+  place1(env, purple),
+  place2(env, purple, green),
+  place2(env, green, lightPurple),
+  place1(env, oliveGreen),
+  place3(env, oliveGreen, lightPurple, wanderBlue),
+|];
+
+let white = {
+  ...Enemy.basic(~start=200., ~speed=initialSpeed, ~full=300., hexColor("ffffff")),
+  movement: GoToPosition((0., 0.)),
+  stepping: Rabbit(600., (450., 600.))
+};
+
+let rabbitTime = (time, enemy) => switch enemy.stepping {
+| Rabbit(min, (_, max)) => {...enemy, stepping: Rabbit(min, (time, max))}
+| _ => assert(false)
+};
+
+let gray = {
+  ...white,
+  color: hexColor("dddddd"),
+  health: (3, 3)
+};
+
+let darkGray = {
+  ...white |> rabbitTime(200.),
+  color: hexColor("999999"),
+  health: (4, 4),
+  shooting: OneShot(Bullet.basic(~stepping=ProximityScatter(100., 5, Bullet.basic(3)), 15))
+};
+
+let stage6 = env => [|
+  place1(env, white),
+  place3(env, white |> rabbitTime(350.), white |> rabbitTime(250.), white),
+  place2(env, gray, wanderBlue),
+  place1(env, darkGray),
+  place2(env, darkGray, oliveGreen),
 |];
 
 let stages = env => [|
@@ -211,16 +262,10 @@ let stages = env => [|
   stage3(env),
   stage4(env),
   stage5(env),
+  stage6(env),
 |] |> Array.map(Array.map(List.map(Enemy.fixMoving)));
 
 /*
-
-Stage 5
-- asteroid
-- asteroid + triple shot
-- asteroid (bomb) + triple shot (heat seeking)
-- asteroid (bomb) + mine (shooter)
-- asteroid (scatter)
 
 Stage 6
 - rabbit
@@ -260,6 +305,13 @@ Stage 4
 - mine w/ proximity scatter + normal
 - alternate mine + mine w/ proximity scatter + normal
 - mine +shooter
+
+Stage 5
+- asteroid
+- asteroid + triple shot
+- asteroid (bomb) + triple shot (heat seeking)
+- asteroid (bomb) + mine (shooter)
+- asteroid (scatter)
 
 
 

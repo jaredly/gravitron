@@ -354,7 +354,7 @@ let drawEnemy = (env, enemy) => {
     Draw.strokeWeight(3, env);
     /* Draw.strokeWeight(2, env); */
     let (warmup, maxval) = timer;
-    let rad = enemy.size *. warmup /. maxval;
+    let rad = rad *. warmup /. maxval;
     GravShared.circle(
       ~center=enemy.pos,
       ~rad,
