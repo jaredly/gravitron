@@ -270,7 +270,7 @@ let mouseDown = (ctx, state, env) => {
 };
 
 let screen = ScreenManager.Screen.{
-  /* ...ScreenManager.empty, */
+  ...ScreenManager.empty,
   run: (ctx, state, env) => mainLoop(ctx, state, env),
   mouseDown,
   keyPressed: (ctx, state, env) => keyPressed(ctx, state, env),

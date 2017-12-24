@@ -286,6 +286,20 @@ let timerCircle = (~center, ~rad, ~timer, env) => {
   );
 };
 
+let backTimerCircle = (~center, ~rad, ~timer, env) => {
+  let loaded = fst(timer) /. snd(timer);
+  Draw.arcf(
+    ~center,
+    ~radx=rad,
+    ~rady=rad,
+    ~start=Constants.two_pi *. (1. -. loaded),
+    ~stop=Constants.two_pi,
+    ~isOpen=true,
+    ~isPie=false,
+    env
+  );
+};
+
 let drawEnemy = (env, enemy) => {
   open Enemy;
   let (warmup, maxval) = enemy.warmup;
@@ -359,7 +373,11 @@ let drawEnemy = (env, enemy) => {
     Draw.noFill(env);
     Draw.stroke(withAlpha(Constants.white, 0.4), env);
     Draw.strokeWeight(2, env);
-    timerCircle(~center=enemy.pos, ~rad=rad +. 5., ~timer, env);
+    let back = switch enemy.shooting {
+    | Alternate(_, _, true) => true
+    | _ => false
+    };
+    (back ? backTimerCircle : timerCircle)(~center=enemy.pos, ~rad=rad +. 5., ~timer, env);
     Draw.noStroke(env);
 
     switch (enemy.dying) {
@@ -450,6 +468,26 @@ let drawBullet = (env, playerPos, bullet) => {
       let tip = posAdd(bullet.pos, vecToPos({theta: bullet.vel.theta, mag: bullet.size *. 2.}));
       let tail = posAdd(bullet.pos, vecToPos({theta: bullet.vel.theta, mag: bullet.size *. -2.}));
       Draw.linef(~p1=tail, ~p2=tip, env);
+    }
+    | Mine(_, _, _) => {
+      Draw.noFill(env);
+      Draw.stroke(withAlpha(color, 0.5), env);
+      Draw.strokeWeight(3, env);
+      let (x, y) = bullet.pos;
+      let s = bullet.size *. 1.5;
+      let p = (t) => (x +. cos(t) *. s, y +. sin(t) *. s);
+      Draw.trianglef(
+        ~p1=p(Constants.pi),
+        ~p2=p(Constants.pi +. Constants.two_pi /. 3.),
+        ~p3=p(Constants.pi +. Constants.two_pi *. 2. /. 3.),
+        env
+      );
+      Draw.trianglef(
+        ~p1=p(0.),
+        ~p2=p(Constants.two_pi /. 3.),
+        ~p3=p(Constants.two_pi *. 2. /. 3.),
+        env
+      );
     }
     | _ => ()
     };

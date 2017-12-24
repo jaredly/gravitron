@@ -66,6 +66,7 @@ let run = (ctx, env) => {
 };
 
 let screen = ScreenManager.Screen.{
+  ...ScreenManager.empty,
   backPressed: (ctx, _, env) => Some(Transition(ctx, `Quit)),
   run: (ctx, _, env) => Same(ctx, run(ctx, env)),
   mouseDown: (ctx, _, env) => {

@@ -149,18 +149,89 @@ let orange = {
 
 let wanderYellow = {...yellow, movement: Wander((0., 0.))};
 
+let pink = {
+  ...Enemy.basic(~start=200., ~full=300., ~health=4, hexColor("FF42DB")),
+  shooting: OneShot(Bullet.basic(~stepping=Scatter((0., 80.), 5, Bullet.basic(3)), 10))
+};
+
+let fastPink = {
+  ...Enemy.basic(~start=200., ~full=300., ~health=4, hexColor("FF42DB")),
+  shooting: OneShot(Bullet.basic(~stepping=Scatter((0., 40.), 5, Bullet.basic(3)), 10))
+};
+
 let stage3 = env => [|
   place1(env, orange),
   place2(env, orange, wanderYellow),
+  place3(env, green, wanderBlue, orange),
+  place2(env, pink, orange),
+  place4(env, wanderYellow, pink, orange, fastPink),
+|];
+
+let teal = {
+  ...Enemy.basic(~start=100., ~full=150., ~health=4, hexColor("00FFAD")),
+  shooting: Alternate(
+    Bullet.basic(
+      ~moving=Mine(30., 60., (0., 0.)),
+      5
+    ),
+    Bullet.basic(5),
+    false
+  )
+};
+
+let baby = {
+  ...Enemy.basic(~start=100., ~full=150., ~health=5, hexColor("00DDFF")),
+  shooting: OneShot(Bullet.basic(
+    ~moving=Mine(40., 70., (0., 0.)),
+    ~stepping=ProximityScatter(110., 5, Bullet.basic(3)),
+    15
+  ))
+};
+
+let stage4 = env => [|
+  place1(env, teal),
+  place2(env, teal, teal |> startTimer(50.)),
+  place2(env, baby, wanderBlue),
+  place2(env, baby, baby),
+  place3(env, baby, teal, wanderBlue),
+|];
+
+let purple = {
+  ...Enemy.basic(~start=100., ~full=150., ~health=3, hexColor("8000FF")),
+  dying: Asteroid
+};
+
+let stage5 = env => [|
+  place1(env, purple)
 |];
 
 let stages = env => [|
   stage1(env),
   stage2(env),
   stage3(env),
+  stage4(env),
+  stage5(env),
 |] |> Array.map(Array.map(List.map(Enemy.fixMoving)));
 
 /*
+
+Stage 5
+- asteroid
+- asteroid + triple shot
+- asteroid (bomb) + triple shot (heat seeking)
+- asteroid (bomb) + mine (shooter)
+- asteroid (scatter)
+
+Stage 6
+- rabbit
+- rabbit + rabbit + rabbit
+- rabbit + triple shot
+- multi-health rabbit
+- avoiding rabbit
+
+Bonus? Where I just go wild
+
+
 
 Stage 1
 - normal
@@ -189,22 +260,6 @@ Stage 4
 - mine w/ proximity scatter + normal
 - alternate mine + mine w/ proximity scatter + normal
 - mine +shooter
-
-Stage 5
-- asteroid
-- asteroid + triple shot
-- asteroid (bomb) + triple shot (heat seeking)
-- asteroid (bomb) + mine (shooter)
-- asteroid (scatter)
-
-Stage 6
-- rabbit
-- rabbit + rabbit + rabbit
-- rabbit + triple shot
-- multi-health rabbit
-- avoiding rabbit
-
-Bonus? Where I just go wild
 
 
 
