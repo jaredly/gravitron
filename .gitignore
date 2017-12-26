@@ -20,3 +20,4 @@ android/build
 .idea
 ios/Build
 *.xcuserdatad
+android/local.properties

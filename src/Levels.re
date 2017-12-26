@@ -78,23 +78,23 @@ let place4 = (env, e1, e2, e3, e4) => {
 
 open Enemy;
 
-let fromHex = hex => {
+let fromHex = (h1, h2) => {
   let code = c => switch c {
   | '0'..'9' => Char.code(c) - 48
   | 'A'..'F' => Char.code(c) - 55
   | 'a'..'f' => Char.code(c) - 87
   | _ => invalid_arg("Hex.to_char: %d is an invalid char", Char.code(c))
   };
-  let a = code(hex.[0]);
-  let b = code(hex.[1]);
+  let a = code(h1);
+  let b = code(h2);
   a * 16 + b;
 };
 
 
 let hexColor = hash => {
-  let r = Str.first_chars(hash, 2) |> fromHex;
-  let g = Str.last_chars(Str.first_chars(hash, 4), 2) |> fromHex;
-  let b = Str.last_chars(hash, 2) |> fromHex;
+  let r = fromHex(hash.[0], hash.[1]);
+  let g = fromHex(hash.[2], hash.[3]);
+  let b = fromHex(hash.[4], hash.[5]);
   Utils.color(~r, ~g, ~b, ~a=255)
 };
 
