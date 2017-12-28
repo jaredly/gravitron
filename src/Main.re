@@ -6,6 +6,8 @@ module LevelEditor = {
   let screen = ScreenManager.empty;
 };
 
+let getEnv = name => try { Some(Sys.getenv(name)) } { | Not_found => None };
+
 let (/+) = Filename.concat;
 let setup = (assetDir, initialScreen, env) => {
   if (!GravShared.isPhone) {
@@ -24,7 +26,12 @@ let setup = (assetDir, initialScreen, env) => {
     );
     Reprocessing.Env.size(~width=size, ~height=size, env);
   } else if (GravShared.fakePhone) {
-    Reprocessing.Env.size(~width=340, ~height=640, env);
+    switch (getEnv("TABLET")) {
+    | Some("7") => Reprocessing.Env.size(~width=600, ~height=1024, env)
+    | Some("10") => Reprocessing.Env.size(~width=800, ~height=1280, env)
+    | Some(_)
+    | None => Reprocessing.Env.size(~width=340, ~height=640, env)
+    }
   };
 
   (
