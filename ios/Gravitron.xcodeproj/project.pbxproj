@@ -25,7 +25,7 @@
 		43C88D311E3B349A002BA291 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		7F6B2A471FDF7C9B00DC8E5E /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../assets; sourceTree = "<group>"; };
 		7F6B2A4B1FDF7F4400DC8E5E /* libreasongl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libreasongl.a; sourceTree = "<group>"; };
-		C99F60651E34FE8F0064B563 /* OCamlIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCamlIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C99F60651E34FE8F0064B563 /* Gravitron.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gravitron.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99F60691E34FE8F0064B563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		C99F606B1E34FE8F0064B563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		C99F606C1E34FE8F0064B563 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -59,7 +59,7 @@
 		C99F605C1E34FE8E0064B563 = {
 			isa = PBXGroup;
 			children = (
-				C99F60671E34FE8F0064B563 /* OCamlIOS */,
+				C99F60671E34FE8F0064B563 /* Gravitron */,
 				C99F60661E34FE8F0064B563 /* Products */,
 				278727F01E3805CF004B754D /* Frameworks */,
 			);
@@ -68,12 +68,12 @@
 		C99F60661E34FE8F0064B563 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C99F60651E34FE8F0064B563 /* OCamlIOS.app */,
+				C99F60651E34FE8F0064B563 /* Gravitron.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C99F60671E34FE8F0064B563 /* OCamlIOS */ = {
+		C99F60671E34FE8F0064B563 /* Gravitron */ = {
 			isa = PBXGroup;
 			children = (
 				7F6B2A471FDF7C9B00DC8E5E /* assets */,
@@ -89,7 +89,7 @@
 				C99F60791E34FE8F0064B563 /* Info.plist */,
 				C99F60681E34FE8F0064B563 /* Supporting Files */,
 			);
-			path = OCamlIOS;
+			path = Gravitron;
 			sourceTree = "<group>";
 		};
 		C99F60681E34FE8F0064B563 /* Supporting Files */ = {
@@ -103,9 +103,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C99F60641E34FE8E0064B563 /* OCamlIOS */ = {
+		C99F60641E34FE8E0064B563 /* Gravitron */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C99F60871E34FE8F0064B563 /* Build configuration list for PBXNativeTarget "OCamlIOS" */;
+			buildConfigurationList = C99F60871E34FE8F0064B563 /* Build configuration list for PBXNativeTarget "Gravitron" */;
 			buildPhases = (
 				C99F60611E34FE8E0064B563 /* Sources */,
 				C99F60621E34FE8E0064B563 /* Frameworks */,
@@ -115,9 +115,9 @@
 			);
 			dependencies = (
 			);
-			name = OCamlIOS;
+			name = Gravitron;
 			productName = OCamlTest;
-			productReference = C99F60651E34FE8F0064B563 /* OCamlIOS.app */;
+			productReference = C99F60651E34FE8F0064B563 /* Gravitron.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -136,7 +136,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C99F60601E34FE8E0064B563 /* Build configuration list for PBXProject "OCamlIOS" */;
+			buildConfigurationList = C99F60601E34FE8E0064B563 /* Build configuration list for PBXProject "Gravitron" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -149,7 +149,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C99F60641E34FE8E0064B563 /* OCamlIOS */,
+				C99F60641E34FE8E0064B563 /* Gravitron */,
 			);
 		};
 /* End PBXProject section */
@@ -336,7 +336,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C99F60601E34FE8E0064B563 /* Build configuration list for PBXProject "OCamlIOS" */ = {
+		C99F60601E34FE8E0064B563 /* Build configuration list for PBXProject "Gravitron" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C99F60851E34FE8F0064B563 /* Debug */,
@@ -345,7 +345,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C99F60871E34FE8F0064B563 /* Build configuration list for PBXNativeTarget "OCamlIOS" */ = {
+		C99F60871E34FE8F0064B563 /* Build configuration list for PBXNativeTarget "Gravitron" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C99F60881E34FE8F0064B563 /* Debug */,
