@@ -184,10 +184,6 @@ let permutations = [| pTimer, pShooting, pHealth, pMovement, pDying, pStepping |
  * And so I can keep going through the loop until they get difficult enough.
  *
  * Also
- * - when you beat it, say "Unlocked: solid walls" or "Unlocked: no walls"
- * - 3-4 needs firing delayed -- pink should go first
- * - 3-5 has all firing at same time too
- * - have your health change color as it gets dangerously low (10% or so)
  * - I don't have any revenge in the new level set
  *   - there were a couple of levels where it felt like "same old same old" - could add in htere
  * - all enemy types should bounce againse walls

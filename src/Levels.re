@@ -163,8 +163,13 @@ let stage3 = env => [|
   place1(env, orange),
   place2(env, orange, wanderYellow),
   place3(env, green, wanderBlue, orange),
-  place2(env, pink, orange),
-  place4(env, wanderYellow, pink, orange, fastPink),
+  place2(env, pink, orange |> startTimer(0.)),
+  place4(env,
+    wanderYellow |> startTimer(0.),
+    pink |> startTimer(250.),
+    orange |> startTimer(150.),
+    fastPink
+  ),
 |];
 
 let teal = {

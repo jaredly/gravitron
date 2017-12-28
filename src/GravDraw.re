@@ -124,7 +124,7 @@ let drawStatus = (ctx, {wallType, level, me, mode}, timeElapsed, env) => {
     ~height=20,
     env
   );
-    Draw.noStroke(env);
+  Draw.noStroke(env);
   Draw.fill(withAlpha(Constants.white, 0.6), env);
   Draw.rect(
     ~pos=(margin - 1, margin - 2),
@@ -140,16 +140,26 @@ let drawStatus = (ctx, {wallType, level, me, mode}, timeElapsed, env) => {
   );
 
   let pauseSize = 25;
+
   /* Health bar */
   let percent = flDiv(me.Player.health, fullPlayerHealth);
+
+  let healthColor = percent < 0.1
+    ? Constants.red
+    : percent < 0.2
+    ? Reprocessing.Utils.color(~r=255, ~g=150, ~b=40, ~a=255)
+    : Constants.white;
+  Draw.fill(healthColor, env);
+  Draw.noStroke(env);
+  Draw.rect(~pos=(margin + pauseSize, margin), ~width=int_of_float(100. *. percent), ~height=10, env);
+
+
   Draw.strokeWeight(1, env);
   Draw.stroke(Constants.white, env);
   Draw.noFill(env);
   Draw.rect(~pos=(margin + pauseSize, margin), ~width=100, ~height=10, env);
-  Draw.fill(Constants.white, env);
-  Draw.noStroke(env);
-  Draw.rect(~pos=(margin + pauseSize, margin), ~width=int_of_float(100. *. percent), ~height=10, env);
 
+  Draw.fill(Constants.white, env);
   /* Lives */
   for (i in 0 to me.Player.lives) {
     circle(~center=(float_of_int(i * 15 + 100 + 10 + margin + pauseSize), fmargin +. 5.), ~rad=5., env)

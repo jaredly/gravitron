@@ -42,19 +42,21 @@ let screen = {
         if (stage === Array.length(ctx.stages) - 1
           && reached + 1 === total
         ) {
+          Draw.tint(Utils.color(~r=0, ~g=255, ~b=0, ~a=255), env);
           switch (SharedTypes.currentWallType(ctx)) {
           | BouncyWalls => {
-            DrawUtils.centerText(~font=ctx.textFont,
+            DrawUtils.centerText(~font=ctx.boldTextFont,
             ~body="Unlocked: Solid walls",
-            ~pos=(w, y + 100), env);
+            ~pos=(w, y + 50), env);
           }
           | FireWalls => {
-            DrawUtils.centerText(~font=ctx.textFont,
+            DrawUtils.centerText(~font=ctx.boldTextFont,
             ~body="Unlocked: No walls",
-            ~pos=(w, y + 100), env);
+            ~pos=(w, y + 50), env);
           }
           | Minimapped => ()
-          }
+          };
+          Draw.noTint(env);
         }
       }
       };
