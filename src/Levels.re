@@ -111,7 +111,7 @@ let blue = Enemy.basic(~start=0.,  ~speed=initialSpeed, ~full=200., ~health=2, ~
 let stage1 = env => [|
   place1(env, red),
   place2(env, red, red |> startTimer(100.)),
-  place2(env, red, blue |> startTimer(100.)),
+  place2(env, red, blue |> startTimer(50.)),
   place2(env, blue, blue |> startTimer(150.)),
   place4(
     env,
@@ -134,12 +134,17 @@ let yellow = {
 
 let wanderBlue = {...blue, movement: Wander((0., 0.))};
 
+let revengeBlue = {
+  ...wanderBlue,
+  dying: Revenge(5, Bullet.basic(5))
+};
+
 let stage2 = env => [|
   place1(env, green),
   place3(env, red, blue, green),
-  place2(env, green, wanderBlue),
-  place3(env, wanderBlue, green, wanderBlue),
-  place3(env, green, wanderBlue, yellow)
+  place2(env, green, revengeBlue),
+  place3(env, revengeBlue, green, revengeBlue),
+  place3(env, green, revengeBlue, yellow)
 |];
 
 let orange = {
@@ -268,146 +273,5 @@ let stages = env => [|
   stage4(env),
   stage5(env),
   stage6(env),
-  [|
-  place1(env, {...purple, health: (4, 4),movement: GoToPosition((0., 0.))}),
-  place1(env, {...purple, health: (4,4),movement: Wander((0., 0.))}),
-  place1(env, {...purple, health: (4,4),movement: Avoider(100.)}),
-  |]
 |] |> Array.map(Array.map(List.map(Enemy.fixMoving)));
 
-/*
-
-Stage 6
-- rabbit
-- rabbit + rabbit + rabbit
-- rabbit + triple shot
-- multi-health rabbit
-- avoiding rabbit
-
-Bonus? Where I just go wild
-
-
-
-Stage 1
-- normal
-- 2 normal
-- wandering + with more health
-- wander + avoider
-- heat seeking missile (boss)
-
-Stage 2
-- triple shot, a few health
-- red + blue + triple shot
-- triple shot + heat seeking wander
-- triple + heat seeking + red
-- triple bomb (boss)
-
-Stage 3
-- bomb
-- heat seeking bomb + normal
-- scatter shot + normal
-- heat seeking bomb + scatter shot
-- proximity scatter (boss)
-
-Stage 4
-- alternate normal mine w/ normal bullet
-- multiple mines
-- mine w/ proximity scatter + normal
-- alternate mine + mine w/ proximity scatter + normal
-- mine +shooter
-
-Stage 5
-- asteroid
-- asteroid + triple shot
-- asteroid (bomb) + triple shot (heat seeking)
-- asteroid (bomb) + mine (shooter)
-- asteroid (scatter)
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stage 1 - just the basics
-- red (one health, one shot)
-- blue (two health, faster shots)
-
-+ red
-+ red + red
-+ red + blue
-+ blue + blue
-+ blue x 4
-
-Stage 2 (current) -
-+ triple-shot small
-+ red + blue + triple-small
-+ triple-big
-+ scatter-shooter
-+ asteroids
-
-Stage 3 (current) -
-+ red rabbit (prolly want two?)
-+ red + heat seeking
-+ red + time bomb
-
-
-
-Things I have to introduce
-
-Bullets:
-- normal bullet
-- heat seeking bullet
-- mine bullet
-
-- time bomb
-- scatter
-- proximity scatter
-- shooter
-
-Enemies:
-- normal
-- with more health
-- wandering, avoiding
-
-- rabbit
-
-- asteroid
-- revenge
-
-- triple shot
-- alternating shots
-
-
-
-
-So, unique bullet kinds that I could do
-
-- normal
-- heat seeking
-- time bomb
-- scatter
-- proximity scatter
-- normal mine (alternated with normal bullet)
-- mine + proximity scatter
-- mine + shooter
-
-Enemies
-- normal
-- with more health
-- wandering
-- avoiding
-- triple shot
-- alternating shots
-- asteroid
-- rabbit
-- revenge
-
-
-*/
