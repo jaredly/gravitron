@@ -78,6 +78,7 @@ let drawHelp = (ctx, player, env) => {
   /* DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y), ~body="Arrow keys to move", env); */
   DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y + 25), ~body="Avoid the missiles", env);
   DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y + 50), ~body="Gravity is your only weapon", env);
+  DrawUtils.centerText(~font=ctx.smallFont, ~pos=(x, y + 75), ~body="Clear the level to advance", env);
   ()
 };
 
