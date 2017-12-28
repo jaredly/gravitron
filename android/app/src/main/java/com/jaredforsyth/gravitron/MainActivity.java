@@ -1,4 +1,4 @@
-package com.example.hellolibs;
+package com.jaredforsyth.gravitron;
 
 import com.jaredforsyth.reasongl.ReasonglActivity;
 
