@@ -35,6 +35,29 @@ let screen = {
         DrawUtils.centerText(~font=ctx.smallFont, ~body=text, ~pos=(w, y + 60), env);
       };
       DrawUtils.centerText(~font=ctx.textFont, ~body=(GravShared.isPhone ? "Tap to continue" : "Click to continue"), ~pos=(w, y + 80), env);
+
+      switch difficulty {
+      | Some(_) => ()
+      | None => {
+        if (stage === Array.length(ctx.stages) - 1
+          && reached + 1 === total
+        ) {
+          switch (SharedTypes.currentWallType(ctx)) {
+          | BouncyWalls => {
+            DrawUtils.centerText(~font=ctx.textFont,
+            ~body="Unlocked: Solid walls",
+            ~pos=(w, y + 100), env);
+          }
+          | FireWalls => {
+            DrawUtils.centerText(~font=ctx.textFont,
+            ~body="Unlocked: No walls",
+            ~pos=(w, y + 100), env);
+          }
+          | Minimapped => ()
+          }
+        }
+      }
+      };
     };
 
     Draw.noTint(env);

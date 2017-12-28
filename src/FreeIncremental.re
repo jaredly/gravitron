@@ -184,7 +184,6 @@ let permutations = [| pTimer, pShooting, pHealth, pMovement, pDying, pStepping |
  * And so I can keep going through the loop until they get difficult enough.
  *
  * Also
- * - first two levels have both firing at same time - fix
  * - when you beat it, say "Unlocked: solid walls" or "Unlocked: no walls"
  * - 3-4 needs firing delayed -- pink should go first
  * - 3-5 has all firing at same time too

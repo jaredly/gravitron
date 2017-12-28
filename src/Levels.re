@@ -110,7 +110,7 @@ let blue = Enemy.basic(~start=0.,  ~speed=initialSpeed, ~full=200., ~health=2, ~
 
 let stage1 = env => [|
   place1(env, red),
-  place2(env, red, red |> startTimer(200.)),
+  place2(env, red, red |> startTimer(100.)),
   place2(env, red, blue |> startTimer(100.)),
   place2(env, blue, blue |> startTimer(150.)),
   place4(
