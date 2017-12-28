@@ -132,7 +132,7 @@ let mainLoop = (ctx, state, env) => {
     }
   | Paused(_) =>
     drawState(ctx, state, env);
-    /* PauseOverlay.draw(ctx, env); */
+    PauseOverlay.draw(ctx, env);
 
     Same(ctx, state)
 
