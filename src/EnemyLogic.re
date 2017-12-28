@@ -59,7 +59,7 @@ let moveEnemy = (env, state, enemy) => {
       | OnScreen => vel
       | x => {
         let theta = offscreenTheta(x);
-        vecAdd(vel, {theta, mag: 1.});
+        vecAdd(vel, {theta, mag: 3.});
         /* let pos = posAdd(enemy.pos, vecToPos(vel)) */
       }
     };
@@ -72,11 +72,8 @@ let moveEnemy = (env, state, enemy) => {
   let off = offscreen(enemy.pos, Env.width(env), Env.height(env), int_of_float(enemy.size) + 10);
   let vel = bounceVel(vel, off);
   let delta = deltaTime(env);
-  let pos = keepOnScreen(enemy.pos, float_of_int(Env.width(env)), float_of_int(Env.height(env)), enemy.size +. 10.);
   let pos = posAdd(enemy.pos, vecToPos(scaleVec(vel, delta)));
-  /* let pos = posAdd(pos, vecToPos(vel)); */
-
-  let pos = posAdd(enemy.pos, vecToPos(vel));
+  let pos = keepOnScreen(pos, float_of_int(Env.width(env)), float_of_int(Env.height(env)), enemy.size +. 10.);
   {...enemy, pos, vel, movement}
 };
 
