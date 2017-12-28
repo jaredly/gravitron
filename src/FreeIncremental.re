@@ -184,9 +184,6 @@ let permutations = [| pTimer, pShooting, pHealth, pMovement, pDying, pStepping |
  * And so I can keep going through the loop until they get difficult enough.
  *
  * Also
- * - I don't have any revenge in the new level set
- *   - there were a couple of levels where it felt like "same old same old" - could add in htere
- * - all enemy types should bounce againse walls
  * - also keep track of free play high score (how far you got)
  */
 let makeEnemyInRange = (lower, upper) => {
