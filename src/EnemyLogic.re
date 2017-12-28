@@ -22,26 +22,33 @@ let resetEnemyStepping = stepping => switch stepping {
 
 let moveEnemy = (env, state, enemy) => {
   let vel = enemy.vel;
-  switch enemy.movement {
+
+  /* let enemy = {...enemy, vel}; */
+
+
+  let (vel, movement) = switch enemy.movement {
   | Stationary =>
     let vel = {theta: vel.theta, mag: vel.mag < 0.01 ? 0.0 : vel.mag *. 0.95};
-    let pos = posAdd(enemy.pos, vecToPos(vel));
-    {...enemy, pos, vel, movement: Stationary}
+    (vel, Stationary)
+    /* let pos = posAdd(enemy.pos, vecToPos(vel));
+    {...enemy, pos, vel, movement: Stationary} */
   | GoToPosition(target) => {
     let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
     let vel = {theta: vel.theta, mag: min(max(vel.mag, 0.), 2.) *. 0.98};
-    let pos = posAdd(enemy.pos, vecToPos(vel));
-    {...enemy, pos, vel, movement: GoToPosition(target)}
+    (vel, GoToPosition(target))
+    /* let pos = posAdd(enemy.pos, vecToPos(vel));
+    {...enemy, pos, vel, movement: GoToPosition(target)} */
   }
   | Wander(target) =>
     let vel = vecAdd(vel, {theta: thetaToward(enemy.pos, target), mag: 0.01});
     let vel = {theta: vel.theta, mag: min(max(vel.mag, 0.), 4.) *. 0.98};
-    let pos = posAdd(enemy.pos, vecToPos(vel));
+    /* let pos = posAdd(enemy.pos, vecToPos(vel)); */
     let target =
       collides(enemy.pos, target, enemy.size *. 2.)
       ? randomTarget(Env.width(env) |> float_of_int, Env.height(env) |> float_of_int, enemy.size)
       : target;
-    {...enemy, pos, vel, movement: Wander(target)}
+    (vel, Wander(target))
+    /* {...enemy, pos, vel, movement: Wander(target)} */
   | Avoider(minDist) =>
     let vel = if (dist(MyUtils.posSub(state.me.pos, enemy.pos)) < minDist) {
       vecAdd(vel, {theta: thetaToward(state.me.Player.pos, enemy.pos), mag: 0.1});
@@ -57,9 +64,20 @@ let moveEnemy = (env, state, enemy) => {
       }
     };
     let vel = {theta: vel.theta, mag: vel.mag *. 0.98};
-    let pos = posAdd(enemy.pos, vecToPos(vel));
-    {...enemy, pos, vel, movement: Avoider(minDist)}
-  }
+    (vel, Avoider(minDist))
+    /* let pos = posAdd(enemy.pos, vecToPos(vel));
+    {...enemy, pos, vel, movement: Avoider(minDist)} */
+  };
+
+  let off = offscreen(enemy.pos, Env.width(env), Env.height(env), int_of_float(enemy.size) + 10);
+  let vel = bounceVel(vel, off);
+  let delta = deltaTime(env);
+  let pos = keepOnScreen(enemy.pos, float_of_int(Env.width(env)), float_of_int(Env.height(env)), enemy.size +. 10.);
+  let pos = posAdd(enemy.pos, vecToPos(scaleVec(vel, delta)));
+  /* let pos = posAdd(pos, vecToPos(vel)); */
+
+  let pos = posAdd(enemy.pos, vecToPos(vel));
+  {...enemy, pos, vel, movement}
 };
 
 let randomTarget = (env, size) => randomTarget(

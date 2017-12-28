@@ -268,6 +268,11 @@ let stages = env => [|
   stage4(env),
   stage5(env),
   stage6(env),
+  [|
+  place1(env, {...purple, health: (4, 4),movement: GoToPosition((0., 0.))}),
+  place1(env, {...purple, health: (4,4),movement: Wander((0., 0.))}),
+  place1(env, {...purple, health: (4,4),movement: Avoider(100.)}),
+  |]
 |] |> Array.map(Array.map(List.map(Enemy.fixMoving)));
 
 /*
