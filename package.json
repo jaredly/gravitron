@@ -13,6 +13,7 @@
     "build:ios": "bsb -make-world -backend native && ./lib/bs/native/buildios.native",
     "build:android": "bsb -make-world -backend native && ./lib/bs/native/buildandroid.native && cp -r assets/* android/app/src/main/assets/",
     "run:android": "npm run build:android && cd android && ./gradlew installDebug",
+    "release:android": "npm run build:android && cd android && ./gradlew assembleRelease",
 
     "setup:android": "./reasongl-android/setup_opam.sh",
     "setup:ios": "./reasongl-ios/setup_opam.sh",
