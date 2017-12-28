@@ -185,6 +185,8 @@ let permutations = [| pTimer, pShooting, pHealth, pMovement, pDying, pStepping |
  *
  * Also
  * - also keep track of free play high score (how far you got)
+ * - virtual keys not accounted for in height --- FIX (android)
+ * - prevent rotateion b/c that's janky
  */
 let makeEnemyInRange = (lower, upper) => {
   let enemy = Enemy.basic(randomColor());
