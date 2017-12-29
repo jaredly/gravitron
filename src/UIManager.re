@@ -1,0 +1,193 @@
+
+open Reprocessing;
+
+type align =
+  | Left
+  | Right
+  | Center;
+
+type valign =
+  | Top
+  | Bottom
+  | Middle;
+
+type buttonStyle = {
+  bgColor: colorT,
+  borderColor: colorT,
+  hoverBorderColor: colorT,
+  innerBorder: option(colorT),
+  fixedWidth: option(int),
+  enabled: bool,
+  margin: int
+};
+
+type element('action) =
+  | Text(string, fontT, align)
+  | Button(string, 'action, fontT, buttonStyle)
+  /* | ButtonSet(list((string, 'action)), fontT, buttonStyle, int) */
+  | Spacer(int)
+  | VBox(list(element('action)), int, align)
+  | Custom(glEnvT => (int, int), (glEnvT, (int, int)) => unit, (glEnvT, (int, int)) => option('action))
+  ;
+
+let getTextWidth = (env, font, text) => switch font^ {
+  | None => 0
+  | Some(font) => Reprocessing_Font.Font.calcStringWidth(env, font, text)
+};
+
+let measureText = (env, font, text) => switch font^ {
+| None => (0, 0)
+| Some(font) => {
+  let x = Reprocessing_Font.Font.getChar(font, 'X');
+  let width = Reprocessing_Font.Font.calcStringWidth(env, font, text);
+  (width, x.Reprocessing_Font.Font.height)
+}
+};
+
+let addBoth = ((a, b), (c, d)) => (a + c, b + d);
+
+let rec measure = (env, element) => switch element {
+| Text(text, font, _) => measureText(env, font, text)
+| Button(text, _, font, style) => {
+  let (w, h) = measureText(env, font, text);
+  let w = switch style.fixedWidth {
+  | Some(w) => w
+  | None => w + style.margin * 2
+  };
+  (w, h + style.margin * 2)
+}
+/* | ButtonSet(items, font, style, spacing) => {
+  let (w, h, num) = List.fold_left(((w, h, num), (t, _)) => {
+    let (ww, hh) = measureText(env, font, t);
+    (max(w, ww), h + hh + style.margin * 2 + spacing, num + 1)
+  }, (0, 0, 0), items);
+  (w + style.margin * 2, max(0, h - spacing))
+} */
+| Custom(measure, draw, act) => measure(env)
+| Spacer(height) => (0, height)
+| VBox(items, spacer, _align) => {
+  let (w, h) = List.fold_left(
+    ((tw, th), item) => {
+      let (w, h) = measure(env, item);
+      (max(w, tw), h + spacer + th)
+    },
+    (0, 0),
+    items
+  );
+  (w, max(0, h - spacer))
+}
+};
+
+let rec draw = (env, element, (x, y), align, valign) => {
+  let (w, h) = measure(env, element);
+  let x = switch align {
+  | Left => x
+  | Right => x - w
+  | Center => x - w/2
+  };
+  let y = switch valign {
+  | Top => y
+  | Middle => y - h/2
+  | Bottom => y - h
+  };
+  switch element {
+  | Text(text, font, align) => {
+    Draw.text(~body=text, ~font, ~pos=(x,y), env);
+  }
+  | Button(text, _, font, style) => {
+    Draw.fill(style.bgColor, env);
+    Draw.strokeWeight(2, env);
+    Draw.stroke(style.borderColor, env);
+
+    if (style.enabled && MyUtils.rectCollide(Env.mouse(env), ((x, y), (w, h)))) {
+      Draw.stroke(style.hoverBorderColor, env);
+    };
+
+    Draw.rect(~pos=(x, y), ~width=w, ~height=h, env);
+
+    let x = switch (style.fixedWidth) {
+    | None => x + style.margin
+    | Some(_) => {
+      x + w / 2 - getTextWidth(env, font, text) /  2
+    }
+    };
+    /* TODO fix y pos */
+    Draw.text(~pos=(x, y + style.margin), ~body=text, ~font, env);
+  }
+  | Custom(_measure, draw, _act) => draw(env, (x, y))
+  | Spacer(_) => ()
+  | VBox(items, spacer, childAlign) => {
+    let x = switch childAlign {
+    | Left => x
+    | Center => x + w/2
+    | Right => x + w
+    };
+    List.fold_left(
+      (y, item) => {
+        let (w, h) = draw(env, item, (x, y), childAlign, Top);
+        y + h + spacer
+      },
+      y,
+      items
+    ) |> ignore;
+  }
+  };
+  (w, h)
+};
+
+let rec act = (env, element, (x, y), align, valign) => {
+  let (w, h) = measure(env, element);
+  let x = switch align {
+  | Left => x
+  | Right => x - w
+  | Center => x - w/2
+  };
+  let y = switch valign {
+  | Top => y
+  | Middle => y - h/2
+  | Bottom => y - h
+  };
+  let action = switch element {
+  | Button(text, action, font, style) => {
+    if (style.enabled && MyUtils.rectCollide(Env.mouse(env), ((x, y), (w, h)))) {
+      Some(action)
+    } else {
+      None
+    }
+  }
+  | Custom(_measure, _draw, act) => act(env, (x, y))
+  | VBox(items, spacer, childAlign) => {
+    let x = switch childAlign {
+    | Left => x
+    | Center => x + w/2
+    | Right => x + w
+    };
+    let (_, action) = List.fold_left(
+      ((y, action), item) => {
+        let ((w, h), action) = act(env, item, (x, y), childAlign, Top);
+        (y + h + spacer, action)
+      },
+      (y, None),
+      items
+    );
+    action
+  }
+  | _ => None
+  };
+
+  ((w, h), action)
+};
+
+let act = (env, element, pos, align, valign) => {
+  snd(act(env, element, pos, align, valign))
+};
+
+type rootElement('action) = {
+  el: element('action),
+  align,
+  valign,
+  pos: (int, int)
+};
+
+let act = (env, {el, align, valign, pos}) => act(env, el, pos, align, valign);
+let draw = (env, {el, align, valign, pos}) => draw(env, el, pos, align, valign);
