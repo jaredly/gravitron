@@ -30,19 +30,26 @@ let startButton = (ctx, env) => {
 };
 
 let wallButton = (ctx, env, name, typ) => SharedTypes.isWallTypeEnabled(ctx, typ)
-? UIManager.Button(
+? {
+  let selected = currentWallType(ctx) == typ;
+  UIManager.Button(
   name,
   `Wall(typ),
   {
     ...buttonStyle(ctx.textFont),
-    innerBorder: currentWallType(ctx) == typ
-      ? Some(MyUtils.withAlpha(Constants.white, 0.4)) : None,
+    textStyle: {
+      font: selected ? ctx.boldTextFont : ctx.textFont,
+      tint: selected ? None : Some(Utils.color(~r=255, ~g=255, ~b=255, ~a=150)),
+    },
+    /* innerBorder: selected
+      ? Some(MyUtils.withAlpha(Constants.white, 0.4)) : None, */
     bgColor: Constants.black,
-    hoverBorderColor: Constants.white,
+    hoverBorderColor: MyUtils.withAlpha(wallColor(typ), 0.5),
     borderColor: wallColor(typ),
-    enabled: true
+    enabled: !selected
   }
 )
+}
 : UIManager.Button(
   "LOCKED",
   `Wall(typ),
