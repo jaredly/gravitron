@@ -91,7 +91,7 @@ let transitionTo = (ctx, transition, env) => {
   /** TODO remove in prod */
   let ctx = reloadCtx(env, ctx);
   switch transition {
-  | `Quit => `WelcomeScreen(WelcomeScreen.initialState(env))
+  | `Quit => `WelcomeScreen(WelcomeScreen2.initialState(env))
   | `Start =>
     print_endline("Start");
     `Game(GravGame.initialState(~wallType=currentWallType(ctx), env, ctx))
@@ -111,7 +111,7 @@ let getScreen = (state) =>
   ScreenManager.Screen.(
     switch state {
     | `WelcomeScreen(state) =>
-      Screen(state, WelcomeScreen.screen, ((state) => `WelcomeScreen(state)))
+      Screen(state, WelcomeScreen2.screen, ((state) => `WelcomeScreen(state)))
     | `LevelPicker(state) => Screen(state, LevelPicker.screen, ((state) => `LevelPicker(state)))
     | `HighScores(state) => Screen(state, HighScores.screen, ((state) => `HighScores(state)))
     | `Game(state) => Screen(state, GravGame.screen, ((state) => `Game(state)))

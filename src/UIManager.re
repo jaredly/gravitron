@@ -11,7 +11,13 @@ type valign =
   | Bottom
   | Middle;
 
+type textStyle = {
+  font: fontT,
+  tint: option(colorT)
+};
+
 type buttonStyle = {
+  textStyle,
   bgColor: colorT,
   borderColor: colorT,
   hoverBorderColor: colorT,
@@ -22,9 +28,9 @@ type buttonStyle = {
 };
 
 type element('action) =
-  | Text(string, fontT, align)
-  | Button(string, 'action, fontT, buttonStyle)
-  /* | ButtonSet(list((string, 'action)), fontT, buttonStyle, int) */
+  | Text(string, textStyle, align)
+  | Button(string, 'action, buttonStyle)
+  /* | ButtonSet(list((string, 'action)), buttonStyle, int) */
   | Spacer(int)
   | VBox(list(element('action)), int, align)
   | Custom(glEnvT => (int, int), (glEnvT, (int, int)) => unit, (glEnvT, (int, int)) => option('action))
@@ -47,9 +53,9 @@ let measureText = (env, font, text) => switch font^ {
 let addBoth = ((a, b), (c, d)) => (a + c, b + d);
 
 let rec measure = (env, element) => switch element {
-| Text(text, font, _) => measureText(env, font, text)
-| Button(text, _, font, style) => {
-  let (w, h) = measureText(env, font, text);
+| Text(text, style, _) => measureText(env, style.font, text)
+| Button(text, _, style) => {
+  let (w, h) = measureText(env, style.textStyle.font, text);
   let w = switch style.fixedWidth {
   | Some(w) => w
   | None => w + style.margin * 2
@@ -91,10 +97,15 @@ let rec draw = (env, element, (x, y), align, valign) => {
   | Bottom => y - h
   };
   switch element {
-  | Text(text, font, align) => {
+  | Text(text, {font, tint}, align) => {
+    switch (tint) {
+    | Some(color) => Draw.tint(color, env)
+    | None => Draw.noTint(env)
+    };
     Draw.text(~body=text, ~font, ~pos=(x,y), env);
+    Draw.noTint(env);
   }
-  | Button(text, _, font, style) => {
+  | Button(text, _, style) => {
     Draw.fill(style.bgColor, env);
     Draw.strokeWeight(2, env);
     Draw.stroke(style.borderColor, env);
@@ -105,14 +116,26 @@ let rec draw = (env, element, (x, y), align, valign) => {
 
     Draw.rect(~pos=(x, y), ~width=w, ~height=h, env);
 
+    switch (style.innerBorder) {
+    | None => ()
+    | Some(color) => {
+      Draw.stroke(color, env);Draw.noFill(env);
+      Draw.rect(~pos=(x + style.margin/2, y + style.margin/2), ~width=w-style.margin, ~height=h-style.margin, env);
+    }
+    };
+
     let x = switch (style.fixedWidth) {
     | None => x + style.margin
     | Some(_) => {
-      x + w / 2 - getTextWidth(env, font, text) /  2
+      x + w / 2 - getTextWidth(env, style.textStyle.font, text) /  2
     }
     };
-    /* TODO fix y pos */
-    Draw.text(~pos=(x, y + style.margin), ~body=text, ~font, env);
+    switch (style.textStyle.tint) {
+    | Some(color) => Draw.tint(color, env)
+    | None => Draw.noTint(env)
+    };
+    Draw.text(~pos=(x, y + style.margin), ~body=text, ~font=style.textStyle.font, env);
+    Draw.noTint(env);
   }
   | Custom(_measure, draw, _act) => draw(env, (x, y))
   | Spacer(_) => ()
@@ -148,7 +171,7 @@ let rec act = (env, element, (x, y), align, valign) => {
   | Bottom => y - h
   };
   let action = switch element {
-  | Button(text, action, font, style) => {
+  | Button(text, action, style) => {
     if (style.enabled && MyUtils.rectCollide(Env.mouse(env), ((x, y), (w, h)))) {
       Some(action)
     } else {
@@ -164,8 +187,12 @@ let rec act = (env, element, (x, y), align, valign) => {
     };
     let (_, action) = List.fold_left(
       ((y, action), item) => {
+        switch (action) {
+        | Some(x) => (0, action)
+        | _ =>
         let ((w, h), action) = act(env, item, (x, y), childAlign, Top);
         (y + h + spacer, action)
+        }
       },
       (y, None),
       items
@@ -190,4 +217,4 @@ type rootElement('action) = {
 };
 
 let act = (env, {el, align, valign, pos}) => act(env, el, pos, align, valign);
-let draw = (env, {el, align, valign, pos}) => draw(env, el, pos, align, valign);
+let draw = (env, {el, align, valign, pos}) => draw(env, el, pos, align, valign) |> ignore;
