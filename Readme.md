@@ -1,8 +1,13 @@
-# [Gravitron](http://gravitron.surge.sh/)
+# [Gravitron](https://gravitron.jaredforsyth.com/)
+
+- Get it from the [iOS app store](https://github.com/jaredly/gravitron/)
+- Get it from the [Android play store](https://play.google.com/store/apps/details?id=com.jaredforsyth.gravitron)
+- [Play it on the web](https://gravitron.jaredforsyth.com/) (desktop only)
+
 
 this is a little game I'm cooking up, written in [Reason](https://reasonml.github.io), using [Reprocessing](https://github.com/Schmavery/reprocessing) (a cross-platform opengl-backed 2d-graphics library).
 
-Try it out at http://gravitron.surge.sh/, and tell me what you think!
+Try it out at http://gravitron.jaredforsyth.com/, and tell me what you think!
 
 Download the osx native version from the [releases](https://github.com/jaredly/gravitron/releases) page.
 
