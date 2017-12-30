@@ -55,7 +55,7 @@ let wallButton = (ctx, env, name, typ) => SharedTypes.isWallTypeEnabled(ctx, typ
   `Wall(typ),
   {
     ...buttonStyle(ctx.boldTextFont),
-    bgColor: Constants.black,
+    bgColor: Utils.color(~r=20, ~g=20, ~b=20, ~a=200),
     textStyle: {font: ctx.boldTextFont, tint: Some(Utils.color(~r=100, ~g=100, ~b=100, ~a=255))},
     hoverBorderColor: Constants.white,
     borderColor: wallColor(typ),

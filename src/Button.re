@@ -41,9 +41,6 @@ let drawInner = (~enabled, (x, y), width, (size, buttons), ~ctx, ~env) => {
 
 
   open Reprocessing;
-  Draw.fill(Utils.color(~r=50, ~g=50 ,~b=80, ~a=150), env);
-  Draw.rect(~pos=(0, 0), ~width=Env.width(env), ~height=Env.height(env), env);
-
   List.iteri((i, (text, action)) => {
     let enabled = enabled(i, action);
     let y = y + i * (buttonHeight + margin);
