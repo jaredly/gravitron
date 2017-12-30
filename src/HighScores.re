@@ -30,9 +30,13 @@ let drawScores = (ctx, env, name, scores, y) => {
   }) + 20
 };
 
-let backButton = (ctx, env) => {
-  Button.singleBottom(env, "Back", ctx.textFont, (Env.width(env) / 2, Env.height(env) - 10))
+let back = (ctx, env) => UIManager.{
+  el: Button("Back", (), WelcomeScreen2.buttonStyle(ctx.textFont)),
+  align: Center,
+  valign: Bottom,
+  pos: (Reprocessing.Env.width(env) / 2, Reprocessing.Env.height(env) - 10)
 };
+
 
 let run = (ctx, (dy, vy, down), env) => {
   Draw.background(Constants.black, env);
@@ -69,7 +73,7 @@ let run = (ctx, (dy, vy, down), env) => {
     env
   );
   DrawUtils.centerText(~font=ctx.boldTextFont, ~body="High scores", ~pos=(w, h), env);
-  Button.drawSingle(env, backButton(ctx, env));
+  UIManager.draw(env, back(ctx, env));
 
   /* let vy = abs_float(vy) < 0.01 ? 0. : vy *. 0.90; */
   (dy, vy, down)
@@ -81,10 +85,9 @@ let screen = {
     Same(ctx, run(ctx, state, env))
   },
   mouseDown: (ctx, (dy, vy, down), env) => {
-    if (Button.hitSingle(env, backButton(ctx, env))) {
-      Transition(ctx, `Quit)
-    } else {
-      Same(ctx, (dy, 0., Some(Env.mouse(env) |> snd |> float_of_int)))
+    switch (UIManager.act(env, back(ctx, env))) {
+    | Some(()) => Transition(ctx, `Quit)
+    | None => Same(ctx, (dy, 0., Some(Env.mouse(env) |> snd |> float_of_int)))
     }
   },
   mouseUp: (ctx, (dy, vy, down), env) => {

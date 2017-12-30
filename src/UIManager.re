@@ -30,7 +30,6 @@ type buttonStyle = {
 type element('action) =
   | Text(string, textStyle, align)
   | Button(string, 'action, buttonStyle)
-  /* | ButtonSet(list((string, 'action)), buttonStyle, int) */
   | Spacer(int)
   | VBox(list(element('action)), int, align)
   | Custom(glEnvT => (int, int), (glEnvT, (int, int)) => unit, (glEnvT, (int, int)) => option('action))
@@ -62,13 +61,6 @@ let rec measure = (env, element) => switch element {
   };
   (w, h + style.margin * 2)
 }
-/* | ButtonSet(items, font, style, spacing) => {
-  let (w, h, num) = List.fold_left(((w, h, num), (t, _)) => {
-    let (ww, hh) = measureText(env, font, t);
-    (max(w, ww), h + hh + style.margin * 2 + spacing, num + 1)
-  }, (0, 0, 0), items);
-  (w + style.margin * 2, max(0, h - spacing))
-} */
 | Custom(measure, draw, act) => measure(env)
 | Spacer(height) => (0, height)
 | VBox(items, spacer, _align) => {

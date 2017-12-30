@@ -1,14 +1,16 @@
 open SharedTypes;
 open Reprocessing;
 
-let buttonStyle = font => UIManager.{
+let buttonStyle = (~enabled=true, font) => UIManager.{
   textStyle: {font, tint: None},
-  bgColor: MyUtils.withAlpha(Constants.white, 0.2),
+  bgColor: enabled
+    ? Utils.color(~r=50, ~g=50, ~b=50, ~a=255)
+    : Utils.color(~r=20, ~g=20, ~b=20, ~a=200),
   hoverBorderColor: Utils.color(~r=100, ~g=100, ~b=100, ~a=255),
-  borderColor: Constants.black,
+  borderColor: MyUtils.withAlpha(Constants.black, 0.),
   innerBorder: None,
   fixedWidth: Some(170),
-  enabled: true,
+  enabled,
   margin: 15
 };
 
@@ -54,8 +56,7 @@ let wallButton = (ctx, env, name, typ) => SharedTypes.isWallTypeEnabled(ctx, typ
   "LOCKED",
   `Wall(typ),
   {
-    ...buttonStyle(ctx.boldTextFont),
-    bgColor: Utils.color(~r=20, ~g=20, ~b=20, ~a=200),
+    ...buttonStyle(~enabled=false, ctx.boldTextFont),
     textStyle: {font: ctx.boldTextFont, tint: Some(Utils.color(~r=100, ~g=100, ~b=100, ~a=255))},
     hoverBorderColor: Constants.white,
     borderColor: wallColor(typ),
