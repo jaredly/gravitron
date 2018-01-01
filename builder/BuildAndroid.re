@@ -1,14 +1,3 @@
-/* let arch = "arm";
-let abi = "armabi";
-let full = "arm-linux-androideabi"; */
-
-
-/*
-let arch = "arm64";
-let abi = "arm64-v8a";
-let full = "aarch64-linux-android";
-*/
-
 
 let makeEnv = (arch, abi, ndk1, full) => {
   let ocaml = "/Users/jared/clone/fork/cross-fixed/android-" ++ arch;
@@ -24,16 +13,15 @@ let makeEnv = (arch, abi, ndk1, full) => {
 
 
 let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
-  /* let arch = "x86_64"; */
-  /* let sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/" ++ sdkName ++ ".platform/Developer/SDKs/" ++ sdkName ++ ".sdk"; */
-
   let ocaml = Filename.concat(Sys.getenv("HOME"), ".opam/4.04.0+android+" ++ ocamlarch);
-  let ocaml = "/Users/jared/clone/fork/cross-fixed/android-" ++ ocamlarch;
-  let ndk = "/Users/jared/clone/fork/cross-fixed/android-ndk";
-  let env = makeEnv(ocamlarch, cxxarch, gccarch, gccarch2);
-  /* let env = ""; */
+  try (Unix.stat("_build") |> ignore) {
+  | Unix.Unix_error(Unix.ENOENT, _, _) => Unix.mkdir("_build", 0o740);
+  };
 
-  /* let ocaml = "./reasongl-ios/bin/4.04.0+ios+" ++ ocamlarch; */
+  let cross = "/Users/jared/clone/fork/cross-fixed";
+  let ocaml = cross ++ "/android-" ++ ocamlarch;
+  let ndk = cross ++ "/android-ndk";
+  let env = makeEnv(ocamlarch, cxxarch, gccarch, gccarch2);
 
   Builder.compile(Builder.{
     name: "reasongl",
@@ -49,7 +37,6 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
       ++ " -I" ++ ocaml ++ "/include"
       ++ " -I" ++ ocaml ++ "/lib/ocaml -L"
       ++ ocaml ++ "/lib",
-    /* cOpts: "-arch " ++ arch ++ " -isysroot " ++ sdk ++ " -isystem " ++ ocaml ++ "/lib/ocaml -DCAML_NAME_SPACE -I./ios/OCamlIOS -I" ++ ocaml ++ "/lib/ocaml/caml -fno-objc-arc -miphoneos-version-min=7.0", */
     mlOpts: "-runtime-variant _pic -g",
     dependencyDirs: ["./reasongl-interface/src", "./reasongl-android/src", "./reprocessing/src"],
     buildDir: "_build/android_" ++ arch,
@@ -57,9 +44,9 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
 
     cc: ndk ++ "/toolchains/" ++ gccarch ++ "-4.9/prebuilt/darwin-x86_64/bin/" ++ gccarch2 ++ "-gcc",
     outDir: "./android/app/src/main/jniLibs/" ++ arch ++ "/",
-    ppx: ["./reasongl-android/matchenv.ppx"],
+    ppx: ["\"" ++ ocaml ++ "/bin/ocamlrun " ++ cross ++ "/matchenv.ppx\""],
     ocamlDir: ocaml,
-    refmt: "./reasongl-ios/refmt", /* HACK */
+    refmt: cross ++ "/refmt", /* HACK */
     /* ppx: ["node_modules/matchenv/lib/bs/native/index.native"], */
     /* ocamlDir: "./node_modules/bs-platform/vendor/ocaml", */
     /* refmt: "./node_modules/bs-platform/bin/refmt3.exe" */
