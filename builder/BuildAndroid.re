@@ -10,11 +10,11 @@ let full = "aarch64-linux-android";
 */
 
 
-let makeEnv = (arch, abi, full) => {
-  let ocaml = "/Users/jared/clone/fork/cross-fixed/" ++ arch;
+let makeEnv = (arch, abi, ndk1, full) => {
+  let ocaml = "/Users/jared/clone/fork/cross-fixed/android-" ++ arch;
   let ndk = "/Users/jared/clone/fork/cross-fixed/android-ndk";
-  let sysroot = ocaml ++ "/android-sysroot";
-  let darwin_ndk = ndk ++ "/toolchains/" ++ full ++ "-4.9/prebuilt/darwin-x86_64";
+  let sysroot = ocaml;
+  let darwin_ndk = ndk ++ "/toolchains/" ++ ndk1 ++ "-4.9/prebuilt/darwin-x86_64";
   let cc = darwin_ndk ++ "/bin/" ++ full ++ "-gcc  --sysroot " ++ ndk ++ "/platforms/android-24/arch-" ++ arch ++ " -I" ++ ndk ++ "/include -L" ++ ndk ++ "/lib -I" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/include -I" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ abi ++ "/include -L" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ abi ++ " -I" ++ sysroot ++ "/include -L" ++ sysroot ++ "/lib";
 
   "OCAMLLIB=\"" ++ sysroot ++ "/lib/ocaml\" CAML_BYTERUN=\"" ++ sysroot ++ "/bin/ocamlrun\" CAML_BYTECC=\"" ++ cc ++ " -O2 -fno-defer-pop -Wall-D_FILE_OFFSET_BITS=64 -D_REENTRANT -fPIC\" CAML_NATIVECC=\"" ++ cc ++ " -O2 -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT\" CAML_MKDLL=\"" ++ cc ++ " -O2 -shared\" CAML_MKMAINDLL=\"" ++ cc ++ " -O2 -shared\" CAML_MKEXE=\"" ++ cc ++ " -O2\" CAML_PACKLD=\"" ++ darwin_ndk ++ "/bin/" ++ full ++ "-ld --sysroot " ++ ndk ++ "/platforms/android-24/arch-" ++ arch ++ " -L" ++ ndk ++ "/lib -L" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ abi ++ " -L" ++ sysroot ++ "/lib -r  -o\" CAML_RANLIB=" ++ darwin_ndk ++ "/bin/" ++ full ++ "-ranlib CAML_ASM=" ++ darwin_ndk ++ "/bin/" ++ full ++ "-as";
@@ -28,9 +28,9 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
   /* let sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/" ++ sdkName ++ ".platform/Developer/SDKs/" ++ sdkName ++ ".sdk"; */
 
   let ocaml = Filename.concat(Sys.getenv("HOME"), ".opam/4.04.0+android+" ++ ocamlarch);
-  let ocaml = "/Users/jared/clone/fork/cross-fixed/" ++ ocamlarch;
+  let ocaml = "/Users/jared/clone/fork/cross-fixed/android-" ++ ocamlarch;
   let ndk = "/Users/jared/clone/fork/cross-fixed/android-ndk";
-  let env = makeEnv(ocamlarch, cxxarch, gccarch);
+  let env = makeEnv(ocamlarch, cxxarch, gccarch, gccarch2);
   /* let env = ""; */
 
   /* let ocaml = "./reasongl-ios/bin/4.04.0+ios+" ++ ocamlarch; */
@@ -46,9 +46,9 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
       ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/include -I"
       ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ cxxarch ++ "/include -L"
       ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ cxxarch
-      ++ " -I" ++ ocaml ++ "/android-sysroot/include"
-      ++ " -I" ++ ocaml ++ "/android-sysroot/lib/ocaml -L"
-      ++ ocaml ++ "/android-sysroot/lib",
+      ++ " -I" ++ ocaml ++ "/include"
+      ++ " -I" ++ ocaml ++ "/lib/ocaml -L"
+      ++ ocaml ++ "/lib",
     /* cOpts: "-arch " ++ arch ++ " -isysroot " ++ sdk ++ " -isystem " ++ ocaml ++ "/lib/ocaml -DCAML_NAME_SPACE -I./ios/OCamlIOS -I" ++ ocaml ++ "/lib/ocaml/caml -fno-objc-arc -miphoneos-version-min=7.0", */
     mlOpts: "-runtime-variant _pic -g",
     dependencyDirs: ["./reasongl-interface/src", "./reasongl-android/src", "./reprocessing/src"],
@@ -58,7 +58,7 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
     cc: ndk ++ "/toolchains/" ++ gccarch ++ "-4.9/prebuilt/darwin-x86_64/bin/" ++ gccarch2 ++ "-gcc",
     outDir: "./android/app/src/main/jniLibs/" ++ arch ++ "/",
     ppx: ["./reasongl-android/matchenv.ppx"],
-    ocamlDir: ocaml ++ "/android-sysroot",
+    ocamlDir: ocaml,
     refmt: "./reasongl-ios/refmt", /* HACK */
     /* ppx: ["node_modules/matchenv/lib/bs/native/index.native"], */
     /* ocamlDir: "./node_modules/bs-platform/vendor/ocaml", */
@@ -72,7 +72,7 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
  * - patch `config.mlp` so that it checks some ENV vbl for `native_c_compiler`, `native_pack_linker`, `asm` and friends https://github.com/ocaml/ocaml/blob/fd7df86e6906b639cbd1c031bd0ef5884473aeb8/utils/config.mlp
  * - patch opam-cross-android so that it hardcodes the NDK paths to someplace normal, like ~/Library/Android/ndk-10e` or something
  */
+/* DOES NOT WORK buildForArch("aarch64", "arm64", "arm64", "arm64-v8a", "aarch64-linux-android", "aarch64-linux-android"); */
 
-/* buildForArch("armeabi-v7a", "armv7", "arm", "armabi", "arm-linux-androideabi", "arm-linux-androideabi"); */
-buildForArch("aarch64", "arm64", "arm64", "arm64-v8a", "aarch64-linux-android", "aarch64-linux-android");
+buildForArch("armeabi-v7a", "armv7", "arm", "armabi", "arm-linux-androideabi", "arm-linux-androideabi");
 /* buildForArch("x86", "x86", "x86", "x86", "x86", "i686-linux-android"); */
