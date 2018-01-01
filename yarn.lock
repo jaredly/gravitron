@@ -2,23 +2,22 @@
 # yarn lockfile v1
 
 
-ReasonglInterface@bsansouci/reasongl-interface:
+ReasonglInterface@bsansouci/reasongl-interface, "ReasonglInterface@github:bsansouci/reasongl-interface":
   version "0.1.14"
-  resolved "https://codeload.github.com/bsansouci/reasongl-interface/tar.gz/5d24098d575d9d7ed3c7595f63c34e1899650d9a"
+  uid "05da91e183e9e5ccf6cc13f5c2e41bb7e897eb04"
+  resolved "https://codeload.github.com/bsansouci/reasongl-interface/tar.gz/05da91e183e9e5ccf6cc13f5c2e41bb7e897eb04"
 
-"ReasonglInterface@file:reasongl-interface":
-  version "0.1.14"
-
-"ReasonglNative@file:reasongl-native":
+"ReasonglNative@github:bsansouci/reasongl-native":
   version "0.2.0"
+  resolved "https://codeload.github.com/bsansouci/reasongl-native/tar.gz/7a5d18319d11938be0ceec54651d3593e16d132f"
   dependencies:
-    ReasonglInterface "file:../../../Library/Caches/Yarn/v1/reasongl-interface"
+    ReasonglInterface bsansouci/reasongl-interface
     Tgls bsansouci/tgls
     Tsdl bsansouci/tsdl
 
 "ReasonglWeb@github:bsansouci/reasongl-web":
   version "0.2.0"
-  resolved "https://codeload.github.com/bsansouci/reasongl-web/tar.gz/d5d6cedaddfc81e1de9e05851ba34b1e44b4b166"
+  resolved "https://codeload.github.com/bsansouci/reasongl-web/tar.gz/91bd73b44bf5fa935a2d876c9a5fcb3faed2075c"
   dependencies:
     ReasonglInterface bsansouci/reasongl-interface
     gl-matrix "*"
@@ -26,8 +25,8 @@ ReasonglInterface@bsansouci/reasongl-interface:
 "Reprocessing@file:./reprocessing":
   version "0.1.0"
   dependencies:
-    ReasonglInterface "file:../../../Library/Caches/Yarn/v1/reasongl-interface"
-    ReasonglNative "file:../../../Library/Caches/Yarn/v1/reasongl-native"
+    ReasonglInterface "github:bsansouci/reasongl-interface"
+    ReasonglNative "github:bsansouci/reasongl-native"
     ReasonglWeb "github:bsansouci/reasongl-web"
     matchenv bsansouci/matchenv
 
@@ -37,17 +36,13 @@ Tgls@bsansouci/tgls:
 
 Tsdl@bsansouci/tsdl:
   version "0.9.1"
-  resolved "https://codeload.github.com/bsansouci/tsdl/tar.gz/7a517a7284c8947559b3a0df17f085a878ead3de"
+  resolved "https://codeload.github.com/bsansouci/tsdl/tar.gz/ff6f02470778999ebdf9868f36bb3058ca6deb23"
   dependencies:
     sdl2 bsansouci/SDL-mirror#bsb-support
 
-bs-platform@^2.0.1:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-2.1.0.tgz#63560ff8f7142c9c0631559df1c35590b9f6d8b2"
-
 bs-platform@bsansouci/bsb-native:
-  version "2.0.1"
-  resolved "https://codeload.github.com/bsansouci/bsb-native/tar.gz/960cf28a4cfea66897d554e014baa98aeb466a33"
+  version "2.1.1"
+  resolved "https://codeload.github.com/bsansouci/bsb-native/tar.gz/89a66ae4cf3f7c0a501526fd081861f7bba47ea3"
 
 gl-matrix@*:
   version "2.4.0"
@@ -55,10 +50,10 @@ gl-matrix@*:
 
 matchenv@bsansouci/matchenv:
   version "0.1.0"
-  resolved "https://codeload.github.com/bsansouci/matchenv/tar.gz/b03280f9127504a57b16bf202c109ed353749044"
+  resolved "https://codeload.github.com/bsansouci/matchenv/tar.gz/d01edc5993de1cdf04f857e466b3d2e19e5d2e22"
   dependencies:
     bs-platform bsansouci/bsb-native
 
 sdl2@bsansouci/SDL-mirror#bsb-support:
   version "2.0.5"
-  resolved "https://codeload.github.com/bsansouci/SDL-mirror/tar.gz/718de31be1f66ad465574173caac82e01b2af982"
+  resolved "https://codeload.github.com/bsansouci/SDL-mirror/tar.gz/436449d6406ee0185737aedae1b8ddbb4c6d81a9"
