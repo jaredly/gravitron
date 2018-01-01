@@ -188,6 +188,9 @@ let mapNewer = (fn, files) => {
 
 let compile = config => {
   print_endline("Building");
+  BuildUtils.readCommand(ocamlopt(config) ++ " -config") |> unwrap(
+    "Failed to run 'config'"
+  ) |>  String.concat("\n") |> print_endline;
   let (allNames, filesInOrder) = copyAndSort(config);
   /** Build .cmx's */
   let cmxs = mapNewer(compileMl(config), filesInOrder);

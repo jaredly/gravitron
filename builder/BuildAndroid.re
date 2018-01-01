@@ -1,8 +1,30 @@
+/* let arch = "arm";
+let abi = "armabi";
+let full = "arm-linux-androideabi"; */
+
+let arch = "arm64";
+let abi = "arm64-v8a";
+let full = "aarch64-linux-android";
+
+let ocaml = "/Users/jared/clone/fork/cross-fixed/armv7";
+let sysroot = ocaml ++ "/android-sysroot";
+let darwin_ndk = ocaml ++ "/android-ndk/toolchains/" ++ full ++ "-4.9/prebuilt/darwin-x86_64";
+let ndk = ocaml ++ "/android-ndk";
+let cc = darwin_ndk ++ "/bin/" ++ full ++ "-gcc  --sysroot " ++ ndk ++ "/platforms/android-24/arch-" ++ arch ++ " -I" ++ ndk ++ "/include -L" ++ ndk ++ "/lib -I" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/include -I" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ abi ++ "/include -L" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ abi ++ " -I" ++ sysroot ++ "/include -L" ++ sysroot ++ "/lib";
+
+let env = "OCAMLLIB=\"" ++ sysroot ++ "/lib/ocaml\" CAML_BYTERUN=\"" ++ sysroot ++ "/bin/ocamlrun\" CAML_BYTECC=\"" ++ cc ++ " -O2 -fno-defer-pop -Wall-D_FILE_OFFSET_BITS=64 -D_REENTRANT -fPIC\" CAML_NATIVECC=\"" ++ cc ++ " -O2 -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT\" CAML_MKDLL=\"" ++ cc ++ " -O2 -shared\" CAML_MKMAINDLL=\"" ++ cc ++ " -O2 -shared\" CAML_MKEXE=\"" ++ cc ++ " -O2\" CAML_PACKLD=\"" ++ darwin_ndk ++ "/bin/" ++ full ++ "-ld --sysroot " ++ ndk ++ "/platforms/android-24/arch-" ++ arch ++ " -L" ++ ndk ++ "/lib -L" ++ ndk ++ "/sources/cxx-stl/gnu-libstdc++/4.9/libs/" ++ abi ++ " -L" ++ sysroot ++ "/lib -r  -o\" CAML_RANLIB=" ++ darwin_ndk ++ "/bin/" ++ full ++ "-ranlib CAML_ASM=" ++ darwin_ndk ++ "/bin/" ++ full ++ "-as";
+
+
+
 
 let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
   /* let arch = "x86_64"; */
   /* let sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/" ++ sdkName ++ ".platform/Developer/SDKs/" ++ sdkName ++ ".sdk"; */
+
   let ocaml = Filename.concat(Sys.getenv("HOME"), ".opam/4.04.0+android+" ++ ocamlarch);
+  let ocaml = "/Users/jared/clone/fork/cross-fixed/armv7";
+  /* let env = ""; */
+
   /* let ocaml = "./reasongl-ios/bin/4.04.0+ios+" ++ ocamlarch; */
 
   Builder.compile(Builder.{
@@ -23,7 +45,7 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
     mlOpts: "-runtime-variant _pic -g",
     dependencyDirs: ["./reasongl-interface/src", "./reasongl-android/src", "./reprocessing/src"],
     buildDir: "_build/android_" ++ arch,
-    env: "BSB_BACKEND=native-android",
+    env: env ++ " BSB_BACKEND=native-android",
 
     cc: ocaml ++ "/android-ndk/toolchains/" ++ gccarch ++ "-4.9/prebuilt/darwin-x86_64/bin/" ++ gccarch2 ++ "-gcc",
     outDir: "./android/app/src/main/jniLibs/" ++ arch ++ "/",
@@ -43,5 +65,6 @@ let buildForArch = (arch, ocamlarch, ndkarch, cxxarch, gccarch, gccarch2) => {
  * - patch opam-cross-android so that it hardcodes the NDK paths to someplace normal, like ~/Library/Android/ndk-10e` or something
  */
 
-buildForArch("armeabi-v7a", "armv7", "arm", "armabi", "arm-linux-androideabi", "arm-linux-androideabi");
-buildForArch("x86", "x86", "x86", "x86", "x86", "i686-linux-android");
+/* buildForArch("armeabi-v7a", "armv7", "arm", "armabi", "arm-linux-androideabi", "arm-linux-androideabi"); */
+buildForArch("aarch64", "arm64", "arm64", "arm64-v8a", "aarch64-linux-android", "aarch64-linux-android");
+/* buildForArch("x86", "x86", "x86", "x86", "x86", "i686-linux-android"); */
