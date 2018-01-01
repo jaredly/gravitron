@@ -1,7 +1,29 @@
 
+let makeEnv = (arch) => {
+  let ocaml = "/Users/jared/clone/fork/cross-fixed/ios-" ++ arch;
+  let sysroot = ocaml;
+  let cc = "clang -arch " ++ arch ++ " -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.1.sdk -miphoneos-version-min=8.0";
+
+  "OCAMLLIB=\"" ++ sysroot ++ "/lib/ocaml\"
+   CAML_BYTERUN=\"" ++ sysroot ++ "/bin/ocamlrun\"
+   CAML_BYTECC=\"" ++ cc ++ " -O2 -Wall\"
+   CAML_NATIVECC=\"" ++ cc ++ " -O2 -Wall\"
+   CAML_MKEXE=\"" ++ cc ++ " -O2\"
+   CAML_ASM=\"" ++ cc ++ " -c\"";
+
+  ""
+};
+
+
+
+
+
 let buildForArch = (arch, ocamlarch, sdkName) => {
-  let sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/" ++ sdkName ++ ".platform/Developer/SDKs/" ++ sdkName ++ ".sdk";
+  let sdk = "/Applications/Xcode.app/Contents/Developer/Platforms/" ++ sdkName ++ ".platform/Developer/SDKs/" ++ sdkName ++ "11.1.sdk";
+
   let ocaml = Filename.concat(Sys.getenv("HOME"), ".opam/4.04.0+ios+" ++ ocamlarch ++ "/ios-sysroot");
+
+  /* let ocaml = "/Users/jared/clone/fork/cross-fixed/ios-" ++ ocamlarch; */
 
   Builder.compile(Builder.{
     name: "reasongl_" ++ arch,
@@ -11,7 +33,7 @@ let buildForArch = (arch, ocamlarch, sdkName) => {
     mlOpts: "bigarray.cmxa -verbose",
     dependencyDirs: ["./reasongl-interface/src", "./reasongl-ios/src", "./reprocessing/src"],
     buildDir: "_build/ios_" ++ arch,
-    env: "BSB_BACKEND=native-ios",
+    env: makeEnv(arch) ++ " BSB_BACKEND=native-ios",
 
     cc: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
     outDir: "./ios/",
@@ -21,12 +43,12 @@ let buildForArch = (arch, ocamlarch, sdkName) => {
   });
 };
 
-buildForArch("x86_64", "amd64", "iPhoneSimulator");
+/* buildForArch("x86_64", "amd64", "iPhoneSimulator"); */
 buildForArch("arm64", "arm64", "iPhoneOS");
 
-BuildUtils.readCommand(
+/* BuildUtils.readCommand(
   "lipo -create -o ios/libreasongl.a ios/libreasongl_arm64.a ios/libreasongl_x86_64.a"
 ) |> Builder.unwrap("unable to link together") |> ignore;
 
 Unix.unlink("ios/libreasongl_arm64.a");
-Unix.unlink("ios/libreasongl_x86_64.a");
+Unix.unlink("ios/libreasongl_x86_64.a"); */
