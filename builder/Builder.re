@@ -86,6 +86,10 @@ let ocamlopt = config => {
   )
 };
 
+let exists = path => try {Unix.stat(path) |> ignore; true} {
+| Unix.Unix_error(Unix.ENOENT, _, _) => false
+};
+
 let compileMl = (config, force, sourcePath) => {
   let cmx = Filename.chop_extension(sourcePath) ++ ".cmx";
   if (force || isNewer(sourcePath, cmx)) {
