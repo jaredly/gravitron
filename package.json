@@ -11,6 +11,7 @@
     "clean": "bsb -clean-world",
 
     "ios": "rsb ios",
+    "android": "rsb android",
 
     "build:ios": "bsb -make-world -backend native && ./lib/bs/native/buildios.native all",
     "build:android": "bsb -make-world -backend native && ./lib/bs/native/buildandroid.native all && cp -r assets/* android/app/src/main/assets/",
