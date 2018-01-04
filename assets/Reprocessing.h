@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
 
-@interface GameViewController : GLKViewController
+@interface ReprocessingViewController : GLKViewController
 
 @property (strong, nonatomic) EAGLContext *context;
 

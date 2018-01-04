@@ -7,9 +7,8 @@
   },
   "sources": [
     "src",
-    {"backend": "native", "dir": "builder"}
   ],
-  "bs-dependencies": ["reprocessing"],
+  "bs-dependencies": ["@jaredly/reprocessing"],
   "package-specs": ["commonjs", "es6"],
   "entries": [{
     "backend": "bytecode",

@@ -10,6 +10,8 @@
     "build:native": "bsb -make-world -backend native",
     "clean": "bsb -clean-world",
 
+    "ios": "rsb ios",
+
     "build:ios": "bsb -make-world -backend native && ./lib/bs/native/buildios.native all",
     "build:android": "bsb -make-world -backend native && ./lib/bs/native/buildandroid.native all && cp -r assets/* android/app/src/main/assets/",
     "run:android": "npm run build:android && cd android && ./gradlew installDebug",
@@ -28,7 +30,7 @@
     "BuckleScript"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "",
   "devDependencies": {
     "bs-platform": "bsansouci/bsb-native"
   },

@@ -9,30 +9,28 @@
 /* Begin PBXBuildFile section */
 		43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2D1E3B340C002BA291 /* Shader.fsh */; };
 		43C88D301E3B340C002BA291 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2E1E3B340C002BA291 /* Shader.vsh */; };
-		43C88D321E3B349A002BA291 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D311E3B349A002BA291 /* Main.storyboard */; };
+		7F5A5AF11FFDFEB900E7603B /* Reprocessing.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F5A5AF01FFDFEB900E7603B /* Reprocessing.m */; };
+		7F5A5AF41FFE010600E7603B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F5A5AF31FFE010600E7603B /* LaunchScreen.storyboard */; };
 		7F6B2A481FDF7C9B00DC8E5E /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 7F6B2A471FDF7C9B00DC8E5E /* assets */; };
 		7F6B2A4C1FDF7F4400DC8E5E /* libreasongl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F6B2A4B1FDF7F4400DC8E5E /* libreasongl.a */; };
 		C99F606A1E34FE8F0064B563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F60691E34FE8F0064B563 /* main.m */; };
 		C99F606D1E34FE8F0064B563 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F606C1E34FE8F0064B563 /* AppDelegate.m */; };
-		C99F60701E34FE8F0064B563 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F606F1E34FE8F0064B563 /* ViewController.m */; };
 		C99F60751E34FE8F0064B563 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C99F60741E34FE8F0064B563 /* Assets.xcassets */; };
-		C99F60781E34FE8F0064B563 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C99F60761E34FE8F0064B563 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		43C88D2D1E3B340C002BA291 /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.fsh; sourceTree = "<group>"; };
 		43C88D2E1E3B340C002BA291 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
-		43C88D311E3B349A002BA291 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		7F5A5AF01FFDFEB900E7603B /* Reprocessing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Reprocessing.m; path = "../../node_modules/@jaredly/reasongl-ios/ios/Reprocessing.m"; sourceTree = "<group>"; };
+		7F5A5AF21FFDFEBE00E7603B /* Reprocessing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Reprocessing.h; path = "../../node_modules/@jaredly/reasongl-ios/ios/Reprocessing.h"; sourceTree = "<group>"; };
+		7F5A5AF31FFE010600E7603B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7F6B2A471FDF7C9B00DC8E5E /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../assets; sourceTree = "<group>"; };
 		7F6B2A4B1FDF7F4400DC8E5E /* libreasongl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libreasongl.a; sourceTree = "<group>"; };
 		C99F60651E34FE8F0064B563 /* Gravitron.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gravitron.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99F60691E34FE8F0064B563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		C99F606B1E34FE8F0064B563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		C99F606C1E34FE8F0064B563 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		C99F606E1E34FE8F0064B563 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		C99F606F1E34FE8F0064B563 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		C99F60741E34FE8F0064B563 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C99F60771E34FE8F0064B563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C99F60791E34FE8F0064B563 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,13 +77,12 @@
 				7F6B2A471FDF7C9B00DC8E5E /* assets */,
 				C99F606B1E34FE8F0064B563 /* AppDelegate.h */,
 				C99F606C1E34FE8F0064B563 /* AppDelegate.m */,
+				7F5A5AF31FFE010600E7603B /* LaunchScreen.storyboard */,
 				43C88D2D1E3B340C002BA291 /* Shader.fsh */,
+				7F5A5AF01FFDFEB900E7603B /* Reprocessing.m */,
+				7F5A5AF21FFDFEBE00E7603B /* Reprocessing.h */,
 				43C88D2E1E3B340C002BA291 /* Shader.vsh */,
-				C99F606E1E34FE8F0064B563 /* ViewController.h */,
-				C99F606F1E34FE8F0064B563 /* ViewController.m */,
-				43C88D311E3B349A002BA291 /* Main.storyboard */,
 				C99F60741E34FE8F0064B563 /* Assets.xcassets */,
-				C99F60761E34FE8F0064B563 /* LaunchScreen.storyboard */,
 				C99F60791E34FE8F0064B563 /* Info.plist */,
 				C99F60681E34FE8F0064B563 /* Supporting Files */,
 			);
@@ -160,10 +157,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */,
-				C99F60781E34FE8F0064B563 /* LaunchScreen.storyboard in Resources */,
 				C99F60751E34FE8F0064B563 /* Assets.xcassets in Resources */,
 				7F6B2A481FDF7C9B00DC8E5E /* assets in Resources */,
-				43C88D321E3B349A002BA291 /* Main.storyboard in Resources */,
+				7F5A5AF41FFE010600E7603B /* LaunchScreen.storyboard in Resources */,
 				43C88D301E3B340C002BA291 /* Shader.vsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -175,24 +171,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C99F60701E34FE8F0064B563 /* ViewController.m in Sources */,
 				C99F606D1E34FE8F0064B563 /* AppDelegate.m in Sources */,
+				7F5A5AF11FFDFEB900E7603B /* Reprocessing.m in Sources */,
 				C99F606A1E34FE8F0064B563 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		C99F60761E34FE8F0064B563 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				C99F60771E34FE8F0064B563 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		C99F60851E34FE8F0064B563 /* Debug */ = {
@@ -301,12 +286,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_NO_PIE = NO;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/OCamlTest",
-					"\"$(SRCROOT)/../Build\"",
-					"$(PROJECT_DIR)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jaredforsyth.gravitron2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -333,10 +313,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_NO_PIE = NO;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jaredforsyth.gravitron2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
