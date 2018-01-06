@@ -25,12 +25,6 @@
   },{
     "backend": "native",
     "main-module": "Dev"
-  },{
-    "backend": "native",
-    "main-module": "BuildAndroid"
-  }, {
-    "backend": "native",
-    "main-module": "BuildIOS"
   }],
   "refmt": 3,
 }
