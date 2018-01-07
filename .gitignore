@@ -22,3 +22,4 @@ ios/Build
 *.xcuserdatad
 android/local.properties
 keystore.properties
+bundler/Gravitron.app.zip
