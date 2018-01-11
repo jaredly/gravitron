@@ -13,7 +13,7 @@ Download the osx native version from the [releases](https://github.com/jaredly/g
 
 ![gameplay](gameplay.gif)
 
-## Building
+## Building (currently broken 🙃, working on a more general solution)
 
 ```
 git submodule update --init --recursive
