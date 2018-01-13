@@ -2,30 +2,19 @@
   "name": "gravitron",
   "version": "0.1.0",
   "scripts": {
-    "start": "./lib/bs/bytecode/indexhot.byte",
-    "start:native": "./lib/bs/native/index.native",
-    "build": "bsb -make-world",
-    "watch": "bsb -make-world -w",
-    "build:web": "bsb -make-world -backend js",
-    "build:native": "bsb -make-world -backend native",
-    "clean": "bsb -clean-world",
-
-    "ios": "rsb ios",
+    "start": "rsb native:hot",
+    "native": "rsb native",
+    "bundle": "rsb native:bundle",
+    "all": "rsb all",
     "android": "rsb android",
-
-    "build:ios": "bsb -make-world -backend native && ./lib/bs/native/buildios.native all",
-    "build:android": "bsb -make-world -backend native && ./lib/bs/native/buildandroid.native all && cp -r assets/* android/app/src/main/assets/",
-    "run:android": "npm run build:android && cd android && ./gradlew installDebug",
-    "release:android": "npm run build:android && cd android && ./gradlew assembleRelease",
-
-    "setup:android": "./reasongl-android/setup_opam.sh",
-    "setup:ios": "./reasongl-ios/setup_opam.sh",
-
-    "js": "./node_modules/bs-platform/bin/bsb -backend js -make-world && webpack && cp -r assets/* docs/assets",
-    "js:serve": "cd docs && http-server -p 3121",
-    "deploy": "npm run js && cd docs && surge . -d gravitron.jaredforsyth.com",
-    "deploy-native": "npm run build:native && cd bundler && ./bundle.sh",
-    "byte": "./node_modules/bs-platform/bin/bsb -w -make-world"
+    "android:run": "rsb android:run",
+    "android:hot": "rsb android:hot",
+    "ios": "rsb ios",
+    "ios:sim": "rsb ios:sim",
+    "ios:device": "rsb ios:device",
+    "js": "rsb js",
+    "serve": "rsb js:serve",
+    "clean": "rm -rf _build && bsb -clean-world"
   },
   "keywords": [
     "BuckleScript"
@@ -33,9 +22,10 @@
   "author": "",
   "license": "",
   "devDependencies": {
-    "bs-platform": "bsansouci/bsb-native"
+    "bs-platform": "bsansouci/bsb-native#fast",
+    "reprocessing-scripts": "1.1.1"
   },
   "dependencies": {
-    "Reprocessing": "file:./reprocessing"
+    "@jaredly/reprocessing": "^1.0.8"
   }
 }

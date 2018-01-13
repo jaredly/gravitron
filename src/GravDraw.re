@@ -150,6 +150,7 @@ let drawStatus = (ctx, {wallType, level, me, mode}, timeElapsed, env) => {
     : percent < 0.2
     ? Reprocessing.Utils.color(~r=255, ~g=150, ~b=40, ~a=255)
     : Constants.white;
+  /* let healthColor = Constants.green; */
   Draw.fill(healthColor, env);
   Draw.noStroke(env);
   Draw.rect(~pos=(margin + pauseSize, margin), ~width=int_of_float(100. *. percent), ~height=10, env);
