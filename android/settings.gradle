@@ -1,6 +1,3 @@
 include ':app'
 include ':reasongl-android'
-project(':reasongl-android').projectDir = new File(rootProject.projectDir, '../reasongl-android/android')
-
-
-
+project(':reasongl-android').projectDir = new File(rootProject.projectDir, '.././node_modules/@jaredly/reasongl-android/android') // GENERATED

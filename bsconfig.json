@@ -27,4 +27,8 @@
     "main-module": "Dev"
   }],
   "refmt": 3,
+  "icon": "./icons/icon.png",
+  "appName": "Gravitron",
+  "iosPathName": "Gravitron",
+  "androidPackage": "com.jaredforsyth.gravitron",
 }
