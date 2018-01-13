@@ -23,7 +23,7 @@
   "license": "",
   "devDependencies": {
     "bs-platform": "bsansouci/bsb-native#fast",
-    "reprocessing-scripts": "1.3.2"
+    "reprocessing-scripts": "1.3.3"
   },
   "dependencies": {
     "@jaredly/reprocessing": "1.1.4"
