@@ -1,6 +1,6 @@
 # [Gravitron](https://gravitron.jaredforsyth.com/)
 
-- Get it from the [iOS app store](https://github.com/jaredly/gravitron/)
+- Get it from the [iOS app store](https://itunes.apple.com/us/app/gravitron-master-gravity/id1330043938)
 - Get it from the [Android play store](https://play.google.com/store/apps/details?id=com.jaredforsyth.gravitron)
 - [Play it on the web](https://gravitron.jaredforsyth.com/) (desktop only)
 
