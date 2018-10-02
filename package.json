@@ -22,7 +22,7 @@
   "author": "",
   "license": "",
   "devDependencies": {
-    "bs-platform": "bsansouci/bsb-native#fast",
+    "bsb-native": "4.0.6",
     "reprocessing-scripts": "1.3.4"
   },
   "dependencies": {
